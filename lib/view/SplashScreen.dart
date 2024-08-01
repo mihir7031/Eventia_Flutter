@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:eventia/view/screenmain.dart';
 
+
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
 
@@ -25,7 +26,7 @@ class _SplashScreenState extends State<SplashScreen> {
         _controller.addListener(() {
           if (_controller.value.position == _controller.value.duration) {
             Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => screenmain()),
+              MaterialPageRoute(builder: (context) => ScreenMain()),
             );
           }
         });
@@ -48,13 +49,13 @@ class _SplashScreenState extends State<SplashScreen> {
         children: [
           _isInitialized
               ? FittedBox(
-                  fit: BoxFit.cover,
-                  child: SizedBox(
-                    width: _controller.value.size.width,
-                    height: _controller.value.size.height,
-                    child: VideoPlayer(_controller),
-                  ),
-                )
+            fit: BoxFit.cover,
+            child: SizedBox(
+              width: _controller.value.size.width,
+              height: _controller.value.size.height,
+              child: VideoPlayer(_controller),
+            ),
+          )
               : Center(child: CircularProgressIndicator()),
         ],
       ),

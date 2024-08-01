@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "161846087142",
+    "project_id": "eventia-70ee9",
+    "storage_bucket": "eventia-70ee9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:161846087142:android:622dcc24ab3806bea19a27",
+        "android_client_info": {
+          "package_name": "com.example.eventia"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC76tflGsS_II0rJMZZ7V2mw06KpCPLJSQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

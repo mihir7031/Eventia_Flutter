@@ -4,34 +4,32 @@ import 'package:eventia/view/profile.dart';
 import 'package:eventia/Event_info/Event_info.dart';
 import 'package:eventia/Add_event/CreateEventForm.dart';
 
-class screenmain extends StatefulWidget {
-  const screenmain({super.key});
+class ScreenMain extends StatefulWidget {
+  const ScreenMain({super.key});
 
   @override
-  State<screenmain> createState() => _screenmainState();
+  State<ScreenMain> createState() => _ScreenMainState();
 }
 
-class _screenmainState extends State<screenmain> {
+class _ScreenMainState extends State<ScreenMain> {
   int _selectedIndex = 0;
+  List<Map<String, String>> favoriteEvents = [];
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
     if (index == 4) {
-      // Profile tab is tapped
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => profile()),
+        MaterialPageRoute(builder: (context) => ProfilePage()),
       );
     } else if (index == 3) {
-      // Favorite tab is tapped
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => favorite_page()),
+        MaterialPageRoute(builder: (context) => FavoritePage(favoriteEvents: favoriteEvents)),
       );
     } else if (index == 2) {
-      // Favorite tab is tapped
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => CreateEventForm()),
@@ -40,41 +38,41 @@ class _screenmainState extends State<screenmain> {
   }
 
   void _onCardTapped() {
-    // Handle card tap here, e.g., navigate to another screen or show a dialog
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => Event_info()),
     );
   }
 
+  void _addFavoriteEvent(Map<String, String> event) {
+    setState(() {
+      favoriteEvents.add(event);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.lightBlue[400],
         title: Row(
           children: [
-            Image.asset(
-              'assets/planner.png', // Your app logo
-              height: 40,
-            ),
+
             const SizedBox(width: 10),
-            const Text('E', style: TextStyle(fontFamily: 'Blacksword')),
-            const Text('ventia', style: TextStyle(fontFamily: 'BeautyDemo')),
+            const Text('E', style: TextStyle(fontFamily: 'Blacksword', color: Colors.black)),
+            const Text('ventia', style: TextStyle(fontFamily: 'BeautyDemo', color: Colors.black)),
           ],
         ),
-        centerTitle: false,
         actions: [
           IconButton(
             icon: Icon(Icons.notifications),
             onPressed: () {},
           ),
           IconButton(
-            icon: const Icon(Icons.nights_stay), // Night mode icon
+            icon: const Icon(Icons.nights_stay),
             onPressed: () {},
           ),
           IconButton(
-            icon: const Icon(Icons.more_vert), // More icon
+            icon: const Icon(Icons.more_vert),
             onPressed: () {},
           ),
         ],
@@ -82,7 +80,6 @@ class _screenmainState extends State<screenmain> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Image.asset('assets/mainscreen_img.jpg', fit: BoxFit.cover),
             const SizedBox(height: 10),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -90,40 +87,85 @@ class _screenmainState extends State<screenmain> {
                 children: List.generate(6, (index) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Column(
-                      children: [
-                        TextButton(
-                          onPressed: () {},
-                          child: Column(
-                            children: [
-                              Icon(Icons.sports, color: Colors.lightBlue[400]),
-                              const Text('Sport',
-                                  style: TextStyle(color: Colors.lightBlue)),
-                            ],
+                    child: GestureDetector(
+                      onTap: () {
+                        // Add your category click action here
+                      },
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              image: DecorationImage(
+                                image: AssetImage('assets/category/Sport.png'),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
                           ),
-                        ),
-                        TextButton(
-                          onPressed: () {},
-                          child: Column(
-                            children: [
-                              Icon(Icons.filter_list, color: Colors.grey),
-                              const Text('Filters',
-                                  style: TextStyle(color: Colors.grey)),
-                            ],
+                          const SizedBox(height: 5),
+                          Text(
+                            'Sport',
+                            style: TextStyle(color: Colors.black87),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   );
                 }),
               ),
             ),
             const SizedBox(height: 10),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Add your filter click action here
+                      },
+                      child: const Text('Filters'),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Add your filter click action here
+                      },
+                      child: const Text('Date'),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Add your filter click action here
+                      },
+                      child: const Text('Location'),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Add your filter click action here
+                      },
+                      child: const Text('Type'),
+                    ),
+                  ),
+                  // Add more filter buttons here if needed
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
             Column(
               children: List.generate(5, (index) {
                 return InkWell(
-                  onTap:
-                      _onCardTapped, // Define what happens when the card is tapped
+                  onTap: _onCardTapped,
                   child: Card(
                     margin: EdgeInsets.all(10.0),
                     child: Row(
@@ -131,16 +173,13 @@ class _screenmainState extends State<screenmain> {
                         Padding(
                           padding: const EdgeInsets.all(4.0),
                           child: SizedBox(
-                            width: 100.0, // Adjust the width as needed
-                            height:
-                                150.0, // Ensure this height matches the desired card height
+                            width: 100.0,
+                            height: 150.0,
                             child: ClipRRect(
-                              borderRadius: BorderRadius.circular(
-                                  8.0), // Optional: to match the card's border radius
+                              borderRadius: BorderRadius.circular(8.0),
                               child: Image.asset(
                                 'assets/card_img1.jpg',
-                                fit: BoxFit
-                                    .cover, // To ensure the image covers the entire space
+                                fit: BoxFit.cover,
                               ),
                             ),
                           ),
@@ -158,9 +197,7 @@ class _screenmainState extends State<screenmain> {
                                 SizedBox(height: 5.0),
                                 Text(
                                   'Lorem Ipsum is simply dummy text of the ',
-                                  style: TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.bold),
+                                  style: Theme.of(context).textTheme.titleLarge,
                                 ),
                                 SizedBox(height: 5.0),
                                 Text('By Eventia'),
@@ -173,7 +210,14 @@ class _screenmainState extends State<screenmain> {
                                     ),
                                     IconButton(
                                       icon: Icon(Icons.favorite_border),
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        _addFavoriteEvent({
+                                          'date': 'Fri, Jun 5  7:00PM IST',
+                                          'title': 'Lorem Ipsum is simply dummy text of the ',
+                                          'subtitle': 'By Eventia',
+                                          'image': 'assets/card_img1.jpg',
+                                        });
+                                      },
                                     ),
                                   ],
                                 ),
@@ -206,7 +250,7 @@ class _screenmainState extends State<screenmain> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite),
-            label: 'Favourite',
+            label: 'Favorite',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),

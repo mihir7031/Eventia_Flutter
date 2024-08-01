@@ -4,17 +4,19 @@ import 'package:eventia/Edit_pages/Personalinfo.dart';
 import 'package:eventia/Edit_pages/Preferences.dart';
 import 'package:eventia/Edit_pages/security.dart';
 
-class profile extends StatelessWidget {
-  const profile({super.key});
+class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-            Text('Profile Page', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.lightBlue[300],
+        title: Text('Profile Page', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        foregroundColor: Colors.black,
       ),
+      backgroundColor: Colors.grey[100],
       body: ListView(
         padding: EdgeInsets.all(16.0),
         children: [
@@ -23,13 +25,15 @@ class profile extends StatelessWidget {
             child: CircleAvatar(
               radius: 50,
               backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+              backgroundColor: Colors.grey[300],
             ),
           ),
           SizedBox(height: 16.0),
 
           // Combined Information (Basic + Personal)
           ProfileSectionWithEditButton(
-            title: 'Personal & Basic Information',
+            title: 'Personal Information',
+            editPage: EditPersonalAndBasicInformationPage(),
             children: [
               ProfileListTile(
                 title: 'Full Name',
@@ -101,6 +105,7 @@ class profile extends StatelessWidget {
           // Preferences
           ProfileSectionWithEditButton(
             title: 'Preferences',
+            editPage: EditPreferencesPage(),
             children: [
               ProfileListTile(
                 title: 'Notification Settings',
@@ -124,6 +129,7 @@ class profile extends StatelessWidget {
           // Security
           ProfileSectionWithEditButton(
             title: 'Security',
+            editPage: EditSecurityPage(),
             children: [
               ProfileListTile(
                 title: 'Change Password',
@@ -155,39 +161,9 @@ class profile extends StatelessWidget {
 class ProfileSectionWithEditButton extends StatelessWidget {
   final String title;
   final List<Widget> children;
+  final Widget editPage;
 
-  ProfileSectionWithEditButton({required this.title, required this.children});
-
-  void _navigateToEditPage(BuildContext context) {
-    Widget editPage;
-
-    switch (title) {
-      case 'Personal & Basic Information':
-        editPage = EditPersonalAndBasicInformationPage();
-        break;
-      case 'Preferences':
-        editPage = EditPreferencesPage();
-        break;
-      case 'Security':
-        editPage = EditSecurityPage();
-        break;
-      default:
-        editPage = Scaffold(
-          appBar: AppBar(
-            title: Text('Edit Page'),
-          ),
-          body: Center(
-            child: Text('Edit form for $title'),
-          ),
-        );
-        break;
-    }
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => editPage),
-    );
-  }
+  ProfileSectionWithEditButton({required this.title, required this.children, required this.editPage});
 
   @override
   Widget build(BuildContext context) {
@@ -204,12 +180,15 @@ class ProfileSectionWithEditButton extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.lightBlue[700],
+                  color: Colors.black,
                 ),
               ),
               IconButton(
                 icon: Icon(Icons.edit, color: Colors.lightBlue[700]),
-                onPressed: () => _navigateToEditPage(context),
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => editPage),
+                ),
               ),
             ],
           ),
@@ -238,7 +217,7 @@ class ProfileSection extends StatelessWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.lightBlue[700],
+              color: Colors.black,
             ),
           ),
         ),
@@ -262,7 +241,7 @@ class ProfileSectionTitle extends StatelessWidget {
         style: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.bold,
-          color: Colors.lightBlue[700],
+          color: Colors.black,
         ),
       ),
     );
@@ -274,17 +253,18 @@ class ProfileListTile extends StatelessWidget {
   final String subtitle;
   final IconData icon;
 
-  ProfileListTile(
-      {required this.title, required this.subtitle, required this.icon});
+  ProfileListTile({required this.title, required this.subtitle, required this.icon});
 
   @override
   Widget build(BuildContext context) {
     return Card(
       margin: EdgeInsets.symmetric(vertical: 8.0),
+      color: Colors.white,
+      elevation: 2,
       child: ListTile(
         leading: Icon(icon, color: Colors.lightBlue[400]),
-        title: Text(title),
-        subtitle: Text(subtitle),
+        title: Text(title, style: TextStyle(color: Colors.black)),
+        subtitle: Text(subtitle, style: TextStyle(color: Colors.grey[600])),
       ),
     );
   }
