@@ -75,6 +75,7 @@ flutter:
   assets:
     - assets/
     - assets/font/
+    - assets/posters/
     - assets/video/mm.mp4
     - assets/video/mm1.mp4
     - assets/category/Sport.png

@@ -1,8 +1,10 @@
+// screen_main.dart
 import 'package:flutter/material.dart';
 import 'package:eventia/Favorite/favorit_page.dart';
 import 'package:eventia/view/profile.dart';
 import 'package:eventia/Event_info/Event_info.dart';
 import 'package:eventia/Add_event/CreateEventForm.dart';
+import 'popup_menu.dart';  // Import the custom popup menu
 
 class ScreenMain extends StatefulWidget {
   const ScreenMain({super.key});
@@ -19,21 +21,25 @@ class _ScreenMainState extends State<ScreenMain> {
     setState(() {
       _selectedIndex = index;
     });
-    if (index == 4) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => ProfilePage()),
-      );
-    } else if (index == 3) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => FavoritePage(favoriteEvents: favoriteEvents)),
-      );
-    } else if (index == 2) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => CreateEventForm()),
-      );
+    switch (index) {
+      case 2:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => CreateEventForm()),
+        );
+        break;
+      case 3:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => FavoritePage(favoriteEvents: favoriteEvents)),
+        );
+        break;
+      case 4:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ProfilePage()),
+        );
+        break;
     }
   }
 
@@ -50,16 +56,28 @@ class _ScreenMainState extends State<ScreenMain> {
     });
   }
 
+  void _onMenuOptionSelected(String value) {
+    // Handle menu option selection
+    switch (value) {
+      case 'Settings':
+      // Navigate to Settings page or perform an action
+        break;
+      case 'Logout':
+      // Perform logout action
+        break;
+    // Add more cases as needed
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Row(
-          children: [
-
-            const SizedBox(width: 10),
-            const Text('E', style: TextStyle(fontFamily: 'Blacksword', color: Colors.black)),
-            const Text('ventia', style: TextStyle(fontFamily: 'BeautyDemo', color: Colors.black)),
+          children: const [
+            SizedBox(width: 10),
+            Text('E', style: TextStyle(fontFamily: 'Blacksword', color: Colors.black)),
+            Text('ventia', style: TextStyle(fontFamily: 'BeautyDemo', color: Colors.black)),
           ],
         ),
         actions: [
@@ -67,14 +85,7 @@ class _ScreenMainState extends State<ScreenMain> {
             icon: Icon(Icons.notifications),
             onPressed: () {},
           ),
-          IconButton(
-            icon: const Icon(Icons.nights_stay),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.more_vert),
-            onPressed: () {},
-          ),
+          CustomPopupMenu(onMenuOptionSelected: _onMenuOptionSelected), // Use the custom popup menu
         ],
       ),
       body: SingleChildScrollView(
@@ -84,7 +95,8 @@ class _ScreenMainState extends State<ScreenMain> {
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
-                children: List.generate(6, (index) {
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: List.generate(5, (index) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: GestureDetector(
@@ -99,13 +111,13 @@ class _ScreenMainState extends State<ScreenMain> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10),
                               image: DecorationImage(
-                                image: AssetImage('assets/category/Sport.png'),
+                                image: AssetImage('assets/posters/p${index+1}.png'),
                                 fit: BoxFit.cover,
                               ),
                             ),
                           ),
                           const SizedBox(height: 5),
-                          Text(
+                          const Text(
                             'Sport',
                             style: TextStyle(color: Colors.black87),
                           ),
@@ -120,6 +132,7 @@ class _ScreenMainState extends State<ScreenMain> {
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -167,7 +180,7 @@ class _ScreenMainState extends State<ScreenMain> {
                 return InkWell(
                   onTap: _onCardTapped,
                   child: Card(
-                    margin: EdgeInsets.all(10.0),
+                    margin: const EdgeInsets.all(10.0),
                     child: Row(
                       children: [
                         Padding(
@@ -178,7 +191,7 @@ class _ScreenMainState extends State<ScreenMain> {
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(8.0),
                               child: Image.asset(
-                                'assets/card_img1.jpg',
+                                'assets/posters/p${index + 1}.png',
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -186,30 +199,30 @@ class _ScreenMainState extends State<ScreenMain> {
                         ),
                         Expanded(
                           child: Padding(
-                            padding: EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.all(8.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
+                                const Text(
                                   'Fri, Jun 5  7:00PM IST',
                                   style: TextStyle(color: Colors.red),
                                 ),
-                                SizedBox(height: 5.0),
+                                const SizedBox(height: 5.0),
                                 Text(
                                   'Lorem Ipsum is simply dummy text of the ',
                                   style: Theme.of(context).textTheme.titleLarge,
                                 ),
-                                SizedBox(height: 5.0),
-                                Text('By Eventia'),
+                                const SizedBox(height: 5.0),
+                                const Text('By Eventia'),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
                                     IconButton(
-                                      icon: Icon(Icons.share),
+                                      icon: const Icon(Icons.share),
                                       onPressed: () {},
                                     ),
                                     IconButton(
-                                      icon: Icon(Icons.favorite_border),
+                                      icon: const Icon(Icons.favorite_border),
                                       onPressed: () {
                                         _addFavoriteEvent({
                                           'date': 'Fri, Jun 5  7:00PM IST',

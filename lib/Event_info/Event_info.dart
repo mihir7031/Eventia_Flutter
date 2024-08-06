@@ -1,4 +1,6 @@
+import 'package:eventia/Event_info/booking.dart';
 import 'package:flutter/material.dart';
+
 
 class Event_info extends StatelessWidget {
   void _showTermsAndConditions(BuildContext context) {
@@ -369,7 +371,11 @@ class Event_info extends StatelessWidget {
                       ),
                       ElevatedButton(
                         onPressed: () {
-                          _showTermsAndConditions(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => BookingPage()),
+                          );
+                          // _showTermsAndConditions(context);
                         },
                         style: ButtonStyle(
                           backgroundColor:
