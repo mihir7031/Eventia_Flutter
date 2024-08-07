@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:eventia/main.dart';  // Importing the main.dart for color constants
 
 class BookingPage extends StatefulWidget {
   @override
@@ -37,12 +38,16 @@ class _BookingPageState extends State<BookingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: accentColor3,
       appBar: AppBar(
-        title: Text('Prateek Kuhad Silhouettes Tour'),
-        backgroundColor: Colors.deepPurple,
+        iconTheme: IconThemeData(
+          color: Colors.red, // Change this to your desired color
+        ),
+        title: Text('Prateek Kuhad Silhouettes Tour',style: TextStyle(color: secondaryColor)),
+        backgroundColor: primaryColor,
         actions: [
           IconButton(
-            icon: Icon(Icons.help_outline),
+            icon: Icon(Icons.help_outline, color: secondaryColor),
             onPressed: () {
               // Handle help or info action
             },
@@ -69,7 +74,7 @@ class _BookingPageState extends State<BookingPage> {
               style: TextStyle(
                 fontSize: 18.0,
                 fontWeight: FontWeight.bold,
-                color: Colors.deepPurple,
+                color: primaryColor,
               ),
             ),
           ),
@@ -100,8 +105,8 @@ class _BookingPageState extends State<BookingPage> {
                           } : null,
                           child: Text('Proceed'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.deepPurple,
-                            foregroundColor: Colors.white,
+                            backgroundColor: primaryColor,
+                            foregroundColor: secondaryColor,
                             padding: EdgeInsets.symmetric(horizontal: 24.0),
                           ),
                         ),
@@ -111,6 +116,7 @@ class _BookingPageState extends State<BookingPage> {
                 } else {
                   final category = categories[index];
                   return Card(
+                      color: cardColor,
                     margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                     elevation: 4.0,
                     child: ListTile(
@@ -125,8 +131,8 @@ class _BookingPageState extends State<BookingPage> {
                         onPressed: () => addTicket(index),
                         child: Text('Add'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepPurple,
-                          foregroundColor: Colors.white,
+                          backgroundColor: primaryColor,
+                          foregroundColor: secondaryColor,
                           padding: EdgeInsets.symmetric(horizontal: 16.0),
                         ),
                       )
@@ -134,12 +140,12 @@ class _BookingPageState extends State<BookingPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            icon: Icon(Icons.remove),
+                            icon: Icon(Icons.remove, color: primaryColor),
                             onPressed: () => removeTicket(index),
                           ),
                           Text('${category.quantity}'),
                           IconButton(
-                            icon: Icon(Icons.add),
+                            icon: Icon(Icons.add, color: primaryColor),
                             onPressed: () => addTicket(index),
                           ),
                         ],
@@ -152,32 +158,7 @@ class _BookingPageState extends State<BookingPage> {
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.deepPurple,
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.deepPurple,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.event),
-            label: 'Events',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bookmark),
-            label: 'Bookings',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-        onTap: (index) {
-          // Handle navigation
-        },
-      ),
+
     );
   }
 }

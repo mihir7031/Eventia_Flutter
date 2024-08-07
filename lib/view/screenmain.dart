@@ -1,10 +1,11 @@
-// screen_main.dart
 import 'package:flutter/material.dart';
 import 'package:eventia/Favorite/favorit_page.dart';
 import 'package:eventia/view/profile.dart';
 import 'package:eventia/Event_info/Event_info.dart';
 import 'package:eventia/Add_event/CreateEventForm.dart';
-import 'popup_menu.dart';  // Import the custom popup menu
+import 'package:eventia/main.dart';
+import 'package:eventia/MyEvent/MyEventPage.dart';
+
 
 class ScreenMain extends StatefulWidget {
   const ScreenMain({super.key});
@@ -16,6 +17,7 @@ class ScreenMain extends StatefulWidget {
 class _ScreenMainState extends State<ScreenMain> {
   int _selectedIndex = 0;
   List<Map<String, String>> favoriteEvents = [];
+  final FocusNode _searchFocusNode = FocusNode();
 
   void _onItemTapped(int index) {
     setState(() {
@@ -31,7 +33,9 @@ class _ScreenMainState extends State<ScreenMain> {
       case 3:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => FavoritePage(favoriteEvents: favoriteEvents)),
+          MaterialPageRoute(
+              builder: (context) =>
+                  FavoritePage(favoriteEvents: favoriteEvents)),
         );
         break;
       case 4:
@@ -57,69 +61,252 @@ class _ScreenMainState extends State<ScreenMain> {
   }
 
   void _onMenuOptionSelected(String value) {
-    // Handle menu option selection
     switch (value) {
       case 'Settings':
-      // Navigate to Settings page or perform an action
+        // Navigate to Settings page or perform an action
         break;
       case 'Logout':
-      // Perform logout action
+        // Perform logout action
         break;
-    // Add more cases as needed
     }
+  }
+
+  @override
+  void dispose() {
+    _searchFocusNode.dispose(); // Dispose the FocusNode
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: accentColor3,
       appBar: AppBar(
+        backgroundColor: accentColor3,
         title: Row(
           children: const [
             SizedBox(width: 10),
-            Text('E', style: TextStyle(fontFamily: 'Blacksword', color: Colors.black)),
-            Text('ventia', style: TextStyle(fontFamily: 'BeautyDemo', color: Colors.black)),
+            Text('E',
+                style:
+                    TextStyle(fontFamily: 'Blacksword', color: primaryColor)),
+            Text('ventia',
+                style:
+                    TextStyle(fontFamily: 'BeautyDemo', color: primaryColor)),
           ],
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications),
+            icon: Icon(Icons.notifications, color: primaryColor),
             onPressed: () {},
           ),
-          CustomPopupMenu(onMenuOptionSelected: _onMenuOptionSelected), // Use the custom popup menu
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 10),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(5, (index) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: GestureDetector(
-                      onTap: () {
-                        // Add your category click action here
+      drawer: Drawer(
+        backgroundColor: accentColor3,
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            UserAccountsDrawerHeader(
+              decoration: BoxDecoration(
+                color: primaryColor, // Change this to your desired color
+              ),
+              accountName: Text("Meet Prajapati"),
+              accountEmail: Text("mm@gmail.com"),
+              currentAccountPicture: CircleAvatar(
+                backgroundColor: Colors.white,
+                child: Text(
+                  "O",
+                  style: TextStyle(fontSize: 40.0),
+                ),
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.event),
+              title: Text('My Events'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MyEventPage()),
+                );
+                // Handle My Events action
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.event_available),
+              title: Text('Joined Events'),
+              onTap: () {
+                Navigator.pop(context);
+                // Handle Joined Events action
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.settings),
+              title: Text('Settings'),
+              onTap: () {
+                Navigator.pop(context);
+                // Handle Settings action
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.logout),
+              title: Text('Login/Logout'),
+              onTap: () {
+                Navigator.pop(context);
+                // Handle Login/Logout action
+              },
+            ),
+          ],
+        ),
+      ),
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).requestFocus(FocusNode());
+        },
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              const SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        focusNode: _searchFocusNode,
+                        decoration: InputDecoration(
+                          hintText: 'Search',
+                          prefixIcon: Icon(Icons.search, color: primaryColor),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                            borderSide: BorderSide.none,
+                          ),
+                          filled: true,
+                          fillColor:
+                              secondaryColor, // Light Greenish-Gray background
+                          contentPadding: EdgeInsets.symmetric(
+                              vertical: 0.0, horizontal: 10.0),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    IconButton(
+                      icon: Icon(Icons.filter_list),
+                      onPressed: () {
+                        // Add filter icon action here
                       },
-                      child: Column(
+                      color: primaryColor, // Set filter icon color to black
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: List.generate(5, (index) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: GestureDetector(
+                        onTap: () {
+                          // Add your category click action here
+                        },
+                        child: Column(
+                          children: [
+                            Container(
+                              width: 100,
+                              height: 100,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                image: DecorationImage(
+                                  image: AssetImage(
+                                      'assets/posters/p${index + 1}.png'),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            const Text(
+                              'Sport',
+                              style: TextStyle(color: primaryColor),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Column(
+                children: List.generate(5, (index) {
+                  return InkWell(
+                    onTap: _onCardTapped,
+                    child: Card(
+                      color: cardColor,
+                      margin: const EdgeInsets.all(10.0),
+                      child: Row(
                         children: [
-                          Container(
-                            width: 100,
-                            height: 100,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              image: DecorationImage(
-                                image: AssetImage('assets/posters/p${index+1}.png'),
-                                fit: BoxFit.cover,
+                          Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: SizedBox(
+                              width: 100.0,
+                              height: 150.0,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8.0),
+                                child: Image.asset(
+                                  'assets/posters/p${index + 1}.png',
+                                  fit: BoxFit.cover,
+                                ),
                               ),
                             ),
                           ),
-                          const SizedBox(height: 5),
-                          const Text(
-                            'Sport',
-                            style: TextStyle(color: Colors.black87),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Fri, Jun 5  7:00PM IST',
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                  const SizedBox(height: 5.0),
+                                  Text(
+                                    'Lorem Ipsum is simply dummy text of the ',
+                                    style:
+                                        Theme.of(context).textTheme.titleLarge,
+                                  ),
+                                  const SizedBox(height: 5.0),
+                                  const Text('By Eventia',
+                                      style: TextStyle(color: primaryColor)),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.share,
+                                            color: primaryColor),
+                                        onPressed: () {},
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.favorite_border,
+                                            color: primaryColor),
+                                        onPressed: () {
+                                          _addFavoriteEvent({
+                                            'date': 'Fri, Jun 5  7:00PM IST',
+                                            'title':
+                                                'Lorem Ipsum is simply dummy text of the ',
+                                            'subtitle': 'By Eventia',
+                                            'image': 'assets/card_img1.jpg',
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -127,153 +314,9 @@ class _ScreenMainState extends State<ScreenMain> {
                   );
                 }),
               ),
-            ),
-            const SizedBox(height: 10),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Add your filter click action here
-                      },
-                      child: const Text('Filters'),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Add your filter click action here
-                      },
-                      child: const Text('Date'),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Add your filter click action here
-                      },
-                      child: const Text('Location'),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Add your filter click action here
-                      },
-                      child: const Text('Type'),
-                    ),
-                  ),
-                  // Add more filter buttons here if needed
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-            Column(
-              children: List.generate(5, (index) {
-                return InkWell(
-                  onTap: _onCardTapped,
-                  child: Card(
-                    margin: const EdgeInsets.all(10.0),
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: SizedBox(
-                            width: 100.0,
-                            height: 150.0,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8.0),
-                              child: Image.asset(
-                                'assets/posters/p${index + 1}.png',
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Fri, Jun 5  7:00PM IST',
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                                const SizedBox(height: 5.0),
-                                Text(
-                                  'Lorem Ipsum is simply dummy text of the ',
-                                  style: Theme.of(context).textTheme.titleLarge,
-                                ),
-                                const SizedBox(height: 5.0),
-                                const Text('By Eventia'),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.share),
-                                      onPressed: () {},
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.favorite_border),
-                                      onPressed: () {
-                                        _addFavoriteEvent({
-                                          'date': 'Fri, Jun 5  7:00PM IST',
-                                          'title': 'Lorem Ipsum is simply dummy text of the ',
-                                          'subtitle': 'By Eventia',
-                                          'image': 'assets/card_img1.jpg',
-                                        });
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Search',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add),
-            label: 'Add',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Favorite',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.lightBlue[400],
-        unselectedItemColor: Colors.grey,
-        onTap: _onItemTapped,
       ),
     );
   }
