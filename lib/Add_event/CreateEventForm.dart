@@ -1,3 +1,4 @@
+import 'package:eventia/main.dart';
 import 'package:flutter/material.dart';
 
 class CreateEventForm extends StatefulWidget {
@@ -33,22 +34,25 @@ class _CreateEventFormState extends State<CreateEventForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create Event'),
+        title: Text('Create Event',style: TextStyle(color: secondaryColor),),
+        backgroundColor: primaryColor,
+
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Form(
             key: _formKey,
+
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Main Event Information
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.blueAccent.withOpacity(0.1),
+                    color: primaryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.blueAccent),
+                    border: Border.all(color: primaryColor),
                   ),
                   padding: EdgeInsets.all(16),
                   margin: EdgeInsets.only(bottom: 16),
@@ -60,6 +64,7 @@ class _CreateEventFormState extends State<CreateEventForm> {
                               fontSize: 20, fontWeight: FontWeight.bold)),
                       SizedBox(height: 16),
                       TextFormField(
+
                         decoration: InputDecoration(labelText: 'Event Name'),
                         validator: (value) {
                           if (value == null || value.isEmpty) {

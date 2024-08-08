@@ -26,8 +26,9 @@ class _PersistentNavBarState extends State<PersistentNavBar> {
     return CupertinoTabScaffold(
 
       tabBar: CupertinoTabBar(
-        backgroundColor: accentColor3,
+        backgroundColor: Colors.white,
         items: const <BottomNavigationBarItem>[
+
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',

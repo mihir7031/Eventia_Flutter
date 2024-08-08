@@ -69,10 +69,10 @@ class Event_info extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: accentColor3,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         iconTheme: IconThemeData(
-          color: Colors.red, // Change this to your desired color
+          color: Colors.white, // Change this to your desired color
         ),
 
           backgroundColor: primaryColor,

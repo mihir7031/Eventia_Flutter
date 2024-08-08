@@ -5,6 +5,7 @@ import 'package:eventia/Event_info/Event_info.dart';
 import 'package:eventia/Add_event/CreateEventForm.dart';
 import 'package:eventia/main.dart';
 import 'package:eventia/MyEvent/MyEventPage.dart';
+import 'package:eventia/joinedEvent/joinedEvent.dart';
 
 
 class ScreenMain extends StatefulWidget {
@@ -80,9 +81,9 @@ class _ScreenMainState extends State<ScreenMain> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: accentColor3,
+      backgroundColor:Colors.white,
       appBar: AppBar(
-        backgroundColor: accentColor3,
+        backgroundColor:Colors.white,
         title: Row(
           children: const [
             SizedBox(width: 10),
@@ -95,14 +96,23 @@ class _ScreenMainState extends State<ScreenMain> {
           ],
         ),
         actions: [
-          IconButton(
-            icon: Icon(Icons.notifications, color: primaryColor),
-            onPressed: () {},
-          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: Container(
+              decoration: BoxDecoration(
+                color: cardColor, // Background color
+                shape: BoxShape.circle, // Circular shape
+              ),
+              child: IconButton(
+                icon: Icon(Icons.notifications, color: primaryColor),
+                onPressed: () {},
+              ),
+            ),
+          )
         ],
       ),
       drawer: Drawer(
-        backgroundColor: accentColor3,
+        backgroundColor: Colors.white,
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
@@ -137,6 +147,10 @@ class _ScreenMainState extends State<ScreenMain> {
               title: Text('Joined Events'),
               onTap: () {
                 Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => JoinedEvent()),
+                );
                 // Handle Joined Events action
               },
             ),
@@ -182,20 +196,22 @@ class _ScreenMainState extends State<ScreenMain> {
                             borderSide: BorderSide.none,
                           ),
                           filled: true,
-                          fillColor:
-                              secondaryColor, // Light Greenish-Gray background
+                          fillColor: cardColor, // Light Greenish-Gray background
                           contentPadding: EdgeInsets.symmetric(
                               vertical: 0.0, horizontal: 10.0),
                         ),
                       ),
                     ),
                     const SizedBox(width: 10),
-                    IconButton(
-                      icon: Icon(Icons.filter_list),
-                      onPressed: () {
-                        // Add filter icon action here
-                      },
-                      color: primaryColor, // Set filter icon color to black
+                    Container(
+                      decoration: BoxDecoration(
+                        color: cardColor, // Background color
+                        shape: BoxShape.circle, // Circular shape
+                      ),
+                      child: IconButton(
+                        icon: Icon(Icons.filter_list, color: primaryColor),
+                        onPressed: () {},
+                      ),
                     ),
                   ],
                 ),
@@ -215,13 +231,13 @@ class _ScreenMainState extends State<ScreenMain> {
                         child: Column(
                           children: [
                             Container(
-                              width: 100,
-                              height: 100,
+                              width: 120,
+                              height: 130,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
                                 image: DecorationImage(
                                   image: AssetImage(
-                                      'assets/posters/p${index + 1}.png'),
+                                      'assets/posters/r${index + 1}.png'),
                                   fit: BoxFit.cover,
                                 ),
                               ),
@@ -270,11 +286,11 @@ class _ScreenMainState extends State<ScreenMain> {
                                 children: [
                                   const Text(
                                     'Fri, Jun 5  7:00PM IST',
-                                    style: TextStyle(color: Colors.red),
+                                    style: TextStyle(color: Colors.red,fontWeight: FontWeight.bold,),
                                   ),
                                   const SizedBox(height: 5.0),
                                   Text(
-                                    'Lorem Ipsum is simply dummy text of the ',
+                                    'TCF LINE UP Intercity Comedy',
                                     style:
                                         Theme.of(context).textTheme.titleLarge,
                                   ),

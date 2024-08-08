@@ -12,7 +12,7 @@ const Color accentColor = Color(0xFFD8E0E9);
 const Color accentColor2 = Color(0xFFCFE2CC);
 const Color accentColor3 = Color(0xffd0d6ce);
 const Color blackColor = Color(0xFF010101);
-const Color cardColor = Color(0xFFc0c9be);
+const Color cardColor = Color(0xFFf4f4f4);
 void main() async {
   // Initialize Firebase
   WidgetsFlutterBinding.ensureInitialized();
@@ -65,6 +65,10 @@ class _MyAppState extends State<MyApp> {
         ),
         scaffoldBackgroundColor: secondaryColor,
         textTheme: TextTheme(
+
+
+
+
           titleLarge: TextStyle(
             color: primaryColor,
             fontWeight: FontWeight.bold,

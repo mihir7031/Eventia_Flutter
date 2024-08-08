@@ -38,10 +38,10 @@ class _BookingPageState extends State<BookingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: accentColor3,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         iconTheme: IconThemeData(
-          color: Colors.red, // Change this to your desired color
+          color: Colors.white, // Change this to your desired color
         ),
         title: Text('Prateek Kuhad Silhouettes Tour',style: TextStyle(color: secondaryColor)),
         backgroundColor: primaryColor,

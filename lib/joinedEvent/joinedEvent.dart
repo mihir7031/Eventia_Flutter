@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:eventia/main.dart';
 import 'package:eventia/Event_info/Event_info.dart';
+import 'package:eventia/joinedEvent/joinedEventInfo.dart';
 
-class MyEventPage extends StatefulWidget {
+class JoinedEvent extends StatefulWidget {
   @override
-  _MyEventPageState createState() => _MyEventPageState();
+  _JoinedEventState createState() => _JoinedEventState();
 }
 
-class _MyEventPageState extends State<MyEventPage> {
-  int _selectedIndex = 0;
-
+class _JoinedEventState extends State<JoinedEvent> {
   void _onCardTapped() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => Event_info()),
+      MaterialPageRoute(builder: (context) => JoinedEventDetailsPage()),
     );
   }
 
@@ -24,12 +23,6 @@ class _MyEventPageState extends State<MyEventPage> {
     'Event 4',
   ];
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,26 +31,12 @@ class _MyEventPageState extends State<MyEventPage> {
         iconTheme: IconThemeData(
           color: Colors.white, // Change this to your desired color
         ),
-        title: Text('Event Management', style: TextStyle(color: secondaryColor)),
+        title: Text('Joined Event', style: TextStyle(color: secondaryColor)),
         backgroundColor: primaryColor,
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Option buttons
-            Container(
-              color: Colors.white,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    _buildOptionButton('Live Event', 0),
-                    _buildOptionButton('Finished Event', 1),
-                    _buildOptionButton('Scheduled Event', 2),
-                  ],
-                ),
-              ),
-            ),
             // Event cards
             ListView.builder(
               shrinkWrap: true,
@@ -136,25 +115,6 @@ class _MyEventPageState extends State<MyEventPage> {
               },
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOptionButton(String text, int index) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: ElevatedButton(
-        onPressed: () => _onItemTapped(index),
-
-        child: Text(
-          text,
-          style: TextStyle(
-            color: _selectedIndex == index ? cardColor : primaryColor,
-          ),
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: _selectedIndex == index ? primaryColor : cardColor,
         ),
       ),
     );
