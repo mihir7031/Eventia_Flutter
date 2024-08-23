@@ -1,5 +1,8 @@
-import 'package:eventia/main.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:io';
 
 class CreateEventForm extends StatefulWidget {
   const CreateEventForm({super.key});
@@ -10,388 +13,404 @@ class CreateEventForm extends StatefulWidget {
 
 class _CreateEventFormState extends State<CreateEventForm> {
   final _formKey = GlobalKey<FormState>();
-  bool _isOffline = true;
-  bool _showSponsor = false;
-  bool _showAgenda = false;
-  bool _showMedia = false;
-  bool _showVolunteer = false;
-  bool _showMoreFeatures = false;
-  bool _isPaid = false;
 
-  DateTime? _selectedDate;
-  TimeOfDay? _selectedTime;
+  bool _isOnlineEvent = false;
+  bool _isPaidEvent = false;
+
+  final TextEditingController _eventNameController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
+  final TextEditingController _aboutEventController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
+  final TextEditingController _durationController = TextEditingController();
+  final TextEditingController _capacityController = TextEditingController();
+  final TextEditingController _priceController = TextEditingController();
+  final TextEditingController _artistNameController = TextEditingController();
+  final TextEditingController _artistProfessionController = TextEditingController();
+  final TextEditingController _organizerInfoController = TextEditingController();
+  final TextEditingController _eventHighlightsController = TextEditingController();
+  final TextEditingController _accessibilityInfoController = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-    _dateController.text = '';
-    _timeController.text = '';
+  List<Map<String, String>> _passes = [];
+
+  File? _selectedImage;
+  String? _imageUrl;
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      setState(() {
+        _dateController.text = '${picked.toLocal()}'.split(' ')[0];
+      });
+    }
+  }
+
+  Future<void> _selectTime(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        _timeController.text = picked.format(context);
+      });
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+    }
+  }
+
+  Future<void> _uploadImage() async {
+    if (_selectedImage != null) {
+      try {
+        final fileName = 'events/${DateTime.now().millisecondsSinceEpoch}.jpg';
+        final storageRef = _storage.ref().child(fileName);
+
+        final uploadTask = storageRef.putFile(_selectedImage!);
+        final taskSnapshot = await uploadTask;
+
+        _imageUrl = await taskSnapshot.ref.getDownloadURL();
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to upload image: $e')),
+        );
+      }
+    }
+  }
+
+  void _addPass() {
+    setState(() {
+      _passes.add({'type': '', 'price': ''});
+    });
+  }
+
+  Future<void> _addEventToDatabase() async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        // Upload the image and get the URL
+        await _uploadImage();
+
+        // Save the event data to Firestore
+        await _firestore.collection('events').add({
+          'eventName': _eventNameController.text,
+          'location': _locationController.text,
+          'aboutEvent': _aboutEventController.text,
+          'date': _dateController.text,
+          'time': _timeController.text,
+          'duration': _durationController.text,
+          'capacity': _capacityController.text,
+          'price': _isPaidEvent ? _priceController.text : 'Free',
+          'artistName': _artistNameController.text,
+          'artistProfession': _artistProfessionController.text,
+          'organizerInfo': _organizerInfoController.text,
+          'eventHighlights': _eventHighlightsController.text,
+          'accessibilityInfo': _accessibilityInfoController.text,
+          'imageUrl': _imageUrl ?? '',
+          'isOnlineEvent': _isOnlineEvent,
+          'passes': _passes,
+        });
+
+        // Clear the text fields
+        _eventNameController.clear();
+        _locationController.clear();
+        _aboutEventController.clear();
+        _dateController.clear();
+        _timeController.clear();
+        _durationController.clear();
+        _capacityController.clear();
+        _priceController.clear();
+        _artistNameController.clear();
+        _artistProfessionController.clear();
+        _organizerInfoController.clear();
+        _eventHighlightsController.clear();
+        _accessibilityInfoController.clear();
+        _passes.clear();
+        _selectedImage = null;
+
+        // Optionally reset the switches
+        setState(() {
+          _isOnlineEvent = false;
+          _isPaidEvent = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Event created successfully!')),
+        );
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context); // Only pop if possible
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to create event: $e')),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Create Event',style: TextStyle(color: secondaryColor),),
-        backgroundColor: primaryColor,
+    final double width = MediaQuery.of(context).size.width;
 
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        title: Row(
+          children: const [
+            SizedBox(width: 10),
+            Text('E', style: TextStyle(fontFamily: 'Blacksword', color: Colors.black)),
+            Text('ventia', style: TextStyle(fontFamily: 'BeautyDemo', color: Colors.black)),
+          ],
+        ),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
           child: Form(
             key: _formKey,
-
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Main Event Information
-                Container(
-                  decoration: BoxDecoration(
-                    color: primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: primaryColor),
-                  ),
-                  padding: EdgeInsets.all(16),
-                  margin: EdgeInsets.only(bottom: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Event Information',
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.bold)),
-                      SizedBox(height: 16),
-                      TextFormField(
-
-                        decoration: InputDecoration(labelText: 'Event Name'),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter event name';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 16),
-                      DropdownButtonFormField<String>(
-                        decoration: InputDecoration(labelText: 'Event Mode'),
-                        items: [
-                          DropdownMenuItem(
-                              value: 'Offline', child: Text('Offline')),
-                          DropdownMenuItem(
-                              value: 'Online', child: Text('Online')),
-                        ],
-                        onChanged: (value) {
-                          setState(() {
-                            _isOffline = value == 'Offline';
-                          });
-                        },
-                        validator: (value) {
-                          if (value == null) {
-                            return 'Please select event mode';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 16),
-                      if (_isOffline)
-                        Column(
-                          children: [
-                            TextFormField(
-                              decoration:
-                                  InputDecoration(labelText: 'Location'),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter location';
-                                }
-                                return null;
-                              },
-                            ),
-                            SizedBox(height: 16),
-                          ],
-                        ),
-                      TextFormField(
-                        controller: _dateController,
-                        decoration: InputDecoration(labelText: 'Date'),
-                        onTap: () async {
-                          DateTime? pickedDate = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime(2000),
-                            lastDate: DateTime(2101),
-                          );
-                          if (pickedDate != null &&
-                              pickedDate != _selectedDate) {
-                            setState(() {
-                              _selectedDate = pickedDate;
-                              _dateController.text =
-                                  "${_selectedDate!.toLocal()}".split(' ')[0];
-                            });
-                          }
-                        },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter date';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 16),
-                      TextFormField(
-                        controller: _timeController,
-                        decoration: InputDecoration(labelText: 'Time'),
-                        onTap: () async {
-                          TimeOfDay? pickedTime = await showTimePicker(
-                            context: context,
-                            initialTime: TimeOfDay.now(),
-                          );
-                          if (pickedTime != null &&
-                              pickedTime != _selectedTime) {
-                            setState(() {
-                              _selectedTime = pickedTime;
-                              _timeController.text =
-                                  "${_selectedTime!.format(context)}";
-                            });
-                          }
-                        },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter time';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 16),
-                      TextFormField(
-                        decoration:
-                            InputDecoration(labelText: 'Duration (hours)'),
-                        keyboardType: TextInputType.number,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter duration';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 16),
-                      TextFormField(
-                        decoration: InputDecoration(labelText: 'About Event'),
-                        maxLines: 5,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter event description';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 16),
-                      TextFormField(
-                        decoration:
-                            InputDecoration(labelText: 'Organization Name'),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter organization name';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 16),
-                      TextFormField(
-                        decoration: InputDecoration(
-                            labelText: 'Event Website (Optional)'),
-                        keyboardType: TextInputType.url,
-                      ),
-                      SizedBox(height: 16),
-                      TextFormField(
-                        decoration: InputDecoration(labelText: 'Capacity'),
-                        keyboardType: TextInputType.number,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter event capacity';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: RadioListTile<bool>(
-                              title: Text('Paid'),
-                              value: true,
-                              groupValue: _isPaid,
-                              onChanged: (value) {
-                                setState(() {
-                                  _isPaid = value!;
-                                });
-                              },
-                            ),
-                          ),
-                          Expanded(
-                            child: RadioListTile<bool>(
-                              title: Text('Unpaid'),
-                              value: false,
-                              groupValue: _isPaid,
-                              onChanged: (value) {
-                                setState(() {
-                                  _isPaid = value!;
-                                });
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (_isPaid)
-                        TextFormField(
-                          decoration: InputDecoration(labelText: 'Price'),
-                          keyboardType: TextInputType.number,
-                        ),
-                      SizedBox(height: 16),
-                      TextFormField(
-                        decoration:
-                            InputDecoration(labelText: 'Registration Deadline'),
-                        onTap: () async {
-                          DateTime? pickedDate = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime(2000),
-                            lastDate: DateTime(2101),
-                          );
-                          if (pickedDate != null &&
-                              pickedDate != _selectedDate) {
-                            setState(() {
-                              _selectedDate = pickedDate;
-                              _dateController.text =
-                                  "${_selectedDate!.toLocal()}".split(' ')[0];
-                            });
-                          }
-                        },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter registration deadline';
-                          }
-                          return null;
-                        },
-                      ),
-                      // Adding New Field
-                      SizedBox(height: 16),
-                      TextFormField(
-                        decoration:
-                            InputDecoration(labelText: 'Contact Person'),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter contact person';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            _showMoreFeatures = !_showMoreFeatures;
-                          });
-                        },
-                        child: Text(_showMoreFeatures
-                            ? 'Hide More Features'
-                            : 'Show More Features'),
-                      ),
-                    ],
-                  ),
+                _buildSectionTitle('Event Details'),
+                _buildTextField(
+                  controller: _eventNameController,
+                  labelText: 'Event Name',
+                  hintText: 'Enter the event name',
                 ),
-                if (_showMoreFeatures)
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.greenAccent.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.greenAccent),
+                SwitchListTile(
+                  title: const Text('Is this an online event?'),
+                  value: _isOnlineEvent,
+                  onChanged: (bool value) {
+                    setState(() {
+                      _isOnlineEvent = value;
+                      if (_isOnlineEvent) _locationController.clear();
+                    });
+                  },
+                ),
+                if (!_isOnlineEvent)
+                  _buildTextField(
+                    controller: _locationController,
+                    labelText: 'Event Location',
+                    hintText: 'Enter the event location',
+                  ),
+                _buildTextField(
+                  controller: _aboutEventController,
+                  labelText: 'About Event',
+                  hintText: 'Enter details about the event',
+                  maxLines: 4,
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildTextField(
+                        controller: _dateController,
+                        labelText: 'Date',
+                        hintText: 'Select date',
+                        readOnly: true,
+                        onTap: () => _selectDate(context),
+                      ),
                     ),
-                    padding: EdgeInsets.all(16),
-                    margin: EdgeInsets.only(top: 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _buildTextField(
+                        controller: _timeController,
+                        labelText: 'Time',
+                        hintText: 'Select time',
+                        readOnly: true,
+                        onTap: () => _selectTime(context),
+                      ),
+                    ),
+                  ],
+                ),
+                _buildTextField(
+                  controller: _durationController,
+                  labelText: 'Event Duration',
+                  hintText: 'Enter event duration',
+                ),
+                _buildTextField(
+                  controller: _capacityController,
+                  labelText: 'Capacity',
+                  hintText: 'Enter event capacity',
+                ),
+                SwitchListTile(
+                  title: const Text('Is this a paid event?'),
+                  value: _isPaidEvent,
+                  onChanged: (bool value) {
+                    setState(() {
+                      _isPaidEvent = value;
+                    });
+                  },
+                ),
+                if (_isPaidEvent)
+                  _buildTextField(
+                    controller: _priceController,
+                    labelText: 'Price',
+                    hintText: 'Enter event price',
+                  ),
+                const SizedBox(height: 10),
+                _buildSectionTitle('Passes'),
+                ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: _passes.length,
+                  itemBuilder: (context, index) {
+                    return Row(
                       children: [
-                        Text('Additional Features',
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold)),
-                        SizedBox(height: 16),
-                        CheckboxListTile(
-                          title: Text('Include Sponsors'),
-                          value: _showSponsor,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              _showSponsor = value!;
-                            });
-                          },
-                        ),
-                        CheckboxListTile(
-                          title: Text('Include Agenda'),
-                          value: _showAgenda,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              _showAgenda = value!;
-                            });
-                          },
-                        ),
-                        CheckboxListTile(
-                          title: Text('Include Media (Video/Images)'),
-                          value: _showMedia,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              _showMedia = value!;
-                            });
-                          },
-                        ),
-                        if (_showMedia)
-                          TextFormField(
-                            decoration: InputDecoration(labelText: 'Media URL'),
-                            keyboardType: TextInputType.url,
-                            validator: (value) {
-                              if (value != null && value.isNotEmpty) {
-                                RegExp urlPattern = RegExp(
-                                  r'^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$',
-                                  caseSensitive: false,
-                                  multiLine: false,
-                                );
-                                if (!urlPattern.hasMatch(value)) {
-                                  return 'Please enter a valid URL';
-                                }
-                              }
-                              return null;
+                        Expanded(
+                          child: _buildTextField(
+                            labelText: 'Pass Type',
+                            hintText: 'Enter pass type',
+                            onChanged: (value) {
+                              _passes[index]['type'] = value;
                             },
                           ),
-                        CheckboxListTile(
-                          title: Text('Include Volunteers'),
-                          value: _showVolunteer,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              _showVolunteer = value!;
-                            });
-                          },
                         ),
-                        if (_showVolunteer)
-                          TextFormField(
-                            decoration: InputDecoration(
-                                labelText: 'Maximum Volunteers'),
-                            keyboardType: TextInputType.number,
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _buildTextField(
+                            labelText: 'Price',
+                            hintText: 'Enter pass price',
+                            onChanged: (value) {
+                              _passes[index]['price'] = value;
+                            },
                           ),
+                        ),
                       ],
+                    );
+                  },
+                ),
+                const SizedBox(height: 10),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: _addPass,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+                      textStyle: const TextStyle(fontSize: 16.0),
+                      backgroundColor: Colors.green,
+                    ),
+                    child: const Text('Add Pass'),
+                  ),
+                ),
+                _buildSectionTitle('Organizer Information'),
+                _buildTextField(
+                  controller: _artistNameController,
+                  labelText: 'Artist Name',
+                  hintText: 'Enter artist name',
+                ),
+                _buildTextField(
+                  controller: _artistProfessionController,
+                  labelText: 'Artist Profession',
+                  hintText: 'Enter artist profession',
+                ),
+                _buildTextField(
+                  controller: _organizerInfoController,
+                  labelText: 'Organizer Information',
+                  hintText: 'Enter organizer information',
+                ),
+                _buildSectionTitle('Event Highlights'),
+                _buildTextField(
+                  controller: _eventHighlightsController,
+                  labelText: 'Event Highlights',
+                  hintText: 'Enter event highlights',
+                ),
+                _buildTextField(
+                  controller: _accessibilityInfoController,
+                  labelText: 'Accessibility Information',
+                  hintText: 'Enter accessibility information',
+                ),
+                const SizedBox(height: 10),
+                _buildSectionTitle('Event Image'),
+                if (_selectedImage != null)
+                  Center(
+                    child: Image.file(
+                      _selectedImage!,
+                      height: 200,
+                      width: width * 0.8,
+                      fit: BoxFit.cover,
                     ),
                   ),
-                SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      // Process data.
-                    }
-                  },
-                  child: Text('Create Event'),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: _pickImage,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+                      textStyle: const TextStyle(fontSize: 16.0),
+                      backgroundColor: Colors.blue,
+                    ),
+                    child: const Text('Select Image from Gallery'),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: _addEventToDatabase,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+                      textStyle: const TextStyle(fontSize: 16.0),
+                      backgroundColor: Colors.blue,
+                    ),
+                    child: const Text('Create Event'),
+                  ),
                 ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 20.0, bottom: 10.0),
+      child: Text(
+        title,
+        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    TextEditingController? controller, // Make controller optional
+    required String labelText,
+    required String hintText,
+    bool readOnly = false,
+    int maxLines = 1,
+    void Function()? onTap,
+    void Function(String)? onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextFormField(
+        controller: controller,
+        readOnly: readOnly,
+        maxLines: maxLines,
+        onTap: onTap,
+        onChanged: onChanged,
+        decoration: InputDecoration(
+          labelText: labelText,
+          hintText: hintText,
+          border: const OutlineInputBorder(),
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter $labelText';
+          }
+          return null;
+        },
       ),
     );
   }

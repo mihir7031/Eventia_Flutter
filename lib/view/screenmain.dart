@@ -6,7 +6,7 @@ import 'package:eventia/Add_event/CreateEventForm.dart';
 import 'package:eventia/main.dart';
 import 'package:eventia/MyEvent/MyEventPage.dart';
 import 'package:eventia/joinedEvent/joinedEvent.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ScreenMain extends StatefulWidget {
   const ScreenMain({super.key});
@@ -48,10 +48,11 @@ class _ScreenMainState extends State<ScreenMain> {
     }
   }
 
-  void _onCardTapped() {
+  void _onCardTapped(DocumentSnapshot event) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => Event_info()),
+      MaterialPageRoute(
+          builder: (context) => Event_info(event: event)),
     );
   }
 
@@ -59,17 +60,6 @@ class _ScreenMainState extends State<ScreenMain> {
     setState(() {
       favoriteEvents.add(event);
     });
-  }
-
-  void _onMenuOptionSelected(String value) {
-    switch (value) {
-      case 'Settings':
-        // Navigate to Settings page or perform an action
-        break;
-      case 'Logout':
-        // Perform logout action
-        break;
-    }
   }
 
   @override
@@ -81,18 +71,18 @@ class _ScreenMainState extends State<ScreenMain> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:Colors.white,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor:Colors.white,
+        backgroundColor: Colors.white,
         title: Row(
           children: const [
             SizedBox(width: 10),
             Text('E',
                 style:
-                    TextStyle(fontFamily: 'Blacksword', color: primaryColor)),
+                TextStyle(fontFamily: 'Blacksword', color: primaryColor)),
             Text('ventia',
                 style:
-                    TextStyle(fontFamily: 'BeautyDemo', color: primaryColor)),
+                TextStyle(fontFamily: 'BeautyDemo', color: primaryColor)),
           ],
         ),
         actions: [
@@ -217,118 +207,101 @@ class _ScreenMainState extends State<ScreenMain> {
                 ),
               ),
               const SizedBox(height: 10),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(5, (index) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: GestureDetector(
-                        onTap: () {
-                          // Add your category click action here
-                        },
-                        child: Column(
-                          children: [
-                            Container(
-                              width: 120,
-                              height: 130,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                image: DecorationImage(
-                                  image: AssetImage(
-                                      'assets/posters/r${index + 1}.png'),
-                                  fit: BoxFit.cover,
+              StreamBuilder(
+                stream: FirebaseFirestore.instance.collection('events').snapshots(),
+                builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Something went wrong'));
+                  }
+
+                  final events = snapshot.data!.docs;
+
+                  return Column(
+                    children: List.generate(events.length, (index) {
+                      var event = events[index];
+                      return InkWell(
+                        onTap: () => _onCardTapped(event),
+                        child: Card(
+                          color: cardColor,
+                          margin: const EdgeInsets.all(10.0),
+                          child: Row(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: SizedBox(
+                                  width: 100.0,
+                                  height: 150.0,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    child: Image.network(
+                                      event['imageUrl'],
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 5),
-                            const Text(
-                              'Sport',
-                              style: TextStyle(color: primaryColor),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-              ),
-              const SizedBox(height: 10),
-              Column(
-                children: List.generate(5, (index) {
-                  return InkWell(
-                    onTap: _onCardTapped,
-                    child: Card(
-                      color: cardColor,
-                      margin: const EdgeInsets.all(10.0),
-                      child: Row(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: SizedBox(
-                              width: 100.0,
-                              height: 150.0,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: Image.asset(
-                                  'assets/posters/p${index + 1}.png',
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Fri, Jun 5  7:00PM IST',
-                                    style: TextStyle(color: Colors.red,fontWeight: FontWeight.bold,),
-                                  ),
-                                  const SizedBox(height: 5.0),
-                                  Text(
-                                    'TCF LINE UP Intercity Comedy',
-                                    style:
-                                        Theme.of(context).textTheme.titleLarge,
-                                  ),
-                                  const SizedBox(height: 5.0),
-                                  const Text('By Eventia',
-                                      style: TextStyle(color: primaryColor)),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      IconButton(
-                                        icon: const Icon(Icons.share,
-                                            color: primaryColor),
-                                        onPressed: () {},
+                                      Text(
+                                        '${event['date']}  • ${event['time']}',
+                                        style: TextStyle(
+                                          color: Colors.red,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                      IconButton(
-                                        icon: const Icon(Icons.favorite_border,
-                                            color: primaryColor),
-                                        onPressed: () {
-                                          _addFavoriteEvent({
-                                            'date': 'Fri, Jun 5  7:00PM IST',
-                                            'title':
-                                                'Lorem Ipsum is simply dummy text of the ',
-                                            'subtitle': 'By Eventia',
-                                            'image': 'assets/card_img1.jpg',
-                                          });
-                                        },
+
+                                      const SizedBox(height: 5.0),
+                                      Text(
+                                        event['eventName'],
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium,
+                                      ),
+                                      const SizedBox(height: 5.0),
+                                      Text(
+                                        event['organizerInfo'],
+                                        style: TextStyle(color: primaryColor),
+                                      ),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(Icons.share,
+                                                color: primaryColor),
+                                            onPressed: () {},
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(Icons.favorite_border,
+                                                color: primaryColor),
+                                            onPressed: () {
+                                              _addFavoriteEvent({
+                                                'date': event['date'],
+                                                'title': event['eventName'],
+                                                'subtitle': event['organizerInfo'],
+                                                'image': event['imageUrl'],
+                                              });
+                                            },
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
+                        ),
+                      );
+                    }),
                   );
-                }),
+                },
               ),
             ],
           ),

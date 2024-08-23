@@ -74,6 +74,13 @@ class _MyAppState extends State<MyApp> {
             fontWeight: FontWeight.bold,
             fontFamily: GoogleFonts.poppins().fontFamily,
           ),
+
+          titleMedium: TextStyle(
+            color: primaryColor,
+            fontWeight: FontWeight.bold,
+            fontFamily: GoogleFonts.poppins().fontFamily,
+          ),
+
           bodyMedium: TextStyle(
             color: primaryColor,
             fontFamily: GoogleFonts.poppins().fontFamily,

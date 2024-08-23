@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:eventia/main.dart';
-import 'package:eventia/Event_info/Event_info.dart';
+import 'package:eventia/Event_info/booking.dart';
 
 class MyEventPage extends StatefulWidget {
   @override
@@ -13,7 +13,7 @@ class _MyEventPageState extends State<MyEventPage> {
   void _onCardTapped() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => Event_info()),
+      MaterialPageRoute(builder: (context) => BookingPage()),
     );
   }
 
