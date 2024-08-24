@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:eventia/view/screenmain.dart';
 import 'package:eventia/navigation.dart';
+import 'package:eventia/LoginPages/login.dart';
+import 'package:eventia/LoginPages/auth_check.dart';
 
 
 class SplashScreen extends StatefulWidget {
@@ -27,9 +29,7 @@ class _SplashScreenState extends State<SplashScreen> {
         _controller.addListener(() {
           if (_controller.value.position == _controller.value.duration) {
             Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => PersistentNavBar(
-                selectedIndex: 0,
-              ),),
+              MaterialPageRoute(builder: (context) => AuthCheck()),
             );
           }
         });

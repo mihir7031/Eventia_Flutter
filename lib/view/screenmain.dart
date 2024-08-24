@@ -7,6 +7,8 @@ import 'package:eventia/main.dart';
 import 'package:eventia/MyEvent/MyEventPage.dart';
 import 'package:eventia/joinedEvent/joinedEvent.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class ScreenMain extends StatefulWidget {
   const ScreenMain({super.key});
@@ -16,6 +18,7 @@ class ScreenMain extends StatefulWidget {
 }
 
 class _ScreenMainState extends State<ScreenMain> {
+  final FirebaseAuth auth = FirebaseAuth.instance;
   int _selectedIndex = 0;
   List<Map<String, String>> favoriteEvents = [];
   final FocusNode _searchFocusNode = FocusNode();
@@ -155,7 +158,8 @@ class _ScreenMainState extends State<ScreenMain> {
             ListTile(
               leading: Icon(Icons.logout),
               title: Text('Login/Logout'),
-              onTap: () {
+              onTap: () async{
+                await auth.signOut();
                 Navigator.pop(context);
                 // Handle Login/Logout action
               },
