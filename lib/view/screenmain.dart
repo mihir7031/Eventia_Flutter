@@ -8,7 +8,9 @@ import 'package:eventia/MyEvent/MyEventPage.dart';
 import 'package:eventia/joinedEvent/joinedEvent.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class ScreenMain extends StatefulWidget {
   const ScreenMain({super.key});
@@ -19,9 +21,74 @@ class ScreenMain extends StatefulWidget {
 
 class _ScreenMainState extends State<ScreenMain> {
   final FirebaseAuth auth = FirebaseAuth.instance;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  final FirebaseStorage storage = FirebaseStorage.instance;
+
   int _selectedIndex = 0;
   List<Map<String, String>> favoriteEvents = [];
   final FocusNode _searchFocusNode = FocusNode();
+
+  String? userName;
+  String? userProfileImage;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserProfile();
+  }
+
+  Future<void> _fetchUserProfile() async {
+    User? currentUser = auth.currentUser;
+    if (currentUser != null) {
+      DocumentSnapshot userDoc =
+          await firestore.collection('User').doc(currentUser.uid).get();
+      if (userDoc.exists) {
+        setState(() {
+          userName = userDoc['name'];
+          userProfileImage = userDoc['imgUrl'];
+        });
+      }
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedImage =
+        await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedImage != null) {
+      _uploadImage(File(pickedImage.path));
+    }
+  }
+
+  Future<void> _uploadImage(File image) async {
+    User? currentUser = auth.currentUser;
+    if (currentUser != null) {
+      String userId = currentUser.uid;
+      String imagePath = 'user_profiles/$userId.jpg';
+
+      try {
+        // Upload image to Firebase Storage
+        UploadTask uploadTask = storage.ref(imagePath).putFile(image);
+        TaskSnapshot snapshot = await uploadTask;
+
+        // Get the download URL
+        String downloadUrl = await snapshot.ref.getDownloadURL();
+
+        // Update Firestore with the new image URL
+        await firestore.collection('User').doc(userId).update({
+          'imgUrl': downloadUrl,
+        });
+
+        // Update local state
+        setState(() {
+          userProfileImage = downloadUrl;
+        });
+      } catch (e) {
+        print('Error uploading image: $e');
+      }
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -54,8 +121,7 @@ class _ScreenMainState extends State<ScreenMain> {
   void _onCardTapped(DocumentSnapshot event) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-          builder: (context) => Event_info(event: event)),
+      MaterialPageRoute(builder: (context) => Event_info(event: event)),
     );
   }
 
@@ -82,10 +148,10 @@ class _ScreenMainState extends State<ScreenMain> {
             SizedBox(width: 10),
             Text('E',
                 style:
-                TextStyle(fontFamily: 'Blacksword', color: primaryColor)),
+                    TextStyle(fontFamily: 'Blacksword', color: primaryColor)),
             Text('ventia',
                 style:
-                TextStyle(fontFamily: 'BeautyDemo', color: primaryColor)),
+                    TextStyle(fontFamily: 'BeautyDemo', color: primaryColor)),
           ],
         ),
         actions: [
@@ -113,14 +179,52 @@ class _ScreenMainState extends State<ScreenMain> {
               decoration: BoxDecoration(
                 color: primaryColor, // Change this to your desired color
               ),
-              accountName: Text("Meet Prajapati"),
-              accountEmail: Text("mm@gmail.com"),
-              currentAccountPicture: CircleAvatar(
-                backgroundColor: Colors.white,
-                child: Text(
-                  "O",
-                  style: TextStyle(fontSize: 40.0),
-                ),
+              accountName: Text(
+                userName ?? 'Loading...',
+                style: TextStyle(color: Colors.white), // Set the text color
+              ),
+              accountEmail: Text(
+                auth.currentUser?.email ?? 'No email',
+                style: TextStyle(color: Colors.white), // Set the text color
+              ),
+              currentAccountPicture: Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundColor: Colors.white,
+                    backgroundImage:
+                        userProfileImage != null && userProfileImage!.isNotEmpty
+                            ? NetworkImage(userProfileImage!)
+                            : null,
+                    child: userProfileImage == null || userProfileImage!.isEmpty
+                        ? Text(
+                            userName != null && userName!.isNotEmpty
+                                ? userName![0].toUpperCase()
+                                : 'U', // Display 'U' if no name is available
+                            style:
+                                TextStyle(fontSize: 40.0, color: primaryColor),
+                          )
+                        : null,
+                  ),
+                  // const SizedBox(width: 10), // Space between avatar and icon
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      width: 25,
+                      height: 25,
+                      decoration: BoxDecoration(
+                        color: cardColor, // Background color
+                        shape: BoxShape.circle, // Circular shape
+                      ),
+                      child:
+                      IconButton(
+                        icon: Icon(Icons.edit, color:primaryColor,size: 12,),
+                        onPressed: _pickImage,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             ListTile(
@@ -132,7 +236,6 @@ class _ScreenMainState extends State<ScreenMain> {
                   context,
                   MaterialPageRoute(builder: (context) => MyEventPage()),
                 );
-                // Handle My Events action
               },
             ),
             ListTile(
@@ -144,7 +247,6 @@ class _ScreenMainState extends State<ScreenMain> {
                   context,
                   MaterialPageRoute(builder: (context) => JoinedEvent()),
                 );
-                // Handle Joined Events action
               },
             ),
             ListTile(
@@ -158,7 +260,7 @@ class _ScreenMainState extends State<ScreenMain> {
             ListTile(
               leading: Icon(Icons.logout),
               title: Text('Login/Logout'),
-              onTap: () async{
+              onTap: () async {
                 await auth.signOut();
                 Navigator.pop(context);
                 // Handle Login/Logout action
@@ -190,7 +292,7 @@ class _ScreenMainState extends State<ScreenMain> {
                             borderSide: BorderSide.none,
                           ),
                           filled: true,
-                          fillColor: cardColor, // Light Greenish-Gray background
+                          fillColor: cardColor,
                           contentPadding: EdgeInsets.symmetric(
                               vertical: 0.0, horizontal: 10.0),
                         ),
@@ -199,8 +301,8 @@ class _ScreenMainState extends State<ScreenMain> {
                     const SizedBox(width: 10),
                     Container(
                       decoration: BoxDecoration(
-                        color: cardColor, // Background color
-                        shape: BoxShape.circle, // Circular shape
+                        color: cardColor,
+                        shape: BoxShape.circle,
                       ),
                       child: IconButton(
                         icon: Icon(Icons.filter_list, color: primaryColor),
@@ -212,7 +314,7 @@ class _ScreenMainState extends State<ScreenMain> {
               ),
               const SizedBox(height: 10),
               StreamBuilder(
-                stream: FirebaseFirestore.instance.collection('events').snapshots(),
+                stream: firestore.collection('events').snapshots(),
                 builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(child: CircularProgressIndicator());
@@ -251,7 +353,8 @@ class _ScreenMainState extends State<ScreenMain> {
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         '${event['date']}  • ${event['time']}',
@@ -260,7 +363,6 @@ class _ScreenMainState extends State<ScreenMain> {
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
-
                                       const SizedBox(height: 5.0),
                                       Text(
                                         event['eventName'],
@@ -274,7 +376,8 @@ class _ScreenMainState extends State<ScreenMain> {
                                         style: TextStyle(color: primaryColor),
                                       ),
                                       Row(
-                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
                                         children: [
                                           IconButton(
                                             icon: const Icon(Icons.share,
@@ -282,13 +385,15 @@ class _ScreenMainState extends State<ScreenMain> {
                                             onPressed: () {},
                                           ),
                                           IconButton(
-                                            icon: const Icon(Icons.favorite_border,
+                                            icon: const Icon(
+                                                Icons.favorite_border,
                                                 color: primaryColor),
                                             onPressed: () {
                                               _addFavoriteEvent({
                                                 'date': event['date'],
                                                 'title': event['eventName'],
-                                                'subtitle': event['organizerInfo'],
+                                                'subtitle':
+                                                    event['organizerInfo'],
                                                 'image': event['imageUrl'],
                                               });
                                             },

@@ -99,6 +99,7 @@ class _LogInState extends State<LogIn> {
                         decoration: InputDecoration(
                           border: InputBorder.none,
                           hintText: "Email",
+                          focusedBorder: InputBorder.none,
                           hintStyle: TextStyle(
                               color: Color(0xFFb2b7bf), fontSize: 18.0),
                         ),
@@ -122,6 +123,7 @@ class _LogInState extends State<LogIn> {
                         },
                         decoration: InputDecoration(
                           border: InputBorder.none,
+                          focusedBorder: InputBorder.none,
                           hintText: "Password",
                           hintStyle: TextStyle(
                               color: Color(0xFFb2b7bf), fontSize: 18.0),

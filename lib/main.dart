@@ -4,7 +4,7 @@ import 'package:eventia/view/screenmain.dart'; // Make sure this is correct
 import 'package:eventia/view/SplashScreen.dart'; // Make sure this is correct
 import 'package:firebase_core/firebase_core.dart';
 import 'package:eventia/navigation.dart';
-
+import 'package:eventia/LoginPages/login.dart';
 // Define your colors
 const Color primaryColor = Color(0xFF282828);
 const Color secondaryColor = Color(0xFFE9EEEA);

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import 'package:eventia/view/screenmain.dart';
-import 'package:eventia/navigation.dart';
 import 'package:eventia/LoginPages/login.dart';
 import 'package:eventia/LoginPages/auth_check.dart';
 
