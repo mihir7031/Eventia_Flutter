@@ -12,6 +12,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:eventia/view/profile.dart';
 
 class ScreenMain extends StatefulWidget {
   const ScreenMain({super.key});
@@ -232,6 +233,18 @@ class _ScreenMainState extends State<ScreenMain> {
               ),
             ),
             ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text('Profile'),
+              onTap: () {
+                Navigator.pop(context);
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ProfilePage()),
+                );
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.event),
               title: const Text('My Events'),
               onTap: () {
@@ -286,6 +299,7 @@ class _ScreenMainState extends State<ScreenMain> {
                       // Navigate to Sign In page
                     },
                   ),
+
           ],
         ),
       ),

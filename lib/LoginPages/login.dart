@@ -1,5 +1,4 @@
 // ignore_for_file: use_build_context_synchronously
-
 import 'package:eventia/LoginPages/forgot_password.dart';
 import 'package:eventia/LoginPages/auth.dart';
 import 'package:eventia/LoginPages/signup.dart';
@@ -9,6 +8,7 @@ import 'package:eventia/navigation.dart';
 import 'package:eventia/main.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:eventia/navigator.dart';
+
 
 class LogIn extends StatefulWidget {
   const LogIn({super.key});
@@ -29,12 +29,8 @@ class _LogInState extends State<LogIn> {
     try {
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const PersistentNavBar(
-                    selectedIndex: 0,
-                  )));
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const NavigatorWidget()));
     } on FirebaseAuthException catch (e) {
       String errorMessage;
       if (e.code == 'user-not-found') {
@@ -100,8 +96,8 @@ class _LogInState extends State<LogIn> {
                 child: Column(
                   children: [
                     Container(
-                      padding:
-                          const EdgeInsets.symmetric(vertical: 2.0, horizontal: 20.0),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 2.0, horizontal: 20.0),
                       decoration: BoxDecoration(
                         color: const Color(0xFFd9d9d9),
                         borderRadius: BorderRadius.circular(30),
@@ -127,8 +123,8 @@ class _LogInState extends State<LogIn> {
                     ),
                     const SizedBox(height: 30.0),
                     Container(
-                      padding:
-                          const EdgeInsets.symmetric(vertical: 2.0, horizontal: 20.0),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 2.0, horizontal: 20.0),
                       decoration: BoxDecoration(
                         color: const Color(0xFFd9d9d9),
                         borderRadius: BorderRadius.circular(30),
@@ -221,8 +217,8 @@ class _LogInState extends State<LogIn> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
                       foregroundColor: primaryColor,
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 10),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -239,8 +235,8 @@ class _LogInState extends State<LogIn> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
                       foregroundColor: primaryColor,
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 10),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -269,8 +265,10 @@ class _LogInState extends State<LogIn> {
                   const SizedBox(width: 5.0),
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => const SignUp()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const SignUp()));
                     },
                     child: const Text(
                       "SignUp",
@@ -283,11 +281,15 @@ class _LogInState extends State<LogIn> {
                   ),
                 ],
               ),
-              const SizedBox(height: 30,),
+              const SizedBox(
+                height: 30,
+              ),
               GestureDetector(
                 onTap: () {
-                  Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (context) => const NavigatorWidget()));
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const NavigatorWidget()));
                 },
                 child: const Text(
                   "Skip for now",
@@ -296,11 +298,9 @@ class _LogInState extends State<LogIn> {
                     fontSize: 16.0,
                     fontWeight: FontWeight.w300,
                     decoration: TextDecoration.underline,
-
                   ),
                 ),
               ),
-
             ],
           ),
         ),

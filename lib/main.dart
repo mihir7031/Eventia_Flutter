@@ -53,20 +53,14 @@ class _MyAppState extends State<MyApp> {
         colorScheme: const ColorScheme.light(
           primary: primaryColor,
           secondary: secondaryColor,
-          surface: accentColor,
-
           onPrimary: secondaryColor,
           onSecondary: primaryColor,
           onSurface: primaryColor,
           onError: blackColor,
           error: blackColor,
         ),
-        scaffoldBackgroundColor: secondaryColor,
+
         textTheme: TextTheme(
-
-
-
-
           titleLarge: TextStyle(
             color: primaryColor,
             fontWeight: FontWeight.bold,
