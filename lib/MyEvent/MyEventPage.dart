@@ -3,6 +3,8 @@ import 'package:eventia/main.dart';
 import 'package:eventia/Event_info/booking.dart';
 
 class MyEventPage extends StatefulWidget {
+  const MyEventPage({super.key});
+
   @override
   _MyEventPageState createState() => _MyEventPageState();
 }
@@ -13,7 +15,7 @@ class _MyEventPageState extends State<MyEventPage> {
   void _onCardTapped() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => BookingPage()),
+      MaterialPageRoute(builder: (context) => const BookingPage()),
     );
   }
 
@@ -35,10 +37,10 @@ class _MyEventPageState extends State<MyEventPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        iconTheme: IconThemeData(
+        iconTheme: const IconThemeData(
           color: Colors.white, // Change this to your desired color
         ),
-        title: Text('Event Management', style: TextStyle(color: secondaryColor)),
+        title: const Text('Event Management', style: TextStyle(color: secondaryColor)),
         backgroundColor: primaryColor,
       ),
       body: SingleChildScrollView(
@@ -61,7 +63,7 @@ class _MyEventPageState extends State<MyEventPage> {
             // Event cards
             ListView.builder(
               shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(), // Prevent scrolling on this ListView
+              physics: const NeverScrollableScrollPhysics(), // Prevent scrolling on this ListView
               itemCount: _events.length,
               itemBuilder: (context, index) {
                 return InkWell(
@@ -146,15 +148,15 @@ class _MyEventPageState extends State<MyEventPage> {
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: ElevatedButton(
         onPressed: () => _onItemTapped(index),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: _selectedIndex == index ? primaryColor : cardColor,
+        ),
 
         child: Text(
           text,
           style: TextStyle(
             color: _selectedIndex == index ? cardColor : primaryColor,
           ),
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: _selectedIndex == index ? primaryColor : cardColor,
         ),
       ),
     );

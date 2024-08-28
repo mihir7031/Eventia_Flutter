@@ -1,279 +1,267 @@
 import 'package:flutter/material.dart';
-import 'package:eventia/Edit_pages/EditBasicInformationPage.dart';
-import 'package:eventia/Edit_pages/Personalinfo.dart';
-import 'package:eventia/Edit_pages/Preferences.dart';
-import 'package:eventia/Edit_pages/security.dart';
-import 'package:eventia/main.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return
-      Scaffold(
+    return Scaffold(
+      backgroundColor: const Color(0xFFE9EEEA), // Primary background color
+      appBar: AppBar(
         backgroundColor: Colors.white,
-        appBar: AppBar(
-
-          title: Text('Profile Page', style: TextStyle(fontWeight: FontWeight.bold,color: secondaryColor )),
-          backgroundColor: primaryColor,
-          elevation: 0,
-          foregroundColor: Colors.black,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
-
-        body: ListView(
-          padding: EdgeInsets.all(16.0),
-          children: [
-            // Profile Picture
-            Center(
-              child: CircleAvatar(
-                radius: 50,
-                backgroundImage: NetworkImage('https://via.placeholder.com/150'),
-                backgroundColor: Colors.grey[300],
-              ),
-            ),
-            SizedBox(height: 16.0),
-
-            // Combined Information (Basic + Personal)
-            ProfileSectionWithEditButton(
-
-              title: 'Personal Information',
-              editPage: EditPersonalAndBasicInformationPage(),
-              children: [
-
-                ProfileListTile(
-                  title: 'Full Name',
-                  subtitle: 'John Doe',
-                  icon: Icons.person,
-                ),
-                ProfileListTile(
-                  title: 'Username',
-                  subtitle: '@johndoe',
-                  icon: Icons.alternate_email,
-                ),
-                ProfileListTile(
-                  title: 'Email Address',
-                  subtitle: 'john.doe@example.com',
-                  icon: Icons.email,
-                ),
-                ProfileListTile(
-                  title: 'Phone Number',
-                  subtitle: '+1234567890',
-                  icon: Icons.phone,
-                ),
-                ProfileListTile(
-                  title: 'Bio',
-                  subtitle: 'A brief bio about John Doe.',
-                  icon: Icons.info,
-                ),
-                ProfileListTile(
-                  title: 'Location',
-                  subtitle: 'New York, USA',
-                  icon: Icons.location_on,
-                ),
-                ProfileListTile(
-                  title: 'Occupation/Role',
-                  subtitle: 'Event Organizer',
-                  icon: Icons.work,
-                ),
-              ],
-            ),
-            Divider(),
-
-            // Event Information
-            ProfileSection(
-              title: 'Event Information',
-              children: [
-                ProfileListTile(
-                  title: 'Upcoming Events',
-                  subtitle: '3 events',
-                  icon: Icons.event,
-                ),
-                ProfileListTile(
-                  title: 'Past Events',
-                  subtitle: '10 events',
-                  icon: Icons.history,
-                ),
-                ProfileListTile(
-                  title: 'Created Events',
-                  subtitle: '5 events',
-                  icon: Icons.create,
-                ),
-                ProfileListTile(
-                  title: 'Favorites',
-                  subtitle: '2 events',
-                  icon: Icons.favorite,
-                ),
-              ],
-            ),
-            Divider(),
-
-            // Preferences
-            ProfileSectionWithEditButton(
-              title: 'Preferences',
-              editPage: EditPreferencesPage(),
-              children: [
-                ProfileListTile(
-                  title: 'Notification Settings',
-                  subtitle: 'Email, SMS, App',
-                  icon: Icons.notifications,
-                ),
-                ProfileListTile(
-                  title: 'Privacy Settings',
-                  subtitle: 'Public',
-                  icon: Icons.lock,
-                ),
-                ProfileListTile(
-                  title: 'Language Preferences',
-                  subtitle: 'English',
-                  icon: Icons.language,
-                ),
-              ],
-            ),
-            Divider(),
-
-            // Security
-            ProfileSectionWithEditButton(
-              title: 'Security',
-              editPage: EditSecurityPage(),
-              children: [
-                ProfileListTile(
-                  title: 'Change Password',
-                  subtitle: '',
-                  icon: Icons.lock,
-                ),
-              ],
-            ),
-            Divider(),
-
-            // Additional Features
-            ProfileSectionTitle('Additional Features'),
-            ProfileListTile(
-              title: 'Badges/Achievements',
-              subtitle: '5 badges',
-              icon: Icons.emoji_events,
-            ),
-            ProfileListTile(
-              title: 'Certificates',
-              subtitle: '3 certificates',
-              icon: Icons.school,
-            ),
-          ],
+        title: const Text(
+          'Profile',
+          style: TextStyle(
+            color: Color(0xFF333333), // Darker text color for better contrast
+            fontSize: 24.0,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      );
-
-  }
-}
-
-class ProfileSectionWithEditButton extends StatelessWidget {
-  final String title;
-  final List<Widget> children;
-  final Widget editPage;
-
-  ProfileSectionWithEditButton({required this.title, required this.children, required this.editPage});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                title,
+              // Profile Avatar
+              Center(
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    const CircleAvatar(
+                      radius: 60.0,
+                      backgroundColor: Color(0xFFB2BBAF), // Background color for avatar
+                      backgroundImage: AssetImage('assets/profile_placeholder.png'), // Replace with user image
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: -10,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xE9A908A1), // Color for edit button
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.3),
+                              blurRadius: 10.0,
+                              offset: const Offset(0, 5),
+                            ),
+                          ],
+                        ),
+                        child: IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.white),
+                          onPressed: () {
+                            // Handle avatar edit
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20.0),
+
+              // User Info with Icons
+              _buildUserInfoWithIcon(Icons.person, 'JohnDoe'),
+              _buildDivider(),
+              _buildUserInfoWithIcon(Icons.phone, '+123 456 7890'),
+              _buildDivider(),
+              _buildUserInfoWithIcon(Icons.email, 'johndoe@example.com'),
+              _buildDivider(),
+              _buildUserInfoWithIcon(Icons.cake, 'January 1, 1990'),
+              _buildDivider(),
+              _buildUserInfoWithIcon(Icons.location_on, 'New York, USA'),
+              _buildDivider(),
+
+              // User Description
+              const SizedBox(height: 20.0),
+              const Text(
+                'About Me',
                 style: TextStyle(
-                  fontSize: 18,
+                  color: Color(0xFF333333),
+                  fontSize: 18.0,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black,
                 ),
               ),
-              IconButton(
-                icon: Icon(Icons.edit, color: primaryColor),
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => editPage),
+              const SizedBox(height: 10.0),
+              const Text(
+                'A passionate event organizer with a love for bringing people together. Enjoys traveling and exploring new cultures, and always looking for new experiences and opportunities to learn.',
+                style: TextStyle(
+                  color: Color(0xFF555555),
+                  fontSize: 16.0,
                 ),
               ),
+              _buildDivider(),
+
+              // Occupation
+              const SizedBox(height: 20.0),
+              _buildUserInfoWithIcon(Icons.work, 'Event Coordinator'),
+              _buildDivider(),
+
+              // Social Media Links
+              const SizedBox(height: 20.0),
+              const Text(
+                'Social Media',
+                style: TextStyle(
+                  color: Color(0xFF333333),
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildSocialMediaIcon(FontAwesomeIcons.facebook, 'Facebook', 'https://facebook.com/johndoe', const Color(0xFF1877F2)),
+                  _buildSocialMediaIcon(FontAwesomeIcons.instagram, 'Instagram', 'https://instagram.com/johndoe', const Color(0xFFC13584)),
+                  _buildSocialMediaIcon(FontAwesomeIcons.twitter, 'Twitter', 'https://twitter.com/johndoe', const Color(0xFF1DA1F2)),
+                  _buildSocialMediaIcon(FontAwesomeIcons.linkedin, 'LinkedIn', 'https://linkedin.com/in/johndoe', const Color(0xFF0077B5)),
+                ],
+              ),
+              _buildDivider(),
+
+              // Address
+              const SizedBox(height: 20.0),
+              _buildUserInfoWithIcon(Icons.home, '123 Main Street, Apt 4B, New York, NY 10001'),
+              _buildDivider(),
+
+              // Preferences
+              const SizedBox(height: 20.0),
+              const Text(
+                'Preferences',
+                style: TextStyle(
+                  color: Color(0xFF333333),
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10.0),
+              const Text(
+                '• Music\n• Sports\n• Traveling\n• Technology\n• Food',
+                style: TextStyle(
+                  color: Color(0xFF555555),
+                  fontSize: 16.0,
+                ),
+              ),
+              const SizedBox(height: 30.0),
+
+              // Edit Profile Button with new color
+              _buildEditButton(),
             ],
           ),
         ),
-        ...children,
-      ],
+      ),
     );
   }
-}
 
-class ProfileSection extends StatelessWidget {
-  final String title;
-  final List<Widget> children;
-
-  ProfileSection({required this.title, required this.children});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Text(
-            title,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-        ),
-        ...children,
-      ],
-    );
-  }
-}
-
-class ProfileSectionTitle extends StatelessWidget {
-  final String title;
-
-  ProfileSectionTitle(this.title);
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildUserInfoWithIcon(IconData icon, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: primaryColor,
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            color: const Color(0xFF333333), // Darker icon color
+            size: 24.0,
+          ),
+          const SizedBox(width: 16.0),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                color: Color(0xFF555555), // Medium-dark text color for values
+                fontSize: 16.0,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return const Divider(
+      color: Color(0xFFB2BBAF), // Line color
+      thickness: 1.0,
+    );
+  }
+
+  Widget _buildSocialMediaIcon(IconData icon, String platform, String url, Color color) {
+    return GestureDetector(
+      onTap: () {
+        // Handle social media link
+        // e.g., launch(url);
+      },
+      child: Column(
+        children: [
+          CircleAvatar(
+            backgroundColor: color, // Brand color for each social media platform
+            radius: 25.0,
+            child: Icon(
+              icon,
+              color: Colors.white,
+              size: 20.0,
+            ),
+          ),
+          const SizedBox(height: 5.0),
+          Text(
+            platform,
+            style: const TextStyle(
+              color: Color(0xFF555555),
+              fontSize: 14.0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEditButton() {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16.0),
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xCFD00557),
+            Color(0xE9A908A1),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 10.0,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: TextButton(
+        onPressed: () {
+          // Handle edit profile action
+        },
+        child: const Text(
+          'Edit Profile',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18.0,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
   }
 }
 
-class ProfileListTile extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-
-  ProfileListTile({required this.title, required this.subtitle, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: cardColor,
-      margin: EdgeInsets.symmetric(vertical: 8.0),
-
-      elevation: 2,
-      child: ListTile(
-        leading: Icon(icon, color: primaryColor),
-        title: Text(title, style: TextStyle(color: primaryColor)),
-        subtitle: Text(subtitle, style: TextStyle(color: primaryColor)),
-      ),
-    );
-  }
-}
+void main() => runApp(const MaterialApp(home: ProfilePage()));

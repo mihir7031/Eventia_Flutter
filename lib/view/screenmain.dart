@@ -1,3 +1,4 @@
+import 'package:eventia/LoginPages/login.dart';
 import 'package:flutter/material.dart';
 import 'package:eventia/Favorite/favorit_page.dart';
 import 'package:eventia/view/profile.dart';
@@ -98,7 +99,7 @@ class _ScreenMainState extends State<ScreenMain> {
       case 2:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => CreateEventForm()),
+          MaterialPageRoute(builder: (context) => const CreateEventForm()),
         );
         break;
       case 3:
@@ -143,8 +144,8 @@ class _ScreenMainState extends State<ScreenMain> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: Row(
-          children: const [
+        title: const Row(
+          children: [
             SizedBox(width: 10),
             Text('E',
                 style:
@@ -158,12 +159,12 @@ class _ScreenMainState extends State<ScreenMain> {
           Padding(
             padding: const EdgeInsets.only(right: 10),
             child: Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: cardColor, // Background color
                 shape: BoxShape.circle, // Circular shape
               ),
               child: IconButton(
-                icon: Icon(Icons.notifications, color: primaryColor),
+                icon: const Icon(Icons.notifications, color: primaryColor),
                 onPressed: () {},
               ),
             ),
@@ -176,16 +177,16 @@ class _ScreenMainState extends State<ScreenMain> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             UserAccountsDrawerHeader(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: primaryColor, // Change this to your desired color
               ),
               accountName: Text(
-                userName ?? 'Loading...',
-                style: TextStyle(color: Colors.white), // Set the text color
+                userName ?? 'Add name',
+                style: const TextStyle(color: Colors.white), // Set the text color
               ),
               accountEmail: Text(
-                auth.currentUser?.email ?? 'No email',
-                style: TextStyle(color: Colors.white), // Set the text color
+                auth.currentUser?.email ?? 'Add email',
+                style: const TextStyle(color: Colors.white), // Set the text color
               ),
               currentAccountPicture: Stack(
                 children: [
@@ -200,9 +201,9 @@ class _ScreenMainState extends State<ScreenMain> {
                         ? Text(
                             userName != null && userName!.isNotEmpty
                                 ? userName![0].toUpperCase()
-                                : 'U', // Display 'U' if no name is available
+                                : '', // Display 'U' if no name is available
                             style:
-                                TextStyle(fontSize: 40.0, color: primaryColor),
+                                const TextStyle(fontSize: 40.0, color: primaryColor),
                           )
                         : null,
                   ),
@@ -213,13 +214,16 @@ class _ScreenMainState extends State<ScreenMain> {
                     child: Container(
                       width: 25,
                       height: 25,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: cardColor, // Background color
                         shape: BoxShape.circle, // Circular shape
                       ),
-                      child:
-                      IconButton(
-                        icon: Icon(Icons.edit, color:primaryColor,size: 12,),
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.edit,
+                          color: primaryColor,
+                          size: 12,
+                        ),
                         onPressed: _pickImage,
                       ),
                     ),
@@ -228,44 +232,60 @@ class _ScreenMainState extends State<ScreenMain> {
               ),
             ),
             ListTile(
-              leading: Icon(Icons.event),
-              title: Text('My Events'),
+              leading: const Icon(Icons.event),
+              title: const Text('My Events'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => MyEventPage()),
+                  MaterialPageRoute(builder: (context) => const MyEventPage()),
                 );
               },
             ),
             ListTile(
-              leading: Icon(Icons.event_available),
-              title: Text('Joined Events'),
+              leading: const Icon(Icons.event_available),
+              title: const Text('Joined Events'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => JoinedEvent()),
+                  MaterialPageRoute(builder: (context) => const JoinedEvent()),
                 );
               },
             ),
             ListTile(
-              leading: Icon(Icons.settings),
-              title: Text('Settings'),
+              leading: const Icon(Icons.settings),
+              title: const Text('Settings'),
               onTap: () {
                 Navigator.pop(context);
                 // Handle Settings action
               },
             ),
-            ListTile(
-              leading: Icon(Icons.logout),
-              title: Text('Login/Logout'),
-              onTap: () async {
-                await auth.signOut();
-                Navigator.pop(context);
-                // Handle Login/Logout action
-              },
-            ),
+            auth.currentUser != null
+                ? ListTile(
+                    leading: const Icon(Icons.logout),
+                    title: const Text('Sign Out'),
+                    onTap: () async {
+                      await auth.signOut();
+                      setState(() {
+                        userName = null;
+                        userProfileImage = null;
+                      });
+                      Navigator.pop(context);
+                    },
+                  )
+                : ListTile(
+                    leading: const Icon(Icons.login),
+                    title: const Text('Sign In'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const LogIn()),
+                      );
+                      // Navigate to Sign In page
+                    },
+                  ),
           ],
         ),
       ),
@@ -286,26 +306,26 @@ class _ScreenMainState extends State<ScreenMain> {
                         focusNode: _searchFocusNode,
                         decoration: InputDecoration(
                           hintText: 'Search',
-                          prefixIcon: Icon(Icons.search, color: primaryColor),
+                          prefixIcon: const Icon(Icons.search, color: primaryColor),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10.0),
                             borderSide: BorderSide.none,
                           ),
                           filled: true,
                           fillColor: cardColor,
-                          contentPadding: EdgeInsets.symmetric(
+                          contentPadding: const EdgeInsets.symmetric(
                               vertical: 0.0, horizontal: 10.0),
                         ),
                       ),
                     ),
                     const SizedBox(width: 10),
                     Container(
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: cardColor,
                         shape: BoxShape.circle,
                       ),
                       child: IconButton(
-                        icon: Icon(Icons.filter_list, color: primaryColor),
+                        icon: const Icon(Icons.filter_list, color: primaryColor),
                         onPressed: () {},
                       ),
                     ),
@@ -317,10 +337,10 @@ class _ScreenMainState extends State<ScreenMain> {
                 stream: firestore.collection('events').snapshots(),
                 builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator());
                   }
                   if (snapshot.hasError) {
-                    return Center(child: Text('Something went wrong'));
+                    return const Center(child: Text('Something went wrong'));
                   }
 
                   final events = snapshot.data!.docs;
@@ -358,7 +378,7 @@ class _ScreenMainState extends State<ScreenMain> {
                                     children: [
                                       Text(
                                         '${event['date']}  • ${event['time']}',
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           color: Colors.red,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -373,7 +393,7 @@ class _ScreenMainState extends State<ScreenMain> {
                                       const SizedBox(height: 5.0),
                                       Text(
                                         event['organizerInfo'],
-                                        style: TextStyle(color: primaryColor),
+                                        style: const TextStyle(color: primaryColor),
                                       ),
                                       Row(
                                         mainAxisAlignment:

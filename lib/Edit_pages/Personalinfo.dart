@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class EditPersonalAndBasicInformationPage extends StatefulWidget {
+  const EditPersonalAndBasicInformationPage({super.key});
+
   @override
   _EditPersonalAndBasicInformationPageState createState() => _EditPersonalAndBasicInformationPageState();
 }
@@ -19,7 +21,7 @@ class _EditPersonalAndBasicInformationPageState extends State<EditPersonalAndBas
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Personal & Basic Information'),
+        title: const Text('Edit Personal & Basic Information'),
         backgroundColor: Colors.lightBlue[300],
       ),
       body: Padding(
@@ -30,7 +32,7 @@ class _EditPersonalAndBasicInformationPageState extends State<EditPersonalAndBas
             children: [
               TextFormField(
                 initialValue: fullName,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Full Name',
                   border: OutlineInputBorder(),
                 ),
@@ -44,10 +46,10 @@ class _EditPersonalAndBasicInformationPageState extends State<EditPersonalAndBas
                   fullName = value!;
                 },
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               TextFormField(
                 initialValue: username,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Username',
                   border: OutlineInputBorder(),
                 ),
@@ -61,10 +63,10 @@ class _EditPersonalAndBasicInformationPageState extends State<EditPersonalAndBas
                   username = value!;
                 },
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               TextFormField(
                 initialValue: emailAddress,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Email Address',
                   border: OutlineInputBorder(),
                 ),
@@ -78,10 +80,10 @@ class _EditPersonalAndBasicInformationPageState extends State<EditPersonalAndBas
                   emailAddress = value!;
                 },
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               TextFormField(
                 initialValue: phoneNumber,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Phone Number',
                   border: OutlineInputBorder(),
                 ),
@@ -95,10 +97,10 @@ class _EditPersonalAndBasicInformationPageState extends State<EditPersonalAndBas
                   phoneNumber = value!;
                 },
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               TextFormField(
                 initialValue: bio,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Bio',
                   border: OutlineInputBorder(),
                 ),
@@ -112,10 +114,10 @@ class _EditPersonalAndBasicInformationPageState extends State<EditPersonalAndBas
                   bio = value!;
                 },
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               TextFormField(
                 initialValue: location,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Location',
                   border: OutlineInputBorder(),
                 ),
@@ -129,10 +131,10 @@ class _EditPersonalAndBasicInformationPageState extends State<EditPersonalAndBas
                   location = value!;
                 },
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               TextFormField(
                 initialValue: occupation,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Occupation/Role',
                   border: OutlineInputBorder(),
                 ),
@@ -146,18 +148,18 @@ class _EditPersonalAndBasicInformationPageState extends State<EditPersonalAndBas
                   occupation = value!;
                 },
               ),
-              SizedBox(height: 32.0),
+              const SizedBox(height: 32.0),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     _formKey.currentState!.save();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Information updated successfully')),
+                      const SnackBar(content: Text('Information updated successfully')),
                     );
                     Navigator.pop(context);
                   }
                 },
-                child: Text('Save Changes'),
+                child: const Text('Save Changes'),
               ),
             ],
           ),

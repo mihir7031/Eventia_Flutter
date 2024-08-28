@@ -11,21 +11,21 @@ class ForgotPassword extends StatefulWidget {
 
 class _ForgotPasswordState extends State<ForgotPassword> {
   String email = "";
-  TextEditingController mailcontroller = new TextEditingController();
+  TextEditingController mailcontroller = TextEditingController();
 
   final _formkey = GlobalKey<FormState>();
 
   resetPassword() async {
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text(
             "Password Reset Email has been sent !",
             style: TextStyle(fontSize: 20.0),
           )));
     } on FirebaseAuthException catch (e) {
       if (e.code == "user-not-found") {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text(
               "No user found for that email.",
               style: TextStyle(fontSize: 20.0),
@@ -41,12 +41,12 @@ class _ForgotPasswordState extends State<ForgotPassword> {
       body: Container(
         child: Column(
           children: [
-            SizedBox(
+            const SizedBox(
               height: 70.0,
             ),
             Container(
               alignment: Alignment.topCenter,
-              child: Text(
+              child: const Text(
                 "Password Recovery",
                 style: TextStyle(
                     color: Colors.white,
@@ -54,10 +54,10 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                     fontWeight: FontWeight.bold),
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 10.0,
             ),
-            Text(
+            const Text(
               "Enter your mail",
               style: TextStyle(
                   color: Colors.white,
@@ -68,15 +68,15 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 child: Form(
                     key: _formkey,
                     child: Padding(
-                      padding: EdgeInsets.only(left: 10.0),
+                      padding: const EdgeInsets.only(left: 10.0),
                       child: ListView(
                         children: [
                           Container(
-                            padding: EdgeInsets.only(left: 10.0),
+                            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0),
                             decoration: BoxDecoration(
-                              border:
-                              Border.all(color: Colors.white70, width: 2.0),
+                              border: Border.all(color: Colors.white70, width: 2.0),
                               borderRadius: BorderRadius.circular(30),
+                              color: Colors.black, // Added background color to match the theme
                             ),
                             child: TextFormField(
                               validator: (value) {
@@ -86,20 +86,29 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                                 return null;
                               },
                               controller: mailcontroller,
-                              style: TextStyle(color: Colors.white),
-                              decoration: InputDecoration(
-                                  hintText: "Email",
-                                  hintStyle: TextStyle(
-                                      fontSize: 18.0, color: Colors.white),
-                                  prefixIcon: Icon(
-                                    Icons.person,
-                                    color: Colors.white70,
-                                    size: 30.0,
-                                  ),
-                                  border: InputBorder.none),
+
+                              style: const TextStyle(color: Colors.white),
+                              decoration: const InputDecoration(
+                                hintText: "Email",
+                                hintStyle: TextStyle(fontSize: 18.0, color: Colors.white70),
+                                prefixIcon: Icon(
+                                  Icons.person,
+                                  color: Colors.white70,
+                                  size: 30.0,
+                                ),
+                                border: InputBorder.none,
+
+                                focusedBorder: InputBorder.none,// No underline
+                                contentPadding: EdgeInsets.symmetric(vertical: 15.0),
+                                filled: true,
+                                fillColor: Colors.transparent,// Vertical padding
+                              ),
+                              keyboardType: TextInputType.emailAddress, // Email keyboard type
+                              cursorColor: Colors.white70, // Cursor color to match the theme
                             ),
                           ),
-                          SizedBox(
+
+                          const SizedBox(
                             height: 40.0,
                           ),
                           GestureDetector(
@@ -113,11 +122,11 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                             },
                             child: Container(
                               width: 140,
-                              padding: EdgeInsets.all(10),
+                              padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(10)),
-                              child: Center(
+                              child: const Center(
                                 child: Text(
                                   "Send Email",
                                   style: TextStyle(
@@ -128,18 +137,18 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                               ),
                             ),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 50.0,
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
+                              const Text(
                                 "Don't have an account?",
                                 style: TextStyle(
                                     fontSize: 18.0, color: Colors.white),
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 width: 5.0,
                               ),
                               GestureDetector(
@@ -147,9 +156,9 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => SignUp()));
+                                          builder: (context) => const SignUp()));
                                 },
-                                child: Text(
+                                child: const Text(
                                   "Create",
                                   style: TextStyle(
                                       color: Color.fromARGB(225, 184, 166, 6),

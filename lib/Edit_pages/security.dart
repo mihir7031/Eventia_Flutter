@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class EditSecurityPage extends StatefulWidget {
+  const EditSecurityPage({super.key});
+
   @override
   _EditSecurityPageState createState() => _EditSecurityPageState();
 }
@@ -22,7 +24,7 @@ class _EditSecurityPageState extends State<EditSecurityPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Security Settings'),
+        title: const Text('Edit Security Settings'),
         backgroundColor: Colors.lightBlue[300],
       ),
       body: Padding(
@@ -33,7 +35,7 @@ class _EditSecurityPageState extends State<EditSecurityPage> {
             children: [
               TextFormField(
                 controller: _passwordController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'New Password',
                   border: OutlineInputBorder(),
                 ),
@@ -45,10 +47,10 @@ class _EditSecurityPageState extends State<EditSecurityPage> {
                   return null;
                 },
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               TextFormField(
                 controller: _confirmPasswordController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Confirm New Password',
                   border: OutlineInputBorder(),
                 ),
@@ -63,10 +65,10 @@ class _EditSecurityPageState extends State<EditSecurityPage> {
                   return null;
                 },
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               ElevatedButton(
                 onPressed: _saveChanges,
-                child: Text('Save Changes'),
+                child: const Text('Save Changes'),
               ),
             ],
           ),

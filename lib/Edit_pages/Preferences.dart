@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class EditPreferencesPage extends StatefulWidget {
+  const EditPreferencesPage({super.key});
+
   @override
   _EditPreferencesPageState createState() => _EditPreferencesPageState();
 }
@@ -42,7 +44,7 @@ class _EditPreferencesPageState extends State<EditPreferencesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Preferences'),
+        title: const Text('Edit Preferences'),
         backgroundColor: Colors.lightBlue[300],
       ),
       body: Padding(
@@ -53,7 +55,7 @@ class _EditPreferencesPageState extends State<EditPreferencesPage> {
             children: [
               TextFormField(
                 controller: _notificationSettingsController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Notification Settings',
                   border: OutlineInputBorder(),
                 ),
@@ -64,10 +66,10 @@ class _EditPreferencesPageState extends State<EditPreferencesPage> {
                   return null;
                 },
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               TextFormField(
                 controller: _privacySettingsController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Privacy Settings',
                   border: OutlineInputBorder(),
                 ),
@@ -78,10 +80,10 @@ class _EditPreferencesPageState extends State<EditPreferencesPage> {
                   return null;
                 },
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               TextFormField(
                 controller: _languagePreferencesController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Language Preferences',
                   border: OutlineInputBorder(),
                 ),
@@ -92,10 +94,10 @@ class _EditPreferencesPageState extends State<EditPreferencesPage> {
                   return null;
                 },
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               ElevatedButton(
                 onPressed: _saveChanges,
-                child: Text('Save Changes'),
+                child: const Text('Save Changes'),
               ),
             ],
           ),

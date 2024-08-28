@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class EditBasicInformationPage extends StatefulWidget {
+  const EditBasicInformationPage({super.key});
+
   @override
   _EditBasicInformationPageState createState() => _EditBasicInformationPageState();
 }
@@ -42,7 +44,7 @@ class _EditBasicInformationPageState extends State<EditBasicInformationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Basic Information'),
+        title: const Text('Edit Basic Information'),
         backgroundColor: Colors.lightBlue[300],
       ),
       body: Padding(
@@ -53,7 +55,7 @@ class _EditBasicInformationPageState extends State<EditBasicInformationPage> {
             children: [
               TextFormField(
                 controller: _fullNameController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Full Name',
                   border: OutlineInputBorder(),
                 ),
@@ -64,10 +66,10 @@ class _EditBasicInformationPageState extends State<EditBasicInformationPage> {
                   return null;
                 },
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               TextFormField(
                 controller: _usernameController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Username',
                   border: OutlineInputBorder(),
                 ),
@@ -78,10 +80,10 @@ class _EditBasicInformationPageState extends State<EditBasicInformationPage> {
                   return null;
                 },
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               TextFormField(
                 controller: _emailController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Email Address',
                   border: OutlineInputBorder(),
                 ),
@@ -92,10 +94,10 @@ class _EditBasicInformationPageState extends State<EditBasicInformationPage> {
                   return null;
                 },
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               TextFormField(
                 controller: _phoneController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Phone Number',
                   border: OutlineInputBorder(),
                 ),
@@ -106,10 +108,10 @@ class _EditBasicInformationPageState extends State<EditBasicInformationPage> {
                   return null;
                 },
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               ElevatedButton(
                 onPressed: _saveChanges,
-                child: Text('Save Changes'),
+                child: const Text('Save Changes'),
               ),
             ],
           ),

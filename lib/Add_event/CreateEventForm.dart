@@ -1,3 +1,4 @@
+import 'package:eventia/main.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
@@ -31,7 +32,7 @@ class _CreateEventFormState extends State<CreateEventForm> {
   final TextEditingController _eventHighlightsController = TextEditingController();
   final TextEditingController _accessibilityInfoController = TextEditingController();
 
-  List<Map<String, String>> _passes = [];
+  final List<Map<String, String>> _passes = [];
 
   File? _selectedImage;
   String? _imageUrl;
@@ -43,7 +44,7 @@ class _CreateEventFormState extends State<CreateEventForm> {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(2020),
+      firstDate: DateTime(2022),
       lastDate: DateTime(2101),
     );
     if (picked != null) {
@@ -168,12 +169,15 @@ class _CreateEventFormState extends State<CreateEventForm> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Row(
-          children: const [
+        backgroundColor: primaryColor,
+        iconTheme: const IconThemeData(
+          color: cardColor, // Change this to the desired color
+        ),
+        title: const Row(
+          children: [
             SizedBox(width: 10),
-            Text('E', style: TextStyle(fontFamily: 'Blacksword', color: Colors.black)),
-            Text('ventia', style: TextStyle(fontFamily: 'BeautyDemo', color: Colors.black)),
+            Text('E', style: TextStyle(fontFamily: 'Blacksword', color: cardColor)),
+            Text('ventia', style: TextStyle(fontFamily: 'BeautyDemo', color: cardColor)),
           ],
         ),
       ),

@@ -2,6 +2,9 @@ import 'package:eventia/LoginPages/login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:eventia/navigation.dart';
+import 'package:eventia/LoginPages/auth.dart';
+import 'package:eventia/main.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -26,7 +29,7 @@ class _SignUpState extends State<SignUp> {
         UserCredential userCredential = await FirebaseAuth.instance
             .createUserWithEmailAndPassword(
             email: email, password: password);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text(
               "Registered Successfully",
               style: TextStyle(fontSize: 20.0),
@@ -34,19 +37,19 @@ class _SignUpState extends State<SignUp> {
         Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => PersistentNavBar(
+                builder: (context) => const PersistentNavBar(
                   selectedIndex: 0,
                 )));
       } on FirebaseAuthException catch (e) {
         if (e.code == 'weak-password') {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               backgroundColor: Colors.orangeAccent,
               content: Text(
                 "Password Provided is too Weak",
                 style: TextStyle(fontSize: 18.0),
               )));
         } else if (e.code == "email-already-in-use") {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               backgroundColor: Colors.orangeAccent,
               content: Text(
                 "Account Already exists",
@@ -61,109 +64,132 @@ class _SignUpState extends State<SignUp> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            SizedBox(height: 60),
-            Text('Eventia',
+      body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              const SizedBox(height: 80),
+              const Text(
+                'Eventia',
                 style: TextStyle(
-                    fontFamily: 'Blacksword',
-                    fontSize: 50,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF273671))),
-            SizedBox(height: 30.0),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Form(
-                key: _formkey,
-                child: Column(
-                  children: [
-                    _buildTextField(
-                      controller: namecontroller,
-                      hint: "Name",
-                      validatorMessage: "Please Enter Name",
-                    ),
-                    SizedBox(height: 30.0),
-                    _buildTextField(
-                      controller: mailcontroller,
-                      hint: "Email",
-                      validatorMessage: "Please Enter Email",
-                    ),
-                    SizedBox(height: 30.0),
-                    _buildTextField(
-                      controller: passwordcontroller,
-                      hint: "Password",
-                      validatorMessage: "Please Enter Password",
-                      obscureText: true,
-                    ),
-                    SizedBox(height: 30.0),
-                    GestureDetector(
-                      onTap: () {
-                        if (_formkey.currentState!.validate()) {
-                          setState(() {
-                            email = mailcontroller.text;
-                            name = namecontroller.text;
-                            password = passwordcontroller.text;
-                          });
-                          registration();
-                        }
-                      },
-                      child: Container(
-                          width: MediaQuery.of(context).size.width,
-                          padding: EdgeInsets.symmetric(
-                              vertical: 15.0, horizontal: 30.0),
-                          decoration: BoxDecoration(
-                              color: Color(0xFF273671),
-                              borderRadius: BorderRadius.circular(30)),
-                          child: Center(
-                              child: Text(
-                                "Sign Up",
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 22.0,
-                                    fontWeight: FontWeight.w500),
-                              ))),
-                    ),
-                  ],
+                  fontFamily: 'Blacksword',
+                  color: primaryColor,
+                  fontSize: 50, // Increased font size
+                  fontWeight: FontWeight.bold,
                 ),
+                textAlign: TextAlign.center,
               ),
-            ),
-            SizedBox(height: 20.0),
-            Text(
-              "or Sign Up with",
-              style: TextStyle(
-                  color: Color(0xFF273671),
-                  fontSize: 22.0,
-                  fontWeight: FontWeight.w500),
-            ),
-            SizedBox(height: 20.0),
-            _buildSocialLoginButtons(),
-            SizedBox(height: 30.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text("Already have an account?",
+              const SizedBox(height: 60.0),
+              Padding(
+                padding: const EdgeInsets.only(left: 10.0),
+                child: Container(
+                  alignment: Alignment.centerLeft,
+                  child: const Text(
+                    "Create your Account",
                     style: TextStyle(
-                        color: Color(0xFF8c8e98),
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.w500)),
-                SizedBox(width: 5.0),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => LogIn()));
-                  },
-                  child: Text(
-                    "LogIn",
-                    style: TextStyle(
-                        color: Color(0xFF273671),
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.w500),
+                      color: primaryColor,
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
-              ],
-            ),
-          ],
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+
+          Form(
+                  key: _formkey,
+                  child: Column(
+                    children: [
+                      _buildTextField(
+                        controller: namecontroller,
+                        hint: "Name",
+                        validatorMessage: "Please Enter Name",
+                      ),
+                      const SizedBox(height: 30.0),
+                      _buildTextField(
+                        controller: mailcontroller,
+                        hint: "Email",
+                        validatorMessage: "Please Enter Email",
+                      ),
+                      const SizedBox(height: 30.0),
+                      _buildTextField(
+                        controller: passwordcontroller,
+                        hint: "Password",
+                        validatorMessage: "Please Enter Password",
+                        obscureText: true,
+                      ),
+                      const SizedBox(height: 30.0),
+                      GestureDetector(
+                        onTap: () {
+                          if (_formkey.currentState!.validate()) {
+                            setState(() {
+                              email = mailcontroller.text;
+                              name = namecontroller.text;
+                              password = passwordcontroller.text;
+                            });
+                            registration();
+                          }
+                        },
+                        child: Container(
+                            width: MediaQuery.of(context).size.width,
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 13.0, horizontal: 30.0),
+                            decoration: BoxDecoration(
+                                color: primaryColor,
+                                borderRadius: BorderRadius.circular(30)),
+                            child: const Center(
+                                child: Text(
+                                  "Sign Up",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 22.0,
+                                      fontWeight: FontWeight.w500),
+                                ))),
+                      ),
+                    ],
+                  ),
+                ),
+
+              const SizedBox(height: 20.0),
+              const Text(
+                "or Sign Up with",
+                style: TextStyle(
+                    color: primaryColor,
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 30.0),
+              _buildSocialLoginButtons(),
+              const SizedBox(height: 30.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("Already have an account?",
+                      style: TextStyle(
+                          color: Color(0xFF8c8e98),
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.w500)),
+                  const SizedBox(width: 5.0),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => const LogIn()));
+                    },
+                    child: const Text(
+                      "LogIn",
+                      style: TextStyle(
+                          color: Color(0xFF273671),
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -175,9 +201,9 @@ class _SignUpState extends State<SignUp> {
         required String validatorMessage,
         bool obscureText = false}) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 20.0),
+      padding:  const EdgeInsets.symmetric(vertical: 2.0, horizontal: 20.0),
       decoration: BoxDecoration(
-        color: Color(0xFFedf0f8),
+        color: const Color(0xFFd9d9d9),
         borderRadius: BorderRadius.circular(30),
       ),
       child: TextFormField(
@@ -192,38 +218,52 @@ class _SignUpState extends State<SignUp> {
         decoration: InputDecoration(
           border: InputBorder.none,
           hintText: hint,
-          hintStyle: TextStyle(color: Color(0xFFb2b7bf), fontSize: 18.0),
+          fillColor: Colors.transparent,
+          focusedBorder: InputBorder.none,
+          hintStyle: const TextStyle(color: Color(0xFF8c8c8c), fontSize: 18.0),
         ),
       ),
     );
   }
 
   Widget _buildSocialLoginButtons() {
-    return Row(
+    return               Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        GestureDetector(
-          onTap: () {
-            // Implement Google Sign Up
-          },
-          child: Image.asset(
-            "assets/login/google.png",
-            height: 45,
-            width: 45,
-            fit: BoxFit.cover,
+        ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white,
+            foregroundColor: primaryColor,
+            padding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
+          icon: const FaIcon(FontAwesomeIcons.google,
+              color: primaryColor), // Using FontAwesomeIcons.twitter
+          label: const Text('google'),
+          onPressed: () {
+            AuthMethods().signInWithGoogle(context);
+          },
         ),
-        SizedBox(width: 30.0),
-        GestureDetector(
-          onTap: () {
-            // Implement Apple Sign Up
-          },
-          child: Image.asset(
-            "assets/login/apple1.png",
-            height: 50,
-            width: 50,
-            fit: BoxFit.cover,
+        const SizedBox(width: 30.0),
+        ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.white,
+            foregroundColor: primaryColor,
+            padding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
+          icon: const FaIcon(FontAwesomeIcons.apple,
+              color: primaryColor), // Using FontAwesomeIcons.twitter
+          label: const Text('apple'),
+          onPressed: () {
+            AuthMethods().signInWithApple();
+          },
         ),
       ],
     );

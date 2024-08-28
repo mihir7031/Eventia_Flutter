@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:eventia/navigation.dart'; // Your home page
-import 'package:eventia/LoginPages/login.dart'; // Your sign-in screen
+// Your home page
+import 'package:eventia/LoginPages/login.dart';
+import 'package:eventia/navigator.dart';// Your sign-in screen
 
 class AuthCheck extends StatelessWidget {
+  const AuthCheck({super.key});
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
@@ -14,13 +17,13 @@ class AuthCheck extends StatelessWidget {
           User? user = snapshot.data;
           // If user is authenticated, navigate to the home page
           if (user != null) {
-            return PersistentNavBar(selectedIndex: 0,);
+            return const NavigatorWidget();
           }
           // If not authenticated, navigate to the sign-in screen
-          return LogIn();
+          return const LogIn();
         } else {
           // Show a loading indicator while checking the auth state
-          return Scaffold(
+          return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }

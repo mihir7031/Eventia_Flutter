@@ -1,20 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:eventia/Favorite/favorit_page.dart';
 import 'package:eventia/view/screenmain.dart';
 import 'package:eventia/view/profile.dart';
-import 'package:eventia/Event_info/Event_info.dart';
 import 'package:eventia/Add_event/CreateEventForm.dart';
-import 'package:eventia/main.dart';
-import 'package:eventia/view/screenmain.dart';
+
 
 class PersistentNavBar extends StatefulWidget {
 
   final int selectedIndex;
 
   const PersistentNavBar(
-      {required this.selectedIndex, Key? key})
-      : super(key: key);
+      {required this.selectedIndex, super.key});
 
   @override
   _PersistentNavBarState createState() => _PersistentNavBarState();
@@ -58,28 +54,28 @@ class _PersistentNavBarState extends State<PersistentNavBar> {
           case 0:
             return CupertinoTabView(
               builder: (context) {
-                return CupertinoPageScaffold(child: ScreenMain());
+                return const CupertinoPageScaffold(child: ScreenMain());
                 // CupertinoTabView
               },
             );
           case 1:
             return CupertinoTabView(
               builder: (context) {
-                return CupertinoPageScaffold(child: CreateEventForm());
+                return const CupertinoPageScaffold(child: CreateEventForm());
                 // CupertinoTabView
               },
             );
           case 2:
             return CupertinoTabView(
               builder: (context) {
-                return CupertinoPageScaffold(child: CreateEventForm());
+                return const CupertinoPageScaffold(child: CreateEventForm());
                 // CupertinoTabView
               },
             );
           case 3:
             return CupertinoTabView(
               builder: (context) {
-                return CupertinoPageScaffold(child: CreateEventForm());
+                return const CupertinoPageScaffold(child: CreateEventForm());
                 // CupertinoTabView
               },
             );

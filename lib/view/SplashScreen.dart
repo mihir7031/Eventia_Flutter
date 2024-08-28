@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import 'package:eventia/LoginPages/login.dart';
 import 'package:eventia/LoginPages/auth_check.dart';
 
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
   _SplashScreenState createState() => _SplashScreenState();
@@ -27,7 +26,7 @@ class _SplashScreenState extends State<SplashScreen> {
         _controller.addListener(() {
           if (_controller.value.position == _controller.value.duration) {
             Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => AuthCheck()),
+              MaterialPageRoute(builder: (context) => const AuthCheck()),
             );
           }
         });
@@ -57,7 +56,7 @@ class _SplashScreenState extends State<SplashScreen> {
               child: VideoPlayer(_controller),
             ),
           )
-              : Center(child: CircularProgressIndicator()),
+              : const Center(child: CircularProgressIndicator()),
         ],
       ),
     );

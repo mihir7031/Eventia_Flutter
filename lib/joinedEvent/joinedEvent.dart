@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:eventia/main.dart';
-import 'package:eventia/Event_info/Event_info.dart';
 import 'package:eventia/joinedEvent/joinedEventInfo.dart';
 
 class JoinedEvent extends StatefulWidget {
+  const JoinedEvent({super.key});
+
   @override
   _JoinedEventState createState() => _JoinedEventState();
 }
@@ -12,7 +13,7 @@ class _JoinedEventState extends State<JoinedEvent> {
   void _onCardTapped() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => JoinedEventDetailsPage()),
+      MaterialPageRoute(builder: (context) => const JoinedEventDetailsPage()),
     );
   }
 
@@ -28,10 +29,10 @@ class _JoinedEventState extends State<JoinedEvent> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        iconTheme: IconThemeData(
+        iconTheme: const IconThemeData(
           color: Colors.white, // Change this to your desired color
         ),
-        title: Text('Joined Event', style: TextStyle(color: secondaryColor)),
+        title: const Text('Joined Event', style: TextStyle(color: secondaryColor)),
         backgroundColor: primaryColor,
       ),
       body: SingleChildScrollView(
@@ -40,7 +41,7 @@ class _JoinedEventState extends State<JoinedEvent> {
             // Event cards
             ListView.builder(
               shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(), // Prevent scrolling on this ListView
+              physics: const NeverScrollableScrollPhysics(), // Prevent scrolling on this ListView
               itemCount: _events.length,
               itemBuilder: (context, index) {
                 return InkWell(

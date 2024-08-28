@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:eventia/main.dart';  // Importing the main.dart for color constants
 
 class BookingPage extends StatefulWidget {
+  const BookingPage({super.key});
+
   @override
   _BookingPageState createState() => _BookingPageState();
 }
@@ -40,14 +42,14 @@ class _BookingPageState extends State<BookingPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        iconTheme: IconThemeData(
+        iconTheme: const IconThemeData(
           color: Colors.white, // Change this to your desired color
         ),
-        title: Text('Prateek Kuhad Silhouettes Tour',style: TextStyle(color: secondaryColor)),
+        title: const Text('Prateek Kuhad Silhouettes Tour',style: TextStyle(color: secondaryColor)),
         backgroundColor: primaryColor,
         actions: [
           IconButton(
-            icon: Icon(Icons.help_outline, color: secondaryColor),
+            icon: const Icon(Icons.help_outline, color: secondaryColor),
             onPressed: () {
               // Handle help or info action
             },
@@ -67,8 +69,8 @@ class _BookingPageState extends State<BookingPage> {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
+          const Padding(
+            padding: EdgeInsets.all(16.0),
             child: Text(
               'Select Your Ticket Category',
               style: TextStyle(
@@ -91,24 +93,24 @@ class _BookingPageState extends State<BookingPage> {
                       children: [
                         Text(
                           'Total Price: ₹${totalPrice.toStringAsFixed(2)}',
-                          style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
                         ),
-                        SizedBox(height: 8.0),
+                        const SizedBox(height: 8.0),
                         Text(
                           '$totalTickets Tickets',
-                          style: TextStyle(fontSize: 16.0),
+                          style: const TextStyle(fontSize: 16.0),
                         ),
-                        SizedBox(height: 16.0),
+                        const SizedBox(height: 16.0),
                         ElevatedButton(
                           onPressed: totalTickets > 0 ? () {
                             // Handle booking action
                           } : null,
-                          child: Text('Proceed'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: primaryColor,
                             foregroundColor: secondaryColor,
-                            padding: EdgeInsets.symmetric(horizontal: 24.0),
+                            padding: const EdgeInsets.symmetric(horizontal: 24.0),
                           ),
+                          child: const Text('Proceed'),
                         ),
                       ],
                     ),
@@ -117,35 +119,35 @@ class _BookingPageState extends State<BookingPage> {
                   final category = categories[index];
                   return Card(
                       color: cardColor,
-                    margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                    margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                     elevation: 4.0,
                     child: ListTile(
-                      contentPadding: EdgeInsets.all(16.0),
+                      contentPadding: const EdgeInsets.all(16.0),
                       title: Text(
                         category.name,
-                        style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
                       ),
                       subtitle: Text('₹${category.price.toStringAsFixed(2)}'),
                       trailing: category.quantity == 0
                           ? ElevatedButton(
                         onPressed: () => addTicket(index),
-                        child: Text('Add'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: primaryColor,
                           foregroundColor: secondaryColor,
-                          padding: EdgeInsets.symmetric(horizontal: 16.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         ),
+                        child: const Text('Add'),
                       )
                           : Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            icon: Icon(Icons.remove, color: primaryColor),
+                            icon: const Icon(Icons.remove, color: primaryColor),
                             onPressed: () => removeTicket(index),
                           ),
                           Text('${category.quantity}'),
                           IconButton(
-                            icon: Icon(Icons.add, color: primaryColor),
+                            icon: const Icon(Icons.add, color: primaryColor),
                             onPressed: () => addTicket(index),
                           ),
                         ],

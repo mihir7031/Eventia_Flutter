@@ -93,11 +93,11 @@ class JoinedEventDetailsPage extends StatelessWidget {
                           ),
                           const SizedBox(width: 16.0),
                           // Event details
-                          Expanded(
+                          const Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
+                                Text(
                                   'Event Name: DJ Night by DJ Olly',
                                   style: TextStyle(
                                     fontSize: 18.0,
@@ -105,47 +105,47 @@ class JoinedEventDetailsPage extends StatelessWidget {
                                     color: Color(0xFF282828),
                                   ),
                                 ),
-                                const SizedBox(height: 10.0),
-                                const Text(
+                                SizedBox(height: 10.0),
+                                Text(
                                   'Language: English',
                                   style: TextStyle(
                                     fontSize: 16.0,
                                     color: Color(0xFF282828),
                                   ),
                                 ),
-                                const SizedBox(height: 10.0),
-                                const Text(
+                                SizedBox(height: 10.0),
+                                Text(
                                   'Day: Friday',
                                   style: TextStyle(
                                     fontSize: 16.0,
                                     color: Color(0xFF282828),
                                   ),
                                 ),
-                                const SizedBox(height: 10.0),
-                                const Text(
+                                SizedBox(height: 10.0),
+                                Text(
                                   'Date: Jun 5, 2024',
                                   style: TextStyle(
                                     fontSize: 16.0,
                                     color: Color(0xFF282828),
                                   ),
                                 ),
-                                const SizedBox(height: 10.0),
-                                const Text(
+                                SizedBox(height: 10.0),
+                                Text(
                                   'Time: 7:00 PM IST',
                                   style: TextStyle(
                                     fontSize: 16.0,
                                     color: Color(0xFF282828),
                                   ),
                                 ),
-                                const SizedBox(height: 10.0),
-                                const Text(
+                                SizedBox(height: 10.0),
+                                Text(
                                   'Location: XYZ Venue',
                                   style: TextStyle(
                                     fontSize: 16.0,
                                     color: Color(0xFF282828),
                                   ),
                                 ),
-                                const SizedBox(height: 20.0),
+                                SizedBox(height: 20.0),
                               ],
                             ),
                           ),
@@ -192,7 +192,7 @@ class JoinedEventDetailsPage extends StatelessWidget {
                             ),
                             const SizedBox(width: 16.0),
                             // Ticket details
-                            Expanded(
+                            const Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -203,23 +203,23 @@ class JoinedEventDetailsPage extends StatelessWidget {
                                       Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          const Text(
+                                          Text(
                                             'Booking ID:',
                                             style: TextStyle(
                                               fontSize: 16.0,
                                               color: Color(0xFF282828),
                                             ),
                                           ),
-                                          const SizedBox(height: 10.0),
-                                          const Text(
+                                          SizedBox(height: 10.0),
+                                          Text(
                                             'Total Units:',
                                             style: TextStyle(
                                               fontSize: 16.0,
                                               color: Color(0xFF282828),
                                             ),
                                           ),
-                                          const SizedBox(height: 10.0),
-                                          const Text(
+                                          SizedBox(height: 10.0),
+                                          Text(
                                             'Total Price:',
                                             style: TextStyle(
                                               fontSize: 16.0,
@@ -231,23 +231,23 @@ class JoinedEventDetailsPage extends StatelessWidget {
                                       Column(
                                         crossAxisAlignment: CrossAxisAlignment.end,
                                         children: [
-                                          const Text(
+                                          Text(
                                             '12345670',
                                             style: TextStyle(
                                               fontSize: 16.0,
                                               color: Color(0xFF282828),
                                             ),
                                           ),
-                                          const SizedBox(height: 10.0),
-                                          const Text(
+                                          SizedBox(height: 10.0),
+                                          Text(
                                             '2',
                                             style: TextStyle(
                                               fontSize: 16.0,
                                               color: Color(0xFF282828),
                                             ),
                                           ),
-                                          const SizedBox(height: 10.0),
-                                          const Text(
+                                          SizedBox(height: 10.0),
+                                          Text(
                                             '5000.00',
                                             style: TextStyle(
                                               fontSize: 16.0,
@@ -319,13 +319,13 @@ class JoinedEventDetailsPage extends StatelessWidget {
                         color: const Color(0xFFD8E0E8),
                         borderRadius: BorderRadius.circular(12.0),
                       ),
-                      child: Row(
+                      child: const Row(
                         children: [
                           // Chat icon
-                          const Icon(Icons.chat, color: Color(0xFF282828)),
-                          const SizedBox(width: 10.0),
+                          Icon(Icons.chat, color: Color(0xFF282828)),
+                          SizedBox(width: 10.0),
                           // Chat text
-                          const Expanded(
+                          Expanded(
                             child: Text(
                               'Join the conversation and share your experience!',
                               style: TextStyle(
@@ -360,18 +360,18 @@ class JoinedEventDetailsPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 10.0),
                     // Example Q&A items
-                    Card(
-                      color: const Color(0xFFD8E0E8),
-                      child: const ListTile(
+                    const Card(
+                      color: Color(0xFFD8E0E8),
+                      child: ListTile(
                         title: Text('Q: What time should I arrive?'),
                         subtitle: Text(
                           'A: The event starts at 7:00 PM, so arriving 15 minutes early is recommended.',
                         ),
                       ),
                     ),
-                    Card(
-                      color: const Color(0xFFD8E0E8),
-                      child: const ListTile(
+                    const Card(
+                      color: Color(0xFFD8E0E8),
+                      child: ListTile(
                         title: Text('Q: Is parking available?'),
                         subtitle: Text('A: Yes, there is ample parking space at the venue.'),
                       ),

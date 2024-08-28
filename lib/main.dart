@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:eventia/view/screenmain.dart'; // Make sure this is correct
-import 'package:eventia/view/SplashScreen.dart'; // Make sure this is correct
+
+import 'package:eventia/view/SplashScreen.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:eventia/navigation.dart';
-import 'package:eventia/LoginPages/login.dart';
+
 // Define your colors
 const Color primaryColor = Color(0xFF282828);
 const Color secondaryColor = Color(0xFFE9EEEA);
@@ -51,15 +50,14 @@ class _MyAppState extends State<MyApp> {
       title: 'Eventia',
       theme: ThemeData(
         primaryColor: primaryColor,
-        colorScheme: ColorScheme.light(
+        colorScheme: const ColorScheme.light(
           primary: primaryColor,
           secondary: secondaryColor,
           surface: accentColor,
-          background: secondaryColor,
+
           onPrimary: secondaryColor,
           onSecondary: primaryColor,
           onSurface: primaryColor,
-          onBackground: primaryColor,
           onError: blackColor,
           error: blackColor,
         ),
@@ -89,7 +87,7 @@ class _MyAppState extends State<MyApp> {
         appBarTheme: AppBarTheme(
           color: secondaryColor,
           elevation: 0,
-          iconTheme: IconThemeData(color: primaryColor),
+          iconTheme: const IconThemeData(color: primaryColor),
           titleTextStyle: TextStyle(
             color: primaryColor,
             fontSize: 20,
@@ -98,9 +96,11 @@ class _MyAppState extends State<MyApp> {
           ),
         ),
         bottomNavigationBarTheme: BottomNavigationBarThemeData(
-          backgroundColor: secondaryColor,
-          selectedItemColor: accentColor,
-          unselectedItemColor: Colors.grey,
+          backgroundColor: Colors.white,
+          selectedItemColor:primaryColor,
+          unselectedItemColor: primaryColor.withOpacity(0.8),
+          selectedLabelStyle: const TextStyle(color: primaryColor),
+          unselectedLabelStyle: TextStyle(color:primaryColor.withOpacity(0.8)),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
@@ -117,19 +117,19 @@ class _MyAppState extends State<MyApp> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10.0),
-            borderSide: BorderSide(
+            borderSide: const BorderSide(
               color: primaryColor,
             ),
           ),
         ),
-        iconTheme: IconThemeData(
+        iconTheme: const IconThemeData(
           color: primaryColor,
         ),
-        floatingActionButtonTheme: FloatingActionButtonThemeData(
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
           backgroundColor: primaryColor,
         ),
       ),
-      home:SplashScreen()
+      home:const SplashScreen()
     );
   }
 }
