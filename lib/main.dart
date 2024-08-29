@@ -17,6 +17,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   // Run your app
+
   runApp(const MyApp());
 }
 
@@ -29,7 +30,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool showSplash = true;
-
   void showSplashScreen() {
     Future.delayed(const Duration(seconds: 5), () {
       setState(() {
@@ -47,6 +47,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+
       title: 'Eventia',
       theme: ThemeData(
         primaryColor: primaryColor,
