@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:eventia/view/screenmain.dart';
-import 'package:eventia/view/profile.dart';
 import 'package:eventia/Add_event/CreateEventForm.dart';
+import 'package:eventia/Add_event/eventform.dart';
+import 'package:eventia/Add_event/event_info_form.dart';
 
 final List<Widget> _pages = [
   const ScreenMain(),
   const CreateEventForm(), // Assuming this is for adding events
-  const CreateEventForm(), // Could be another page like SearchPage(),
-  const CreateEventForm(), // Could be another page like FavoritesPage(),
+  EventForm(), // Could be another page like SearchPage(),
+  CreateEventPage(), // Could be another page like FavoritesPage(),
 ];
 
 class NavigatorWidget extends StatefulWidget {

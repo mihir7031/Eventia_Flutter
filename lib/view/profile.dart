@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:eventia/profile_info_gathering/profile_info_taking.dart';
+import 'dart:io';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -13,25 +16,33 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final FirebaseAuth auth = FirebaseAuth.instance;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  final FirebaseStorage storage = FirebaseStorage.instance;
 
-  Future<Map<String, dynamic>?>? userProfileFuture;
+  File? _imageFile;
 
-  @override
-  void initState() {
-    super.initState();
-    userProfileFuture = _fetchUserProfile();
+  Future<void> _pickImage() async {
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = File(pickedFile.path);
+      });
+      await _uploadImage();
+    }
   }
 
-  Future<Map<String, dynamic>?> _fetchUserProfile() async {
+  Future<void> _uploadImage() async {
+    if (_imageFile == null) return;
+
     User? currentUser = auth.currentUser;
     if (currentUser != null) {
-      DocumentSnapshot userDoc =
-      await firestore.collection('User').doc(currentUser.uid).get();
-      if (userDoc.exists) {
-        return userDoc.data() as Map<String, dynamic>?;
-      }
+      String fileName = '${currentUser.uid}.jpg';
+      UploadTask uploadTask = storage.ref().child('user_profiles/$fileName').putFile(_imageFile!);
+
+      TaskSnapshot snapshot = await uploadTask;
+      String downloadUrl = await snapshot.ref.getDownloadURL();
+
+      await firestore.collection('User').doc(currentUser.uid).update({'imgUrl': downloadUrl});
     }
-    return null; // If no user or no document found
   }
 
   @override
@@ -39,14 +50,14 @@ class _ProfilePageState extends State<ProfilePage> {
     User? currentUser = auth.currentUser;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE9EEEA), // Primary background color
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         title: const Text(
           'Profile',
           style: TextStyle(
-            color: Color(0xFF333333), // Darker text color for better contrast
+            color: Color(0xFF333333),
             fontSize: 24.0,
             fontWeight: FontWeight.bold,
           ),
@@ -62,266 +73,231 @@ class _ProfilePageState extends State<ProfilePage> {
           child: const Text('Please log in'),
         ),
       )
-          : FutureBuilder<Map<String, dynamic>?>(
-        future: userProfileFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+          : StreamBuilder<DocumentSnapshot>(
+        stream: firestore.collection('User').doc(currentUser.uid).snapshots(),
+        builder: (context, userSnapshot) {
+          if (userSnapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return const Center(child: Text('Error loading profile.'));
-          } else if (!snapshot.hasData || snapshot.data == null) {
+          } else if (userSnapshot.hasError) {
+            return Center(
+              child: Text('Error loading profile: ${userSnapshot.error}'),
+            );
+          } else if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
             return const Center(child: Text('Profile not found.'));
           }
 
-          var userProfile = snapshot.data!;
-          String? userName = userProfile['name'];
-          String? userEmail = userProfile['email'];
-          String? userProfileImage = userProfile['imgUrl'];
+          var userData = userSnapshot.data!.data() as Map<String, dynamic>;
+          String? userName = userData['name'];
+          String? userEmail = userData['email'];
+          String? userProfileImage = userData['imgUrl'];
 
-          return SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 24.0, vertical: 20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Profile Avatar
-                  Center(
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        CircleAvatar(
-                          radius: 60.0,
-                          backgroundColor:
-                          const Color(0xFFB2BBAF), // Background color for avatar
-                          backgroundImage: userProfileImage != null
-                              ? NetworkImage(userProfileImage)
-                              : null,
-                          child: userProfileImage == null
-                              ? const Icon(Icons.person,
-                              size: 60, color: Colors.grey)
-                              : null,
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          right: -10,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: const Color(
-                                  0xE9A908A1), // Color for edit button
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.3),
-                                  blurRadius: 10.0,
-                                  offset: const Offset(0, 5),
-                                ),
-                              ],
-                            ),
-                            child: IconButton(
-                              icon: const Icon(Icons.edit,
-                                  color: Colors.white),
-                              onPressed: () {
-                                // Handle avatar edit
-                              },
-                            ),
+          return StreamBuilder<DocumentSnapshot>(
+            stream: firestore.collection('User_profile').doc(currentUser.uid).snapshots(),
+            builder: (context, profileSnapshot) {
+              if (profileSnapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (profileSnapshot.hasError) {
+                return Center(
+                  child: Text('Error loading profile: ${profileSnapshot.error}'),
+                );
+              }
+
+              var profileData = profileSnapshot.data?.data() as Map<String, dynamic>? ?? {};
+              String? birthdate = profileData['birthdate'];
+              String? profession = profileData['profession'];
+              String? city = profileData['city'];
+              String? state = profileData['state'];
+              String? aboutMe = profileData['aboutMe'];
+              String? language = profileData['language'];
+
+              List<Widget> profileWidgets = [
+                Center(
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      CircleAvatar(
+                        radius: 55,
+                        backgroundColor: Colors.grey[200],
+                        backgroundImage: userProfileImage != null && userProfileImage.isNotEmpty
+                            ? NetworkImage(userProfileImage)
+                            : null,
+                        child: userProfileImage == null || userProfileImage.isEmpty
+                            ? Text(
+                          userName != null && userName.isNotEmpty ? userName[0].toUpperCase() : '',
+                          style: const TextStyle(fontSize: 40.0, color: Colors.grey),
+                        )
+                            : null,
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: -10,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.pinkAccent,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.3),
+                                blurRadius: 6.0,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: IconButton(
+                            icon: const Icon(Icons.camera_alt, color: Colors.white),
+                            onPressed: _pickImage,
                           ),
                         ),
-                      ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20.0),
+                Center(
+                  child: Text(
+                    userName ?? 'Name not available',
+                    style: const TextStyle(
+                      fontSize: 22.0,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF333333),
                     ),
                   ),
-                  const SizedBox(height: 20.0),
+                ),
+                Center(
+                  child: Text(
+                    userEmail ?? 'Email not available',
+                    style: const TextStyle(
+                      fontSize: 16.0,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 30.0),
+              ];
 
-                  // User Info with Icons
-                  _buildUserInfoWithIcon(
-                      Icons.person, userName ?? 'Name not available'),
+              if (birthdate != null) {
+                profileWidgets.addAll([
+                  _buildProfileOption(icon: Icons.cake, label: 'Birthday', value: birthdate),
                   _buildDivider(),
-                  _buildUserInfoWithIcon(
-                      Icons.email, userEmail ?? 'Email not available'),
-                  _buildDivider(),
+                ]);
+              }
 
-                  // Other static info for now, you can update these as needed
-                  _buildUserInfoWithIcon(Icons.cake, 'January 1, 1990'),
+              if (profession != null) {
+                profileWidgets.addAll([
+                  _buildProfileOption(icon: Icons.work, label: 'Profession', value: profession),
                   _buildDivider(),
-                  _buildUserInfoWithIcon(
-                      Icons.location_on, 'New York, USA'),
-                  _buildDivider(),
+                ]);
+              }
 
-                  // User Description
-                  const SizedBox(height: 20.0),
+              if (city != null && state != null) {
+                profileWidgets.addAll([
+                  _buildProfileOption(icon: Icons.location_on, label: 'Location', value: '$city, $state'),
+                  _buildDivider(),
+                ]);
+              }
+
+              if (aboutMe != null) {
+                profileWidgets.addAll([
                   const Text(
                     'About Me',
                     style: TextStyle(
-                      color: Color(0xFF333333),
                       fontSize: 18.0,
                       fontWeight: FontWeight.bold,
+                      color: Color(0xFF333333),
                     ),
                   ),
                   const SizedBox(height: 10.0),
-                  const Text(
-                    'A passionate event organizer with a love for bringing people together. Enjoys traveling and exploring new cultures, and always looking for new experiences and opportunities to learn.',
-                    style: TextStyle(
-                      color: Color(0xFF555555),
-                      fontSize: 16.0,
-                    ),
+                  Text(
+                    aboutMe,
+                    style: const TextStyle(fontSize: 16.0, color: Color(0xFF555555)),
                   ),
-                  _buildDivider(),
-
-                  // Occupation
                   const SizedBox(height: 20.0),
-                  _buildUserInfoWithIcon(Icons.work, 'Event Coordinator'),
+                ]);
+              }
+
+              if (language != null) {
+                profileWidgets.addAll([
+                  _buildProfileOption(icon: Icons.language, label: 'Language', value: language),
                   _buildDivider(),
+                ]);
+              }
 
-                  // Social Media Links
-                  const SizedBox(height: 20.0),
-                  const Text(
-                    'Social Media',
-                    style: TextStyle(
-                      color: Color(0xFF333333),
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 10.0),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildSocialMediaIcon(
-                          FontAwesomeIcons.facebook,
-                          'Facebook',
-                          'https://facebook.com/johndoe',
-                          const Color(0xFF1877F2)),
-                      _buildSocialMediaIcon(
-                          FontAwesomeIcons.instagram,
-                          'Instagram',
-                          'https://instagram.com/johndoe',
-                          const Color(0xFFC13584)),
-                      _buildSocialMediaIcon(
-                          FontAwesomeIcons.twitter,
-                          'Twitter',
-                          'https://twitter.com/johndoe',
-                          const Color(0xFF1DA1F2)),
-                      _buildSocialMediaIcon(
-                          FontAwesomeIcons.linkedin,
-                          'LinkedIn',
-                          'https://linkedin.com/in/johndoe',
-                          const Color(0xFF0077B5)),
-                    ],
-                  ),
-                  _buildDivider(),
+              profileWidgets.add(
+                _buildEditButton(),
+              );
 
-                  // Address
-                  const SizedBox(height: 20.0),
-                  _buildUserInfoWithIcon(Icons.home,
-                      '123 Main Street, Apt 4B, New York, NY 10001'),
-                  _buildDivider(),
-
-                  // Preferences
-                  const SizedBox(height: 20.0),
-                  const Text(
-                    'Preferences',
-                    style: TextStyle(
-                      color: Color(0xFF333333),
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold,
-                    ),
+              return SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: profileWidgets,
                   ),
-                  const SizedBox(height: 10.0),
-                  const Text(
-                    '• Music\n• Sports\n• Traveling\n• Technology\n• Food',
-                    style: TextStyle(
-                      color: Color(0xFF555555),
-                      fontSize: 16.0,
-                    ),
-                  ),
-                  const SizedBox(height: 30.0),
-
-                  // Edit Profile Button with new color
-                  _buildEditButton(),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           );
         },
       ),
     );
   }
 
-  Widget _buildUserInfoWithIcon(IconData icon, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            color: const Color(0xFF333333), // Darker icon color
-            size: 24.0,
-          ),
-          const SizedBox(width: 16.0),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                color: Color(0xFF555555), // Medium-dark text color for readability
-                fontSize: 16.0,
+  Widget _buildProfileOption({required IconData icon, required String label, required String value}) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          color: Colors.grey,
+          size: 28.0,
+        ),
+        const SizedBox(width: 12.0),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF333333),
+                ),
               ),
-            ),
+              const SizedBox(height: 4.0),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 14.0,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildDivider() {
-    return const Divider(
-      color: Color(0xFFCCCCCC), // Light gray divider color
-      thickness: 1.0,
-    );
-  }
-
-  Widget _buildSocialMediaIcon(
-      IconData icon, String name, String url, Color color) {
-    return IconButton(
-      icon: Icon(icon, color: color, size: 30.0),
-      onPressed: () {
-        // Handle social media navigation
-      },
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 12.0),
+      child: Divider(
+        color: Color(0xFFDDDDDD),
+        thickness: 1.0,
+      ),
     );
   }
 
   Widget _buildEditButton() {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16.0),
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xCFD00557),
-            Color(0xE9A908A1),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 10.0,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: TextButton(
+    return Center(
+      child: ElevatedButton(
         onPressed: () {
-          // Handle edit profile action
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) =>  UserInfoForm()),
+          );
         },
-        child: const Text(
-          'Edit Profile',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18.0,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        child: const Text('Edit Profile'),
       ),
     );
   }

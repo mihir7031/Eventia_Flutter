@@ -1,10 +1,11 @@
 import 'package:eventia/LoginPages/login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:eventia/navigation.dart';
 import 'package:eventia/LoginPages/auth.dart';
 import 'package:eventia/main.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:eventia/navigator.dart';
+import 'package:eventia/LoginPages/database.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -27,19 +28,50 @@ class _SignUpState extends State<SignUp> {
         mailcontroller.text.isNotEmpty) {
       try {
         UserCredential userCredential = await FirebaseAuth.instance
-            .createUserWithEmailAndPassword(
-            email: email, password: password);
+            .createUserWithEmailAndPassword(email: email, password: password);
+
+        // Create a map to store user details in the User collection
+        Map<String, dynamic> userInfoMap = {
+          "id": userCredential.user!.uid,
+          "name": namecontroller.text,
+          "email": mailcontroller.text,
+          "imgUrl": " ",
+        };
+
+        // Add user details to Firestore User collection
+        await DatabaseMethods().addUser(userCredential.user!.uid, userInfoMap);
+
+        // Check if the User_profile document already exists
+        var existingProfile = await DatabaseMethods()
+            .getUserProfileInfo(userCredential.user!.uid);
+
+        if (existingProfile == null) {
+          // Create a map for the User_profile collection with additional fields
+          Map<String, dynamic> userProfileMap = {
+            "id": userCredential.user!.uid,
+            "birthdate": "", // You can update this with the actual input later
+            "profession": "",
+            "city": "",
+            "state": "",
+            "about_me": "",
+            "language": "",
+            "social_media": "",
+          };
+
+          // Add the user profile to the User_profile collection if it doesn't exist
+          await DatabaseMethods()
+              .addUserProfile(userCredential.user!.uid, userProfileMap);
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text(
               "Registered Successfully",
               style: TextStyle(fontSize: 20.0),
             )));
+
+        // Navigate to another page after successful registration
         Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => const PersistentNavBar(
-                  selectedIndex: 0,
-                )));
+            context, MaterialPageRoute(builder: (context) => const NavigatorWidget()));
       } on FirebaseAuthException catch (e) {
         if (e.code == 'weak-password') {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -65,7 +97,7 @@ class _SignUpState extends State<SignUp> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: SingleChildScrollView(
           child: Column(
             children: [
@@ -95,64 +127,60 @@ class _SignUpState extends State<SignUp> {
                   ),
                 ),
               ),
-              const SizedBox(
-                height: 20,
-              ),
-
-          Form(
-                  key: _formkey,
-                  child: Column(
-                    children: [
-                      _buildTextField(
-                        controller: namecontroller,
-                        hint: "Name",
-                        validatorMessage: "Please Enter Name",
-                      ),
-                      const SizedBox(height: 30.0),
-                      _buildTextField(
-                        controller: mailcontroller,
-                        hint: "Email",
-                        validatorMessage: "Please Enter Email",
-                      ),
-                      const SizedBox(height: 30.0),
-                      _buildTextField(
-                        controller: passwordcontroller,
-                        hint: "Password",
-                        validatorMessage: "Please Enter Password",
-                        obscureText: true,
-                      ),
-                      const SizedBox(height: 30.0),
-                      GestureDetector(
-                        onTap: () {
-                          if (_formkey.currentState!.validate()) {
-                            setState(() {
-                              email = mailcontroller.text;
-                              name = namecontroller.text;
-                              password = passwordcontroller.text;
-                            });
-                            registration();
-                          }
-                        },
-                        child: Container(
-                            width: MediaQuery.of(context).size.width,
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 13.0, horizontal: 30.0),
-                            decoration: BoxDecoration(
-                                color: primaryColor,
-                                borderRadius: BorderRadius.circular(30)),
-                            child: const Center(
-                                child: Text(
-                                  "Sign Up",
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 22.0,
-                                      fontWeight: FontWeight.w500),
-                                ))),
-                      ),
-                    ],
-                  ),
+              const SizedBox(height: 20),
+              Form(
+                key: _formkey,
+                child: Column(
+                  children: [
+                    _buildTextField(
+                      controller: namecontroller,
+                      hint: "Name",
+                      validatorMessage: "Please Enter Name",
+                    ),
+                    const SizedBox(height: 30.0),
+                    _buildTextField(
+                      controller: mailcontroller,
+                      hint: "Email",
+                      validatorMessage: "Please Enter Email",
+                    ),
+                    const SizedBox(height: 30.0),
+                    _buildTextField(
+                      controller: passwordcontroller,
+                      hint: "Password",
+                      validatorMessage: "Please Enter Password",
+                      obscureText: true,
+                    ),
+                    const SizedBox(height: 30.0),
+                    GestureDetector(
+                      onTap: () {
+                        if (_formkey.currentState!.validate()) {
+                          setState(() {
+                            email = mailcontroller.text;
+                            name = namecontroller.text;
+                            password = passwordcontroller.text;
+                          });
+                          registration();
+                        }
+                      },
+                      child: Container(
+                          width: MediaQuery.of(context).size.width,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 13.0, horizontal: 30.0),
+                          decoration: BoxDecoration(
+                              color: primaryColor,
+                              borderRadius: BorderRadius.circular(30)),
+                          child: const Center(
+                              child: Text(
+                                "Sign Up",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 22.0,
+                                    fontWeight: FontWeight.w500),
+                              ))),
+                    ),
+                  ],
                 ),
-
+              ),
               const SizedBox(height: 20.0),
               const Text(
                 "or Sign Up with",
@@ -201,7 +229,7 @@ class _SignUpState extends State<SignUp> {
         required String validatorMessage,
         bool obscureText = false}) {
     return Container(
-      padding:  const EdgeInsets.symmetric(vertical: 2.0, horizontal: 20.0),
+      padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 20.0),
       decoration: BoxDecoration(
         color: const Color(0xFFd9d9d9),
         borderRadius: BorderRadius.circular(30),
@@ -227,7 +255,7 @@ class _SignUpState extends State<SignUp> {
   }
 
   Widget _buildSocialLoginButtons() {
-    return               Row(
+    return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         ElevatedButton.icon(
@@ -240,8 +268,7 @@ class _SignUpState extends State<SignUp> {
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-          icon: const FaIcon(FontAwesomeIcons.google,
-              color: primaryColor), // Using FontAwesomeIcons.twitter
+          icon: const FaIcon(FontAwesomeIcons.google, color: primaryColor),
           label: const Text('google'),
           onPressed: () {
             AuthMethods().signInWithGoogle(context);
@@ -258,8 +285,7 @@ class _SignUpState extends State<SignUp> {
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-          icon: const FaIcon(FontAwesomeIcons.apple,
-              color: primaryColor), // Using FontAwesomeIcons.twitter
+          icon: const FaIcon(FontAwesomeIcons.apple, color: primaryColor),
           label: const Text('apple'),
           onPressed: () {
             AuthMethods().signInWithApple();
