@@ -91,32 +91,48 @@ class _ScreenMainState extends State<ScreenMain> {
       }
     }
   }
+  Future<void> _addFavoriteEvent(String eventId) async {
+    User? currentUser = auth.currentUser;
+    if (currentUser != null) {
+      String userId = currentUser.uid;
+      DocumentReference favoriteRef = firestore.collection('favourite').doc(userId);
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-    switch (index) {
-      case 2:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const CreateEventForm()),
-        );
-        break;
-      case 3:
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  FavoritePage(favoriteEvents: favoriteEvents)),
-        );
-        break;
-      case 4:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => ProfilePage()),
-        );
-        break;
+      try {
+        // Get the document for the current user in the "favourite" collection
+        DocumentSnapshot docSnapshot = await favoriteRef.get();
+
+        if (docSnapshot.exists) {
+          // Document exists, update the array if the event is not already in the list
+          List<dynamic> favoriteEvents = docSnapshot['events'] ?? [];
+
+          if (!favoriteEvents.contains(eventId)) {
+            await favoriteRef.update({
+              'events': FieldValue.arrayUnion([eventId]),
+            });
+
+            // Optionally, update the local state
+            setState(() {
+              this.favoriteEvents.add({'id': eventId});
+            });
+          } else {
+            print('Event is already favorited by the user.');
+          }
+        } else {
+          // Document does not exist, create it and add the event to the array
+          await favoriteRef.set({
+            'userId': userId,
+            'events': [eventId],  // Create an array with the eventId
+            'addedAt': FieldValue.serverTimestamp(),
+          });
+
+          // Optionally, update the local state
+          setState(() {
+            this.favoriteEvents.add({'id': eventId});
+          });
+        }
+      } catch (e) {
+        print('Error adding favorite: $e');
+      }
     }
   }
 
@@ -127,11 +143,7 @@ class _ScreenMainState extends State<ScreenMain> {
     );
   }
 
-  void _addFavoriteEvent(Map<String, String> event) {
-    setState(() {
-      favoriteEvents.add(event);
-    });
-  }
+
 
   @override
   void dispose() {
@@ -142,7 +154,7 @@ class _ScreenMainState extends State<ScreenMain> {
   @override
   Widget build(BuildContext context) {
     return
-       Scaffold(
+      Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
           backgroundColor: Colors.white,
@@ -256,7 +268,7 @@ class _ScreenMainState extends State<ScreenMain> {
                         ],
                       );
                     }
-                    return CircleAvatar(
+                    return const CircleAvatar(
                       radius: 50,
                       backgroundColor: Colors.white,
                       child: const Text(
@@ -411,7 +423,8 @@ class _ScreenMainState extends State<ScreenMain> {
                                         borderRadius: BorderRadius.circular(8.0),
                                         child: Image.network(
                                           event['imageUrl'] != null &&
-                                              event['imageUrl'].isNotEmpty
+                                              event['imageUrl'].isNotEmpty &&
+                                              event['imageUrl']!= " "
                                               ? event['imageUrl']
                                               : 'https://via.placeholder.com/150', // Placeholder image URL
                                           fit: BoxFit.cover,
@@ -467,13 +480,7 @@ class _ScreenMainState extends State<ScreenMain> {
                                                     Icons.favorite_border,
                                                     color: primaryColor),
                                                 onPressed: () {
-                                                  _addFavoriteEvent({
-                                                    'date': event['date'],
-                                                    'title': event['eventName'],
-                                                    'subtitle':
-                                                    event['organizerInfo'],
-                                                    'image': event['imageUrl'],
-                                                  });
+                                                  _addFavoriteEvent(event.id);
                                                 },
                                               ),
                                             ],
