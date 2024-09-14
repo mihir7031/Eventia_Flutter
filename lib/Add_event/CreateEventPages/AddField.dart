@@ -1,56 +1,59 @@
-import 'dart:convert';
 import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 
-class AddField extends StatefulWidget {
-  final bool isSave; // Add isSave parameter
+// FieldModel Class
+class FieldModel {
+  final String type;
+  final TextEditingController titleController;
+  final TextEditingController? descriptionController;
+  final List<String> imagePaths; // For photos
+  final List<String> fileNames; // For files
+  final TextEditingController? linkController; // Optional for social media
 
-  AddField({this.isSave = false}); // Default to false if not provided
+  FieldModel({
+    required this.type,
+    TextEditingController? titleController,
+    this.descriptionController,
+    List<String>? imagePaths,
+    List<String>? fileNames,
+    this.linkController,
+  })  : titleController = titleController ?? TextEditingController(),
+        imagePaths = imagePaths ?? [],
+        fileNames = fileNames ?? [];
 
-  @override
-  _AddFieldState createState() => _AddFieldState();
+  Map<String, dynamic> toMap() {
+    return {
+      'type': type,
+      'title': titleController.text,
+      'description': descriptionController?.text ?? '',
+      'imagePaths': imagePaths,
+      'fileNames': fileNames,
+      'link': linkController?.text ?? '',
+    };
+  }
 }
 
-class _AddFieldState extends State<AddField> {
-  List<FieldModel> fields = [];
+// Main Application
 
+// FormScreen Widget with Add Field Functionality
+class FormScreen extends StatefulWidget {
   @override
-  void initState() {
-    super.initState();
-    // Automatically save fields if isSave is true
-    if (widget.isSave) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        saveFields().then((_) {
-          // Optionally show a confirmation or navigate after saving
-        });
-      });
-    }
-  }
+  _FormScreenState createState() => _FormScreenState();
+}
 
-  void addTextField() {
-    setState(() {
-      fields.add(FieldModel(type: 'text', title: '', description: ''));
-    });
-  }
+class _FormScreenState extends State<FormScreen> {
+  final List<FieldModel> fields = [];
 
-  void addPhotoField() {
+  void addField(String fieldType) {
     setState(() {
-      fields.add(FieldModel(type: 'photo', title: '', imagePaths: []));
-    });
-  }
-
-  void addFileField() {
-    setState(() {
-      fields.add(FieldModel(type: 'file', title: '', fileNames: []));
-    });
-  }
-
-  void addSocialMediaField() {
-    setState(() {
-      fields.add(FieldModel(type: 'social_media', title: '', link: ''));
+      fields.add(FieldModel(
+        type: fieldType,
+        titleController: TextEditingController(),
+        descriptionController: fieldType == 'Text' ? TextEditingController() : null,
+        linkController: fieldType == 'Social Media' ? TextEditingController() : null,
+      ));
     });
   }
 
@@ -60,180 +63,88 @@ class _AddFieldState extends State<AddField> {
     });
   }
 
-  void showFieldOptions() {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          height: 300, // Set a fixed height for better layout
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                ListTile(
-                  leading: Icon(Icons.text_fields),
-                  title: Text('Text'),
-                  onTap: () {
-                    addTextField();
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.photo),
-                  title: Text('Photo'),
-                  onTap: () {
-                    addPhotoField();
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.file_present),
-                  title: Text('File'),
-                  onTap: () {
-                    addFileField();
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.share),
-                  title: Text('Social Media'),
-                  onTap: () {
-                    addSocialMediaField();
-                    Navigator.pop(context);
-                  },
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> saveFields() async {
-    final firestore = FirebaseFirestore.instance;
-    final documentRef = firestore.collection('events').doc(); // Create a new document
-
-    List<Map<String, dynamic>> fieldMaps = fields.map((field) => field.toMap()).toList();
-
-    await documentRef.set({
-      'fields': fieldMaps,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: <Widget>[
-          for (int i = 0; i < fields.length; i++)
-            Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8.0),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey, width: 1.0),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: getFieldWidget(fields[i], () => removeField(i)),
-                ),
-                if (i < fields.length - 1) SizedBox(height: 15.0,) // Add a divider between fields
-              ],
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Dynamic Form Fields'),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            ListView.builder(
+              shrinkWrap: true,
+              itemCount: fields.length,
+              itemBuilder: (context, index) {
+                final field = fields[index];
+                switch (field.type) {
+                  case 'Text':
+                    return TextFieldWidget(
+                      titleController: field.titleController,
+                      descriptionController: field.descriptionController!,
+                      onDelete: () => removeField(index),
+                    );
+                  case 'Photo':
+                    return PhotoFieldWidget(
+                      titleController: field.titleController,
+                      imageFiles: [],
+                      onDelete: () => removeField(index),
+                    );
+                  case 'File':
+                    return FileFieldWidget(
+                      titleController: field.titleController,
+                      fileNames: [],
+                      onDelete: () => removeField(index),
+                    );
+                  case 'Social Media':
+                    return SocialMediaFieldWidget(
+                      titleController: field.titleController,
+                      linkController: field.linkController!,
+                      onDelete: () => removeField(index),
+                    );
+                  default:
+                    return Container();
+                }
+              },
             ),
-          SizedBox(height: 20),
-          if (!widget.isSave) // Conditionally show Add More button
-            Container(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: showFieldOptions,
-                child: Text('Add More'),
-              ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => addField('Text'),
+              child: Text('Add Text Field'),
             ),
-        ],
+            ElevatedButton(
+              onPressed: () => addField('Photo'),
+              child: Text('Add Photo Field'),
+            ),
+            ElevatedButton(
+              onPressed: () => addField('File'),
+              child: Text('Add File Field'),
+            ),
+            ElevatedButton(
+              onPressed: () => addField('Social Media'),
+              child: Text('Add Social Media Field'),
+            ),
+          ],
+        ),
       ),
     );
   }
-
-  Widget getFieldWidget(FieldModel field, VoidCallback onDelete) {
-    switch (field.type) {
-      case 'text':
-        return TextFieldWidget(
-          title: field.title,
-          description: field.description,
-          onDelete: onDelete,
-        );
-      case 'photo':
-        return PhotoFieldWidget(
-          title: field.title,
-          imagePaths: field.imagePaths,
-          onDelete: onDelete,
-        );
-      case 'file':
-        return FileFieldWidget(
-          title: field.title,
-          fileNames: field.fileNames,
-          onDelete: onDelete,
-        );
-      case 'social_media':
-        return SocialMediaFieldWidget(
-          title: field.title,
-          link: field.link,
-          onDelete: onDelete,
-        );
-      default:
-        return Container(); // Fallback in case of unknown type
-    }
-  }
 }
 
-// Field Model
-class FieldModel {
-  final String type;
-  final String title;
-  final String description;
-  final List<String> imagePaths; // For photos
-  final List<String> fileNames; // For files
-  final String link; // For social media
-
-  FieldModel({
-    required this.type,
-    required this.title,
-    this.description = '',
-    this.imagePaths = const [],
-    this.fileNames = const [],
-    this.link = '',
-  });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'type': type,
-      'title': title,
-      'description': description,
-      'imagePaths': imagePaths,
-      'fileNames': fileNames,
-      'link': link,
-    };
-  }
-}
-
-// Widget for Text Field
+// TextField Widget
 class TextFieldWidget extends StatelessWidget {
-  final String title;
-  final String description;
+  final TextEditingController titleController;
+  final TextEditingController descriptionController;
   final VoidCallback onDelete;
 
   TextFieldWidget({
-    required this.title,
-    required this.description,
+    required this.titleController,
+    required this.descriptionController,
     required this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
-    final titleController = TextEditingController(text: title);
-    final descriptionController = TextEditingController(text: description);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -247,35 +158,23 @@ class TextFieldWidget extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(height: 8), // Padding between elements
+        SizedBox(height: 8),
         TextField(
           controller: titleController,
           decoration: InputDecoration(
             labelText: 'Title',
-            border: UnderlineInputBorder(), // No border by default
-            enabledBorder:
-            UnderlineInputBorder(), // No border when enabled but not focused
-            focusedBorder:
-            UnderlineInputBorder(), // No border when focused
-            disabledBorder: InputBorder.none,
-            filled: false, // No border by default
+            border: UnderlineInputBorder(),
           ),
         ),
-        SizedBox(height: 16), // Padding between title and description
+        SizedBox(height: 16),
         TextField(
           controller: descriptionController,
           decoration: InputDecoration(
             labelText: 'Description',
-            border: UnderlineInputBorder(), // No border by default
-            enabledBorder:
-            UnderlineInputBorder(), // No border when enabled but not focused
-            focusedBorder:
-            UnderlineInputBorder(), // No border when focused
-            disabledBorder: InputBorder.none,
-            filled: false, // No border by default
+            border: UnderlineInputBorder(),
           ),
-          keyboardType: TextInputType.multiline,  // Enables multiline input
-          minLines: 1,  // Minimum number of lines the TextField will show
+          keyboardType: TextInputType.multiline,
+          minLines: 1,
           maxLines: null,
         ),
       ],
@@ -283,15 +182,15 @@ class TextFieldWidget extends StatelessWidget {
   }
 }
 
-// Widget for Photo Field
+// PhotoField Widget
 class PhotoFieldWidget extends StatefulWidget {
-  final String title;
-  final List<String> imagePaths;
+  final TextEditingController titleController;
+  final List<XFile> imageFiles;
   final VoidCallback onDelete;
 
   PhotoFieldWidget({
-    required this.title,
-    required this.imagePaths,
+    required this.titleController,
+    required this.imageFiles,
     required this.onDelete,
   });
 
@@ -305,15 +204,15 @@ class _PhotoFieldWidgetState extends State<PhotoFieldWidget> {
   @override
   void initState() {
     super.initState();
-    _imageFiles = widget.imagePaths.map((path) => XFile(path)).toList();
+    _imageFiles = widget.imageFiles;
   }
 
   Future<void> pickImages() async {
-    final ImagePicker _picker = ImagePicker();
-    final List<XFile>? selectedImages = await _picker.pickMultiImage();
-    if (selectedImages != null) {
+    final picker = ImagePicker();
+    final pickedFiles = await picker.pickMultiImage();
+    if (pickedFiles != null) {
       setState(() {
-        _imageFiles.addAll(selectedImages);
+        _imageFiles.addAll(pickedFiles);
       });
     }
   }
@@ -339,21 +238,15 @@ class _PhotoFieldWidgetState extends State<PhotoFieldWidget> {
             ),
           ],
         ),
-        SizedBox(height: 8), // Padding between elements
+        SizedBox(height: 8),
         TextField(
-
+          controller: widget.titleController,
           decoration: InputDecoration(
             labelText: "Title",
-            border: UnderlineInputBorder(), // No border by default
-            enabledBorder:
-            UnderlineInputBorder(), // No border when enabled but not focused
-            focusedBorder:
-            UnderlineInputBorder(), // No border when focused
-            disabledBorder: InputBorder.none,
-            filled: false, // No border by default
+            border: UnderlineInputBorder(),
           ),
         ),
-        SizedBox(height: 16), // Padding between title and image button
+        SizedBox(height: 16),
         ElevatedButton(
           onPressed: pickImages,
           child: Text('Pick Images'),
@@ -391,14 +284,14 @@ class _PhotoFieldWidgetState extends State<PhotoFieldWidget> {
   }
 }
 
-// Widget for File Field
+// FileField Widget
 class FileFieldWidget extends StatefulWidget {
-  final String title;
+  final TextEditingController titleController;
   final List<String> fileNames;
   final VoidCallback onDelete;
 
   FileFieldWidget({
-    required this.title,
+    required this.titleController,
     required this.fileNames,
     required this.onDelete,
   });
@@ -446,21 +339,15 @@ class _FileFieldWidgetState extends State<FileFieldWidget> {
             ),
           ],
         ),
-        SizedBox(height: 8), // Padding between elements
+        SizedBox(height: 8),
         TextField(
-
+          controller: widget.titleController,
           decoration: InputDecoration(
             labelText: "Title",
-            border: UnderlineInputBorder(), // No border by default
-            enabledBorder:
-            UnderlineInputBorder(), // No border when enabled but not focused
-            focusedBorder:
-            UnderlineInputBorder(), // No border when focused
-            disabledBorder: InputBorder.none,
-            filled: false, // No border by default
+            border: UnderlineInputBorder(),
           ),
         ),
-        SizedBox(height: 16), // Padding between title and file button
+        SizedBox(height: 16),
         ElevatedButton(
           onPressed: pickFiles,
           child: Text('Pick Files'),
@@ -485,23 +372,20 @@ class _FileFieldWidgetState extends State<FileFieldWidget> {
   }
 }
 
-// Widget for Social Media Field
+// SocialMediaField Widget
 class SocialMediaFieldWidget extends StatelessWidget {
-  final String title;
-  final String link;
+  final TextEditingController titleController;
+  final TextEditingController linkController;
   final VoidCallback onDelete;
 
   SocialMediaFieldWidget({
-    required this.title,
-    required this.link,
+    required this.titleController,
+    required this.linkController,
     required this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
-    final titleController = TextEditingController(text: title);
-    final linkController = TextEditingController(text: link);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -515,36 +399,23 @@ class SocialMediaFieldWidget extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(height: 8), // Padding between elements
+        SizedBox(height: 8),
         TextField(
           controller: titleController,
           decoration: InputDecoration(
             labelText: 'Title',
-            border: UnderlineInputBorder(), // No border by default
-            enabledBorder:
-            UnderlineInputBorder(), // No border when enabled but not focused
-            focusedBorder:
-            UnderlineInputBorder(), // No border when focused
-            disabledBorder: InputBorder.none,
-            filled: false, // No border by default
+            border: UnderlineInputBorder(),
           ),
         ),
-        SizedBox(height: 16), // Padding between title and link
+        SizedBox(height: 16),
         TextField(
           controller: linkController,
           decoration: InputDecoration(
             labelText: 'Link',
-            border: UnderlineInputBorder(), // No border by default
-            enabledBorder:
-            UnderlineInputBorder(), // No border when enabled but not focused
-            focusedBorder:
-            UnderlineInputBorder(), // No border when focused
-            disabledBorder: InputBorder.none,
-            filled: false, // No border by default
+            border: UnderlineInputBorder(),
           ),
         ),
       ],
     );
   }
 }
-
