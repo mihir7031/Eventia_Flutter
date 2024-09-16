@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class FirebaseService {
   // final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -25,9 +26,6 @@ class FirebaseService {
       return null;
     }
   }
-
-
-
 }
 
 class InfoForm extends StatefulWidget {
@@ -68,13 +66,17 @@ class _InfoFormState extends State<InfoForm> {
       });
     }
   }
-  Future<void> saveEventData(Map<String, dynamic> eventData, BuildContext context) async {
+
+  Future<void> saveEventData(
+      Map<String, dynamic> eventData, BuildContext context) async {
     try {
       final firestore = FirebaseFirestore.instance;
-      final documentRef = firestore.collection('eventss').doc(); // Create a new document
+      final documentRef =
+          firestore.collection('eventss').doc(); // Create a new document
 
       // Convert the fields list to a map
-      List<Map<String, dynamic>> fieldMaps = fields.map((field) => field.toMap()).toList();
+      List<Map<String, dynamic>> fieldMaps =
+          fields.map((field) => field.toMap()).toList();
 
       // Add fields and eventData together, along with a timestamp
       eventData['fields'] = fieldMaps;
@@ -100,6 +102,7 @@ class _InfoFormState extends State<InfoForm> {
       );
     }
   }
+
   // Date Picker
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? pickedDate = await showDatePicker(
@@ -338,19 +341,24 @@ class _InfoFormState extends State<InfoForm> {
   Future<void> _pickPoster() async {
     final XFile? pickedFile =
         await _picker.pickImage(source: ImageSource.gallery);
+
+    // Check if an image was picked
     if (pickedFile != null) {
+      // Update the state only if a new image was selected
       setState(() {
         eventPoster = File(pickedFile.path);
       });
     }
   }
-   // ----------------------------------------------------
+
+  // ----------------------------------------------------
   Widget getFieldWidget(FieldModel field, VoidCallback onDelete) {
     switch (field.type) {
       case 'text':
         return TextFieldWidget(
           titleController: field.titleController,
-          descriptionController: field.descriptionController ?? TextEditingController(), // Provide fallback
+          descriptionController: field.descriptionController ??
+              TextEditingController(), // Provide fallback
           onDelete: onDelete,
         );
       case 'photo':
@@ -368,7 +376,8 @@ class _InfoFormState extends State<InfoForm> {
       case 'social_media':
         return SocialMediaFieldWidget(
           titleController: field.titleController,
-          linkController: field.linkController ?? TextEditingController(), // Provide fallback
+          linkController: field.linkController ??
+              TextEditingController(), // Provide fallback
           onDelete: onDelete,
         );
       default:
@@ -376,13 +385,11 @@ class _InfoFormState extends State<InfoForm> {
     }
   }
 
-
   void addTextField() {
     setState(() {
       fields.add(FieldModel(type: 'text')); // Only required parameters
     });
   }
-
 
   void addPhotoField() {
     setState(() {
@@ -402,14 +409,11 @@ class _InfoFormState extends State<InfoForm> {
     });
   }
 
-
   void removeField(int index) {
     setState(() {
       fields.removeAt(index);
     });
   }
-
-
 
   void showFieldOptions() {
     showModalBottomSheet(
@@ -621,9 +625,18 @@ class _InfoFormState extends State<InfoForm> {
                 if (isPaid)
                   Column(
                     children: [
-                      ElevatedButton(
-                        onPressed: _addPass,
-                        child: Text('Add Pass'),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Container(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _addPass,
+                          child: Text('Add Pass'),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 20,
                       ),
                       for (int i = 0; i < passes.length; i++)
                         ListTile(
@@ -644,17 +657,42 @@ class _InfoFormState extends State<InfoForm> {
                             ],
                           ),
                         ),
+                      SizedBox(
+                        height: 20,
+                      ),
                     ],
                   ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),
-                  child: eventPoster == null
-                      ? ElevatedButton(
-                          onPressed: _pickPoster,
-                          child: Text('Pick Event Poster'),
-                        )
-                      : Image.file(eventPoster!),
+                SizedBox(
+                  height: 20,
                 ),
+                Padding(
+                    padding: const EdgeInsets.only(bottom: 16.0),
+                    child: GestureDetector(
+                      onTap: _pickPoster, // This opens the gallery on tap
+                      child: eventPoster != null
+                          ? Image.file(
+                              eventPoster!,
+                              height:
+                                  200.0, // Set the desired height for the image
+                              fit: BoxFit
+                                  .cover, // Optional: Adjust fit as needed
+                            )
+                          : Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.add_a_photo,
+                                    size: 50), // Icon with specified size
+                                SizedBox(
+                                    height:
+                                        8), // Adds spacing between icon and text
+                                Text(
+                                  "Upload Poster",
+                                  style: TextStyle(
+                                      fontSize: 16), // Style the text as needed
+                                ),
+                              ],
+                            ),
+                    )),
                 Padding(
                   padding: EdgeInsets.all(16.0),
                 ),
@@ -681,58 +719,58 @@ class _InfoFormState extends State<InfoForm> {
                           ],
                         ),
                       SizedBox(height: 20),
-                       // Conditionally show Add More button
-                        Container(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: showFieldOptions,
-                            child: Text('Add More'),
-                          ),
+                      // Conditionally show Add More button
+                      Container(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: showFieldOptions,
+                          child: Text('Add More'),
                         ),
+                      ),
                       SizedBox(height: 20),
-                       // Conditionally show Save button
-
+                      // Conditionally show Save button
                     ],
                   ),
                 ),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (_formKey.currentState!.validate()) {
-                      String? imageUrl;
-                      if (eventPoster != null) {
-                        // Upload image to Firebase and get the URL
-                        imageUrl =
-                            await FirebaseService().uploadImage(eventPoster!);
+                Container(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate()) {
+                        String? imageUrl;
+                        if (eventPoster != null) {
+                          // Upload image to Firebase and get the URL
+                          imageUrl =
+                              await FirebaseService().uploadImage(eventPoster!);
+                        }
+
+                        saveEventData({
+                          'eventName': eventName,
+                          'selectedTime': selectedTime?.format(context),
+                          'selectedDate': selectedDate,
+                          'duration': duration,
+                          'location': location,
+                          'capacity': capacity,
+                          'ageLimit': ageLimit,
+                          'isOnline': isOnline,
+                          'isPaid': isPaid,
+                          'passes': passes,
+                          'chatEnvironment': chatEnvironment,
+                          'eventPoster':
+                              imageUrl, // Store the uploaded image URL
+                        }, context);
+
+                        _formKey.currentState?.reset();
+                        setState(() {
+                          selectedTime = null;
+                          selectedDate = null;
+                          eventPoster = null;
+                          passes = [];
+                        });
                       }
-
-                      saveEventData({
-                        'eventName': eventName,
-                        'selectedTime': selectedTime?.format(context),
-                        'selectedDate': selectedDate,
-                        'duration': duration,
-                        'location': location,
-                        'capacity': capacity,
-                        'ageLimit': ageLimit,
-                        'isOnline': isOnline,
-                        'isPaid': isPaid,
-                        'passes': passes,
-                        'chatEnvironment': chatEnvironment,
-                        'eventPoster': imageUrl, // Store the uploaded image URL
-                      },context);
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Event Data Saved')),
-                      );
-                      _formKey.currentState?.reset();
-                      setState(() {
-                        selectedTime = null;
-                        selectedDate = null;
-                        eventPoster = null;
-                        passes = [];
-                      });
-                    }
-                  },
-                  child: Text('Save'),
+                    },
+                    child: Text('Save'),
+                  ),
                 ),
               ],
             ),
@@ -740,7 +778,6 @@ class _InfoFormState extends State<InfoForm> {
         ),
       ),
     );
-
   }
 }
 
@@ -778,9 +815,8 @@ class TextFieldWidget extends StatelessWidget {
             labelText: 'Title',
             border: UnderlineInputBorder(), // No border by default
             enabledBorder:
-            UnderlineInputBorder(), // No border when enabled but not focused
-            focusedBorder:
-            UnderlineInputBorder(), // No border when focused
+                UnderlineInputBorder(), // No border when enabled but not focused
+            focusedBorder: UnderlineInputBorder(), // No border when focused
             disabledBorder: InputBorder.none,
             filled: false, // No border by default
           ),
@@ -792,14 +828,13 @@ class TextFieldWidget extends StatelessWidget {
             labelText: 'Description',
             border: UnderlineInputBorder(), // No border by default
             enabledBorder:
-            UnderlineInputBorder(), // No border when enabled but not focused
-            focusedBorder:
-            UnderlineInputBorder(), // No border when focused
+                UnderlineInputBorder(), // No border when enabled but not focused
+            focusedBorder: UnderlineInputBorder(), // No border when focused
             disabledBorder: InputBorder.none,
             filled: false, // No border by default
           ),
-          keyboardType: TextInputType.multiline,  // Enables multiline input
-          minLines: 1,  // Minimum number of lines the TextField will show
+          keyboardType: TextInputType.multiline, // Enables multiline input
+          minLines: 1, // Minimum number of lines the TextField will show
           maxLines: null,
         ),
       ],
@@ -807,11 +842,10 @@ class TextFieldWidget extends StatelessWidget {
   }
 }
 
-
-// Widget for Photo Field
+//photo field
 class PhotoFieldWidget extends StatefulWidget {
   final TextEditingController titleController;
-  final List<String> imagePaths;
+  final List<String> imagePaths; // Image URLs will be saved here
   final VoidCallback onDelete;
 
   PhotoFieldWidget({
@@ -825,7 +859,23 @@ class PhotoFieldWidget extends StatefulWidget {
 }
 
 class _PhotoFieldWidgetState extends State<PhotoFieldWidget> {
-  List<XFile> _imageFiles = [];
+  List<XFile> _imageFiles = []; // Selected images before upload
+
+  final FirebaseStorage _storage = FirebaseStorage.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  String uid = '';
+
+  void inputData() {
+    final User? user = auth.currentUser;
+    if (user != null) {
+      setState(() {
+        uid = user.uid;
+      });
+    } else {
+      print("No user is logged in.");
+    }
+  }
 
   Future<void> pickImages() async {
     final picker = ImagePicker();
@@ -843,6 +893,38 @@ class _PhotoFieldWidgetState extends State<PhotoFieldWidget> {
     });
   }
 
+  Future<String?> uploadImage(File imageFile) async {
+    try {
+      String fileName =
+          'eventss_images_${DateTime.now().millisecondsSinceEpoch}';
+      Reference storageRef =
+          _storage.ref().child('eventss_images/$uid/$fileName');
+      UploadTask uploadTask = storageRef.putFile(imageFile);
+      TaskSnapshot taskSnapshot = await uploadTask;
+      return await taskSnapshot.ref.getDownloadURL();
+    } catch (e) {
+      print('Error uploading image: $e');
+      return null;
+    }
+  }
+
+  // Function to upload images and save the URLs in widget.imagePaths
+  Future<void> uploadImagesAndSaveUrls() async {
+    for (var imageFile in _imageFiles) {
+      File file = File(imageFile.path);
+      String? downloadUrl = await uploadImage(file);
+      if (downloadUrl != null) {
+        setState(() {
+          widget.imagePaths.add(downloadUrl); // Add URL to widget.imagePaths
+        });
+      }
+    }
+
+    print("Images uploaded and URLs saved to imagePaths.");
+  }
+
+  // Function to save data to Firestore
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -858,53 +940,56 @@ class _PhotoFieldWidgetState extends State<PhotoFieldWidget> {
             ),
           ],
         ),
-        SizedBox(height: 8), // Padding between elements
+        SizedBox(height: 8),
         TextField(
           controller: widget.titleController,
           decoration: InputDecoration(
             labelText: "Title",
-            border: UnderlineInputBorder(), // No border by default
-            enabledBorder:
-            UnderlineInputBorder(), // No border when enabled but not focused
-            focusedBorder:
-            UnderlineInputBorder(), // No border when focused
+            border: UnderlineInputBorder(),
+            enabledBorder: UnderlineInputBorder(),
+            focusedBorder: UnderlineInputBorder(),
             disabledBorder: InputBorder.none,
-            filled: false, // No border by default
+            filled: false,
           ),
         ),
-        SizedBox(height: 16), // Padding between title and image button
+        SizedBox(height: 16),
         ElevatedButton(
           onPressed: pickImages,
           child: Text('Pick Images'),
         ),
         _imageFiles.isNotEmpty
             ? Wrap(
-          children: _imageFiles.map((imageFile) {
-            int index = _imageFiles.indexOf(imageFile);
-            return Stack(
-              children: [
-                Container(
-                  margin: EdgeInsets.all(8.0),
-                  width: 100,
-                  height: 100,
-                  child: Image.file(
-                    File(imageFile.path),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: IconButton(
-                    icon: Icon(Icons.delete, color: Colors.red),
-                    onPressed: () => removeImage(index),
-                  ),
-                ),
-              ],
-            );
-          }).toList(),
-        )
+                children: _imageFiles.map((imageFile) {
+                  int index = _imageFiles.indexOf(imageFile);
+                  return Stack(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.all(8.0),
+                        width: 100,
+                        height: 100,
+                        child: Image.file(
+                          File(imageFile.path),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => removeImage(index),
+                        ),
+                      ),
+                    ],
+                  );
+                }).toList(),
+              )
             : Container(),
+        SizedBox(height: 16),
+        ElevatedButton(
+          onPressed: uploadImagesAndSaveUrls,
+          child: Text('Upload Images'),
+        ),
       ],
     );
   }
@@ -972,9 +1057,8 @@ class _FileFieldWidgetState extends State<FileFieldWidget> {
             labelText: "Title",
             border: UnderlineInputBorder(), // No border by default
             enabledBorder:
-            UnderlineInputBorder(), // No border when enabled but not focused
-            focusedBorder:
-            UnderlineInputBorder(), // No border when focused
+                UnderlineInputBorder(), // No border when enabled but not focused
+            focusedBorder: UnderlineInputBorder(), // No border when focused
             disabledBorder: InputBorder.none,
             filled: false, // No border by default
           ),
@@ -986,24 +1070,23 @@ class _FileFieldWidgetState extends State<FileFieldWidget> {
         ),
         _fileNames.isNotEmpty
             ? Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: _fileNames.map((fileName) {
-            int index = _fileNames.indexOf(fileName);
-            return ListTile(
-              title: Text(fileName),
-              trailing: IconButton(
-                icon: Icon(Icons.delete, color: Colors.red),
-                onPressed: () => removeFile(index),
-              ),
-            );
-          }).toList(),
-        )
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: _fileNames.map((fileName) {
+                  int index = _fileNames.indexOf(fileName);
+                  return ListTile(
+                    title: Text(fileName),
+                    trailing: IconButton(
+                      icon: Icon(Icons.delete, color: Colors.red),
+                      onPressed: () => removeFile(index),
+                    ),
+                  );
+                }).toList(),
+              )
             : Container(),
       ],
     );
   }
 }
-
 
 // Widget for Social Media Field
 class SocialMediaFieldWidget extends StatelessWidget {
@@ -1039,9 +1122,8 @@ class SocialMediaFieldWidget extends StatelessWidget {
             labelText: 'Title',
             border: UnderlineInputBorder(), // No border by default
             enabledBorder:
-            UnderlineInputBorder(), // No border when enabled but not focused
-            focusedBorder:
-            UnderlineInputBorder(), // No border when focused
+                UnderlineInputBorder(), // No border when enabled but not focused
+            focusedBorder: UnderlineInputBorder(), // No border when focused
             disabledBorder: InputBorder.none,
             filled: false, // No border by default
           ),
@@ -1053,9 +1135,8 @@ class SocialMediaFieldWidget extends StatelessWidget {
             labelText: 'Link',
             border: UnderlineInputBorder(), // No border by default
             enabledBorder:
-            UnderlineInputBorder(), // No border when enabled but not focused
-            focusedBorder:
-            UnderlineInputBorder(), // No border when focused
+                UnderlineInputBorder(), // No border when enabled but not focused
+            focusedBorder: UnderlineInputBorder(), // No border when focused
             disabledBorder: InputBorder.none,
             filled: false, // No border by default
           ),
@@ -1068,10 +1149,12 @@ class SocialMediaFieldWidget extends StatelessWidget {
 class FieldModel {
   final String type;
   final TextEditingController titleController;
-  final TextEditingController? descriptionController; // Optional for text fields
+  final TextEditingController?
+      descriptionController; // Optional for text fields
   final List<String> imagePaths; // For photos
   final List<String> fileNames; // For files
-  final TextEditingController? linkController; // Optional for social media links
+  final TextEditingController?
+      linkController; // Optional for social media links
 
   FieldModel({
     required this.type,
@@ -1081,7 +1164,8 @@ class FieldModel {
     List<String>? fileNames,
     TextEditingController? linkController,
   })  : titleController = titleController ?? TextEditingController(),
-        descriptionController = descriptionController ?? TextEditingController(),
+        descriptionController =
+            descriptionController ?? TextEditingController(),
         imagePaths = imagePaths ?? [],
         fileNames = fileNames ?? [],
         linkController = linkController ?? TextEditingController();
