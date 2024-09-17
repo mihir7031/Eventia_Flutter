@@ -8,6 +8,13 @@ import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+
+
+
+final firestore = FirebaseFirestore.instance;
+final documentRef =
+firestore.collection('eventss').doc();
+String documentRefLink=documentRef.id;
 class FirebaseService {
   // final FirebaseFirestore _db = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
@@ -54,6 +61,7 @@ class _InfoFormState extends State<InfoForm> {
   File? eventPoster;
   final ImagePicker _picker = ImagePicker();
 
+
   // Time Picker
   Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay? pickedTime = await showTimePicker(
@@ -70,10 +78,12 @@ class _InfoFormState extends State<InfoForm> {
   Future<void> saveEventData(
       Map<String, dynamic> eventData, BuildContext context) async {
     try {
-      final firestore = FirebaseFirestore.instance;
-      final documentRef =
-          firestore.collection('eventss').doc(); // Create a new document
-
+      // Create a new document
+      final User? currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        throw Exception('User not logged in');
+      }
+      final String uid = currentUser.uid;
       // Convert the fields list to a map
       List<Map<String, dynamic>> fieldMaps =
           fields.map((field) => field.toMap()).toList();
@@ -81,7 +91,7 @@ class _InfoFormState extends State<InfoForm> {
       // Add fields and eventData together, along with a timestamp
       eventData['fields'] = fieldMaps;
       eventData['createdAt'] = FieldValue.serverTimestamp();
-
+      eventData['uid'] = uid; // Add uid as a separate field
       // Save the event data and fields to Firestore
       await documentRef.set(eventData);
       setState(() {
@@ -860,6 +870,8 @@ class PhotoFieldWidget extends StatefulWidget {
 
 class _PhotoFieldWidgetState extends State<PhotoFieldWidget> {
   List<XFile> _imageFiles = []; // Selected images before upload
+  bool isLoading = false; // To track loading state
+  bool isSaved = false; // To track if data is saved
 
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -895,12 +907,20 @@ class _PhotoFieldWidgetState extends State<PhotoFieldWidget> {
 
   Future<String?> uploadImage(File imageFile) async {
     try {
-      String fileName =
-          'eventss_images_${DateTime.now().millisecondsSinceEpoch}';
-      Reference storageRef =
-          _storage.ref().child('eventss_images/$uid/$fileName');
+      if (uid.isEmpty) {
+        inputData(); // Ensure uid is set
+      }
+
+      // Generate a unique file name
+      String fileName = 'event_image_${DateTime.now().millisecondsSinceEpoch}';
+      // Reference to the location in Firebase Storage (events_images/{uid}/{fileName})
+      Reference storageRef = _storage.ref().child('events_images/$uid/$documentRefLink/$fileName');
+
+      // Upload the file
       UploadTask uploadTask = storageRef.putFile(imageFile);
       TaskSnapshot taskSnapshot = await uploadTask;
+
+      // Get the download URL of the uploaded file
       return await taskSnapshot.ref.getDownloadURL();
     } catch (e) {
       print('Error uploading image: $e');
@@ -910,6 +930,11 @@ class _PhotoFieldWidgetState extends State<PhotoFieldWidget> {
 
   // Function to upload images and save the URLs in widget.imagePaths
   Future<void> uploadImagesAndSaveUrls() async {
+    setState(() {
+      isLoading = true; // Show loading indicator
+      isSaved = false; // Reset saved state
+    });
+
     for (var imageFile in _imageFiles) {
       File file = File(imageFile.path);
       String? downloadUrl = await uploadImage(file);
@@ -920,16 +945,31 @@ class _PhotoFieldWidgetState extends State<PhotoFieldWidget> {
       }
     }
 
+    setState(() {
+      isLoading = false; // Hide loading indicator
+      isSaved = true; // Show saved message
+    });
+
     print("Images uploaded and URLs saved to imagePaths.");
   }
-
-  // Function to save data to Firestore
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Show "Data Saved" message when saved
+        if (isSaved)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              "Data Saved",
+              style: TextStyle(
+                color: Colors.green,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
         Row(
           children: [
             Text("Photo Field"),
@@ -959,34 +999,37 @@ class _PhotoFieldWidgetState extends State<PhotoFieldWidget> {
         ),
         _imageFiles.isNotEmpty
             ? Wrap(
-                children: _imageFiles.map((imageFile) {
-                  int index = _imageFiles.indexOf(imageFile);
-                  return Stack(
-                    children: [
-                      Container(
-                        margin: EdgeInsets.all(8.0),
-                        width: 100,
-                        height: 100,
-                        child: Image.file(
-                          File(imageFile.path),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      Positioned(
-                        right: 0,
-                        top: 0,
-                        child: IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => removeImage(index),
-                        ),
-                      ),
-                    ],
-                  );
-                }).toList(),
-              )
+          children: _imageFiles.map((imageFile) {
+            int index = _imageFiles.indexOf(imageFile);
+            return Stack(
+              children: [
+                Container(
+                  margin: EdgeInsets.all(8.0),
+                  width: 100,
+                  height: 100,
+                  child: Image.file(
+                    File(imageFile.path),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: IconButton(
+                    icon: Icon(Icons.delete, color: Colors.red),
+                    onPressed: () => removeImage(index),
+                  ),
+                ),
+              ],
+            );
+          }).toList(),
+        )
             : Container(),
         SizedBox(height: 16),
-        ElevatedButton(
+        // Show CircularProgressIndicator when uploading
+        isLoading
+            ? Center(child: CircularProgressIndicator())
+            : ElevatedButton(
           onPressed: uploadImagesAndSaveUrls,
           child: Text('Upload Images'),
         ),
@@ -994,11 +1037,9 @@ class _PhotoFieldWidgetState extends State<PhotoFieldWidget> {
     );
   }
 }
-
-// Widget for File Field
 class FileFieldWidget extends StatefulWidget {
   final TextEditingController titleController;
-  final List<String> fileNames;
+  final List<String> fileNames; // File URLs will be saved here
   final VoidCallback onDelete;
 
   FileFieldWidget({
@@ -1012,27 +1053,92 @@ class FileFieldWidget extends StatefulWidget {
 }
 
 class _FileFieldWidgetState extends State<FileFieldWidget> {
-  late List<String> _fileNames;
+  List<PlatformFile> _pickedFiles = []; // Selected files before upload
+  bool isLoading = false; // To track loading state
+  bool isSaved = false; // To track if data is saved
+
+  final FirebaseStorage _storage = FirebaseStorage.instance;
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  String uid = '';
 
   @override
   void initState() {
     super.initState();
-    _fileNames = widget.fileNames;
+    inputData(); // Ensure UID is fetched when widget is initialized
+  }
+
+  void inputData() {
+    final User? user = auth.currentUser;
+    if (user != null) {
+      setState(() {
+        uid = user.uid;
+      });
+    } else {
+      print("No user is logged in.");
+    }
   }
 
   Future<void> pickFiles() async {
     final result = await FilePicker.platform.pickFiles(allowMultiple: true);
     if (result != null) {
       setState(() {
-        _fileNames.addAll(result.files.map((file) => file.name).toList());
+        _pickedFiles = result.files; // Store the picked files
       });
     }
   }
 
   void removeFile(int index) {
     setState(() {
-      _fileNames.removeAt(index);
+      _pickedFiles.removeAt(index);
     });
+  }
+
+  Future<String?> uploadFile(File file) async {
+    try {
+      if (uid.isEmpty) {
+        inputData(); // Ensure uid is set
+      }
+
+      // Generate a unique file name
+      String fileName = 'event_file_${DateTime.now().millisecondsSinceEpoch}_${file.path.split('/').last}';
+      // Reference to the location in Firebase Storage (events_files/{uid}/{fileName})
+      Reference storageRef = _storage.ref().child('events_files/$uid/$documentRefLink/$fileName');
+
+      // Upload the file
+      UploadTask uploadTask = storageRef.putFile(file);
+      TaskSnapshot taskSnapshot = await uploadTask;
+
+      // Get the download URL of the uploaded file
+      return await taskSnapshot.ref.getDownloadURL();
+    } catch (e) {
+      print('Error uploading file: $e');
+      return null;
+    }
+  }
+
+  // Function to upload files and save the URLs in widget.fileNames
+  Future<void> uploadFilesAndSaveUrls() async {
+    setState(() {
+      isLoading = true; // Show loading indicator
+      isSaved = false; // Reset saved state
+    });
+
+    for (var platformFile in _pickedFiles) {
+      File file = File(platformFile.path!);
+      String? downloadUrl = await uploadFile(file);
+      if (downloadUrl != null) {
+        setState(() {
+          widget.fileNames.add(downloadUrl); // Add URL to widget.fileNames
+        });
+      }
+    }
+
+    setState(() {
+      isLoading = false; // Hide loading indicator
+      isSaved = true; // Show saved message
+    });
+
+    print("Files uploaded and URLs saved to fileNames.");
   }
 
   @override
@@ -1040,6 +1146,18 @@ class _FileFieldWidgetState extends State<FileFieldWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Show "Data Saved" message when saved
+        if (isSaved)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              "Data Saved",
+              style: TextStyle(
+                color: Colors.green,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
         Row(
           children: [
             Text("File Field"),
@@ -1057,7 +1175,7 @@ class _FileFieldWidgetState extends State<FileFieldWidget> {
             labelText: "Title",
             border: UnderlineInputBorder(), // No border by default
             enabledBorder:
-                UnderlineInputBorder(), // No border when enabled but not focused
+            UnderlineInputBorder(), // No border when enabled but not focused
             focusedBorder: UnderlineInputBorder(), // No border when focused
             disabledBorder: InputBorder.none,
             filled: false, // No border by default
@@ -1068,25 +1186,34 @@ class _FileFieldWidgetState extends State<FileFieldWidget> {
           onPressed: pickFiles,
           child: Text('Pick Files'),
         ),
-        _fileNames.isNotEmpty
+        _pickedFiles.isNotEmpty
             ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: _fileNames.map((fileName) {
-                  int index = _fileNames.indexOf(fileName);
-                  return ListTile(
-                    title: Text(fileName),
-                    trailing: IconButton(
-                      icon: Icon(Icons.delete, color: Colors.red),
-                      onPressed: () => removeFile(index),
-                    ),
-                  );
-                }).toList(),
-              )
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: _pickedFiles.map((file) {
+            int index = _pickedFiles.indexOf(file);
+            return ListTile(
+              title: Text(file.name),
+              trailing: IconButton(
+                icon: Icon(Icons.delete, color: Colors.red),
+                onPressed: () => removeFile(index),
+              ),
+            );
+          }).toList(),
+        )
             : Container(),
+        SizedBox(height: 16),
+        // Show CircularProgressIndicator when uploading
+        isLoading
+            ? Center(child: CircularProgressIndicator())
+            : ElevatedButton(
+          onPressed: uploadFilesAndSaveUrls,
+          child: Text('Upload Files'),
+        ),
       ],
     );
   }
 }
+
 
 // Widget for Social Media Field
 class SocialMediaFieldWidget extends StatelessWidget {

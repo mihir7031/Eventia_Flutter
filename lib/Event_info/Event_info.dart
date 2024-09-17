@@ -18,64 +18,64 @@ class _Event_infoState extends State<Event_info> {
     });
   }
 
-  void _showTermsAndConditions(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          child: AlertDialog(
-            title: const Text('Terms & Conditions'),
-            content: const SingleChildScrollView(
-              child: Text('These are the terms and conditions for the event...'),
-            ),
-            actions: [
-              TextButton(
-                child: const Text('Cancel'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-              TextButton(
-                child: const Text('Next'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  // Add your navigation code here
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+  // void _showTermsAndConditions(BuildContext context) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AnimatedContainer(
+  //         duration: const Duration(milliseconds: 300),
+  //         curve: Curves.easeInOut,
+  //         child: AlertDialog(
+  //           title: const Text('Terms & Conditions'),
+  //           content: const SingleChildScrollView(
+  //             child: Text('These are the terms and conditions for the event...'),
+  //           ),
+  //           actions: [
+  //             TextButton(
+  //               child: const Text('Cancel'),
+  //               onPressed: () {
+  //                 Navigator.of(context).pop();
+  //               },
+  //             ),
+  //             TextButton(
+  //               child: const Text('Next'),
+  //               onPressed: () {
+  //                 Navigator.of(context).pop();
+  //                 // Add your navigation code here
+  //               },
+  //             ),
+  //           ],
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 
-  void _showRequirements(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          child: AlertDialog(
-            title: const Text('Requirements'),
-            content: const SingleChildScrollView(
-              child: Text('These are the requirements for attending the event...'),
-            ),
-            actions: [
-              TextButton(
-                child: const Text('OK'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+  // void _showRequirements(BuildContext context) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AnimatedContainer(
+  //         duration: const Duration(milliseconds: 300),
+  //         curve: Curves.easeInOut,
+  //         child: AlertDialog(
+  //           title: const Text('Requirements'),
+  //           content: const SingleChildScrollView(
+  //             child: Text('These are the requirements for attending the event...'),
+  //           ),
+  //           actions: [
+  //             TextButton(
+  //               child: const Text('OK'),
+  //               onPressed: () {
+  //                 Navigator.of(context).pop();
+  //               },
+  //             ),
+  //           ],
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -95,42 +95,46 @@ class _Event_infoState extends State<Event_info> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  height: 250,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: NetworkImage(widget.event['imageUrl'] ??
-                          'https://example.com/default-image.jpg'),
-                      fit: BoxFit.cover,
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0,left: 8.0,right: 8.0),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    height: 400,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: NetworkImage(widget.event['imageUrl'] ??
+                            'https://example.com/default-image.jpg'),
+                        fit:BoxFit.fitHeight,
+                      ),
                     ),
                   ),
-                ),
-                Container(
-                  height: 250,
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.black54, Colors.transparent],
-                      begin: Alignment.bottomCenter,
-                      end: Alignment.topCenter,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: 20,
-                  left: 20,
-                  child: Text(
-                    widget.event['eventName'] ?? 'Event Title',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 24,
-                    ),
-                  ),
-                ),
-              ],
+                  // Container(
+                  //   height: 400,
+                  //   decoration: const BoxDecoration(
+                  //     gradient: LinearGradient(
+                  //       colors: [Colors.black54, Colors.transparent],
+                  //       begin: Alignment.bottomCenter,
+                  //       end: Alignment.topCenter,
+                  //     ),
+                  //   ),
+                  // ),
+                  // Positioned(
+                  //   bottom: 15,
+                  //   left: 40,
+                  //   child: Text(
+                  //     widget.event['eventName'] ?? 'Event Title',
+                  //     style: const TextStyle(
+                  //       color: Colors.white,
+                  //       fontWeight: FontWeight.bold,
+                  //       fontSize: 24,
+                  //     ),
+                  //   ),
+                  // ),
+                ],
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(16),

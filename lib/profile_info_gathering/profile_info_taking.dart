@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
+
 
 class UserInfoForm extends StatefulWidget {
   @override
@@ -83,6 +85,7 @@ class _UserInfoFormState extends State<UserInfoForm> {
     if (pickedDate != null && pickedDate != _selectedDate) {
       setState(() {
         _selectedDate = pickedDate;
+
       });
     }
   }
@@ -168,7 +171,12 @@ class _UserInfoFormState extends State<UserInfoForm> {
               // City Field
               TextFormField(
                 controller: _cityController,
-                decoration: InputDecoration(labelText: 'City'),
+                decoration: InputDecoration(labelText: 'City',border:
+                UnderlineInputBorder(), // Keeps only the bottom border
+                  enabledBorder: UnderlineInputBorder(),
+                  focusedBorder: UnderlineInputBorder(),
+                  fillColor: Colors.transparent, // Removes any background color
+                  filled: false,),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your city';
@@ -196,7 +204,12 @@ class _UserInfoFormState extends State<UserInfoForm> {
                   return TextFormField(
                     controller: fieldTextEditingController,
                     focusNode: fieldFocusNode,
-                    decoration: InputDecoration(labelText: 'State'),
+                    decoration: InputDecoration(labelText: 'State',border:
+                    UnderlineInputBorder(), // Keeps only the bottom border
+                      enabledBorder: UnderlineInputBorder(),
+                      focusedBorder: UnderlineInputBorder(),
+                      fillColor: Colors.transparent, // Removes any background color
+                      filled: false,),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your state';
@@ -211,7 +224,12 @@ class _UserInfoFormState extends State<UserInfoForm> {
               // About Me Field
               TextFormField(
                 controller: _aboutMeController,
-                decoration: InputDecoration(labelText: 'About Me'),
+                decoration: InputDecoration(labelText: 'About Me',border:
+                UnderlineInputBorder(), // Keeps only the bottom border
+                  enabledBorder: UnderlineInputBorder(),
+                  focusedBorder: UnderlineInputBorder(),
+                  fillColor: Colors.transparent, // Removes any background color
+                  filled: false,),
                 maxLines: 3,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -225,7 +243,12 @@ class _UserInfoFormState extends State<UserInfoForm> {
               // Profession Field
               TextFormField(
                 controller: _professionController,
-                decoration: InputDecoration(labelText: 'Profession'),
+                decoration: InputDecoration(labelText: 'Profession',border:
+                UnderlineInputBorder(), // Keeps only the bottom border
+                  enabledBorder: UnderlineInputBorder(),
+                  focusedBorder: UnderlineInputBorder(),
+                  fillColor: Colors.transparent, // Removes any background color
+                  filled: false,),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your profession';
@@ -238,7 +261,12 @@ class _UserInfoFormState extends State<UserInfoForm> {
               // Language Dropdown
               DropdownButtonFormField<String>(
                 value: _selectedLanguage,
-                decoration: InputDecoration(labelText: 'Language'),
+                decoration: InputDecoration(labelText: 'Language',border:
+                UnderlineInputBorder(), // Keeps only the bottom border
+                  enabledBorder: UnderlineInputBorder(),
+                  focusedBorder: UnderlineInputBorder(),
+                  fillColor: Colors.transparent, // Removes any background color
+                  filled: false,),
                 isExpanded: true,
                 items: _languages.map((String language) {
                   return DropdownMenuItem<String>(
