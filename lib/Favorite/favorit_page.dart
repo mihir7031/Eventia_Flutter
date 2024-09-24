@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:eventia/Event_info/Event_info.dart';
 import 'package:eventia/main.dart';
+import 'package:intl/intl.dart';
 
 class FavoritePage extends StatefulWidget {
   const FavoritePage({Key? key}) : super(key: key);
@@ -87,7 +88,7 @@ class _FavoritePageState extends State<FavoritePage> {
           }
 
           return FutureBuilder<QuerySnapshot>(
-            future: firestore.collection('events').where(FieldPath.documentId, whereIn: eventIds).get(),
+            future: firestore.collection('eventss').where(FieldPath.documentId, whereIn: eventIds).get(),
             builder: (context, eventSnapshot) {
               if (eventSnapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -98,10 +99,21 @@ class _FavoritePageState extends State<FavoritePage> {
 
               final events = eventSnapshot.data!.docs;
 
+
               return ListView.builder(
                 itemCount: events.length,
                 itemBuilder: (context, index) {
                   final event = events[index];
+                  Timestamp? timestamp = event['selectedDate'] as Timestamp?;
+
+                  // If the timestamp is null, show a default message
+                  String formattedDate;
+                  if (timestamp != null) {
+                    DateTime dateTime = timestamp.toDate();
+                    formattedDate = DateFormat('dd-MM-yy').format(dateTime);
+                  } else {
+                    formattedDate = 'Date not available'; // Handle null date
+                  }
 
                   return GestureDetector(
                     onTap: () {
@@ -112,11 +124,14 @@ class _FavoritePageState extends State<FavoritePage> {
                         ),
                       );
                     },
+
                     child: Card(
                       color: cardColor,
                       margin: const EdgeInsets.all(10.0),
+
                       child: Row(
                         children: [
+
                           Padding(
                             padding: const EdgeInsets.all(4.0),
                             child: SizedBox(
@@ -125,10 +140,10 @@ class _FavoritePageState extends State<FavoritePage> {
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(8.0),
                                 child: Image.network(
-                                  event['imageUrl'] != null &&
-                                      event['imageUrl'].isNotEmpty &&
-                                      event['imageUrl'] != " "
-                                      ? event['imageUrl']
+                                  event['eventPoster'] != null &&
+                                      event['eventPoster'].isNotEmpty &&
+                                      event['eventPoster'] != " "
+                                      ? event['eventPoster']
                                       : 'https://via.placeholder.com/150', // Placeholder image URL
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) {
@@ -148,7 +163,7 @@ class _FavoritePageState extends State<FavoritePage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    '${event['date']}  • ${event['time']}',
+                                    '${formattedDate}  • ${event['selectedTime']}',
                                     style: const TextStyle(
                                       color: Colors.red,
                                       fontWeight: FontWeight.bold,
@@ -161,10 +176,10 @@ class _FavoritePageState extends State<FavoritePage> {
                                     Theme.of(context).textTheme.titleMedium,
                                   ),
                                   const SizedBox(height: 5.0),
-                                  Text(
-                                    event['organizerInfo'],
-                                    style: const TextStyle(color: primaryColor),
-                                  ),
+                                  // Text(
+                                  //   event['organizerInfo'],
+                                  //   style: const TextStyle(color: primaryColor),
+                                  // ),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: [

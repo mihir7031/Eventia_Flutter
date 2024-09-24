@@ -12,6 +12,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:eventia/notification/notification.dart';
+import 'package:intl/intl.dart';
 import 'dart:io';
 
 class ScreenMain extends StatefulWidget {
@@ -390,7 +391,8 @@ class _ScreenMainState extends State<ScreenMain> {
                   ),
                   const SizedBox(height: 20),
                   StreamBuilder<QuerySnapshot>(
-                    stream: firestore.collection('events').snapshots(),
+                    stream: firestore.collection('eventss').snapshots(),
+
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
@@ -401,12 +403,24 @@ class _ScreenMainState extends State<ScreenMain> {
                           child: Text('No events found.'),
                         );
                       }
-
                       var events = snapshot.data!.docs;
 
                       return Column(
                         children: List.generate(events.length, (index) {
                           var event = events[index];
+
+                          // Check if 'selectedDate' exists and is not null
+                          Timestamp? timestamp = event['selectedDate'] as Timestamp?;
+
+                          // If the timestamp is null, show a default message
+                          String formattedDate;
+                          if (timestamp != null) {
+                            DateTime dateTime = timestamp.toDate();
+                            formattedDate = DateFormat('dd-MM-yy').format(dateTime);
+                          } else {
+                            formattedDate = 'Date not available'; // Handle null date
+                          }
+
                           return InkWell(
                             onTap: () => _onCardTapped(event),
                             child: Card(
@@ -422,10 +436,10 @@ class _ScreenMainState extends State<ScreenMain> {
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(8.0),
                                         child: Image.network(
-                                          event['imageUrl'] != null &&
-                                              event['imageUrl'].isNotEmpty &&
-                                              event['imageUrl']!= " "
-                                              ? event['imageUrl']
+                                          event['eventPoster'] != null &&
+                                              event['eventPoster'].isNotEmpty &&
+                                              event['eventPoster']!= " "
+                                              ? event['eventPoster']
                                               : 'https://via.placeholder.com/150', // Placeholder image URL
                                           fit: BoxFit.cover,
                                           errorBuilder:
@@ -446,8 +460,13 @@ class _ScreenMainState extends State<ScreenMain> {
                                         crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                         children: [
+
+
+
+
+
                                           Text(
-                                            '${event['date']}  • ${event['time']}',
+                                            '${formattedDate}  • ${event['selectedTime']}',
                                             style: const TextStyle(
                                               color: Colors.red,
                                               fontWeight: FontWeight.bold,
@@ -462,7 +481,7 @@ class _ScreenMainState extends State<ScreenMain> {
                                           ),
                                           const SizedBox(height: 5.0),
                                           Text(
-                                            event['organizerInfo'],
+                                            event['aboutEvent'],
                                             style: const TextStyle(
                                                 color: primaryColor),
                                           ),

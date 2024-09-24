@@ -1,6 +1,8 @@
 import 'package:eventia/Event_info/booking.dart';
 import 'package:flutter/material.dart';
-import 'package:eventia/main.dart';  // Importing the main.dart for color constants
+import 'package:eventia/main.dart';
+import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';// Importing the main.dart for color constants
 
 class Event_info extends StatefulWidget {
   final dynamic event;
@@ -105,7 +107,7 @@ class _Event_infoState extends State<Event_info> {
                     width: double.infinity,
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                        image: NetworkImage(widget.event['imageUrl'] ??
+                        image: NetworkImage(widget.event['eventPoster'] ??
                             'https://example.com/default-image.jpg'),
                         fit:BoxFit.fitHeight,
                       ),
@@ -136,18 +138,21 @@ class _Event_infoState extends State<Event_info> {
                 ],
               ),
             ),
+
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Card(
+
                     margin: const EdgeInsets.symmetric(vertical: 8),
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+
                           Text(
                             widget.event['eventName'] ?? 'Event Title',
                             style: const TextStyle(
@@ -156,11 +161,29 @@ class _Event_infoState extends State<Event_info> {
                             ),
                           ),
                           const SizedBox(height: 8),
+
                           Row(
+
                             children: [
                               const Icon(Icons.calendar_today, color: primaryColor),
                               const SizedBox(width: 8),
-                              Text(widget.event['date'] ?? 'Date Not Available'),
+
+                              Builder(
+                                builder: (context) {
+                                  Timestamp? timestamp = widget.event['selectedDate'] as Timestamp?;
+                                  String formattedDate;
+
+                                  if (timestamp != null) {
+                                    DateTime dateTime = timestamp.toDate();
+                                    formattedDate = DateFormat('dd-MM-yy').format(dateTime);
+                                  } else {
+                                    formattedDate = 'Date Not Available';
+                                  }
+
+                                  return Text(formattedDate); // Use formatted date
+                                },
+                              ),
+
                             ],
                           ),
                           const SizedBox(height: 8),
@@ -168,7 +191,7 @@ class _Event_infoState extends State<Event_info> {
                             children: [
                               const Icon(Icons.access_time, color: primaryColor),
                               const SizedBox(width: 8),
-                              Text(widget.event['time'] ?? 'Time Not Available'),
+                              Text(widget.event['selectedTime'] ?? 'Time Not Available'),
                             ],
                           ),
                           const SizedBox(height: 8),
@@ -194,11 +217,14 @@ class _Event_infoState extends State<Event_info> {
                               const SizedBox(width: 8),
                               Flexible(
                                 child: Text(
-                                  widget.event['location'] ?? 'Location Not Available',
+                                  widget.event['isOnline'] != true
+                                      ? 'Online Event' // Display this if isOnline is true
+                                      : widget.event['location'] ?? 'Location Not Available', // Display location or fallback text
                                   style: const TextStyle(fontSize: 16),
                                   overflow: TextOverflow.ellipsis, // Add ellipsis if the text overflows
                                 ),
                               ),
+
                               const SizedBox(width: 8),
                               TextButton(
                                 onPressed: () {
@@ -241,23 +267,23 @@ class _Event_infoState extends State<Event_info> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Event Highlights',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(widget.event['eventHighlights'] ?? 'No highlights available.'),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Artist',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
-                  ),
+                  // const Text(
+                  //   'Event Highlights',
+                  //   style: TextStyle(
+                  //     fontWeight: FontWeight.bold,
+                  //     fontSize: 18,
+                  //   ),
+                  // ),
+                  // const SizedBox(height: 8),
+                  // Text(widget.event['eventHighlights'] ?? 'No highlights available.'),
+                  // const SizedBox(height: 16),
+                  // const Text(
+                  //   'Artist',
+                  //   style: TextStyle(
+                  //     fontWeight: FontWeight.bold,
+                  //     fontSize: 18,
+                  //   ),
+                  // ),
                   const SizedBox(height: 8),
                   // Row(
                   //   children: [
@@ -287,22 +313,22 @@ class _Event_infoState extends State<Event_info> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(widget.event['accessibilityInfo'] ?? 'No accessibility information provided.'),
+                  // Text(widget.event['accessibilityInfo'] ?? 'No accessibility information provided.'),
                   const SizedBox(height: 16),
                   const Divider(color: Colors.grey),
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      Expanded(
-                        child: Text(
-                          '₹${widget.event['price'] ?? '0'} onwards',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                            color: Colors.red,
-                          ),
-                        ),
-                      ),
+                      // Expanded(
+                      //   child: Text(
+                      //     '₹${widget.event['price'] ?? '0'} onwards',
+                      //     style: const TextStyle(
+                      //       fontWeight: FontWeight.bold,
+                      //       fontSize: 18,
+                      //       color: Colors.red,
+                      //     ),
+                      //   ),
+                      // ),
                       ElevatedButton(
                         onPressed: () {
                           Navigator.push(

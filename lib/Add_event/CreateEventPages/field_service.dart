@@ -53,7 +53,8 @@ class _InfoFormState extends State<InfoForm> {
   int capacity = 0;
   int ageLimit = 0;
   bool chatEnvironment = false;
-
+  String eventDescription='';
+  String aboutEvent='';
   bool isOnline = true;
   bool isPaid = false;
   List<Map<String, dynamic>> passes = [];
@@ -116,7 +117,7 @@ class _InfoFormState extends State<InfoForm> {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
+      firstDate: DateTime.now(),
       lastDate: DateTime(2100),
     );
     if (pickedDate != null) {
@@ -559,6 +560,47 @@ class _InfoFormState extends State<InfoForm> {
                     validator: (value) => value!.isEmpty ? 'Please enter event name' : null,
                   ),
                 ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: TextFormField(
+                    decoration: InputDecoration(
+                      labelText: 'Event Description',
+                      border: UnderlineInputBorder(),
+                      enabledBorder: UnderlineInputBorder(),
+                      focusedBorder: UnderlineInputBorder(),
+                      fillColor: Colors.transparent,
+                      filled: false,
+                    ),
+                    onChanged: (value) {
+                      eventDescription = value;
+                      _validateForm();
+                    },
+                    validator: (value) =>
+                    value!.isEmpty ? 'Please enter event description' : null,
+                  ),
+                ),
+
+// Add About Event (30 characters) field
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: TextFormField(
+                    maxLength: 60, // Limit the input to 30 characters
+                    decoration: InputDecoration(
+                      labelText: 'About Event (60 characters)',
+                      border: UnderlineInputBorder(),
+                      enabledBorder: UnderlineInputBorder(),
+                      focusedBorder: UnderlineInputBorder(),
+                      fillColor: Colors.transparent,
+                      filled: false,
+                    ),
+                    onChanged: (value) {
+                      aboutEvent = value;
+                      _validateForm();
+                    },
+                    validator: (value) =>
+                    value!.isEmpty ? 'Please provide a brief event description (60 characters)' : null,
+                  ),
+                ),
                 // Time selection
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
@@ -791,7 +833,12 @@ class _InfoFormState extends State<InfoForm> {
                           'isPaid': isPaid,
                           'passes': passes,
                           'chatEnvironment': chatEnvironment,
-                          'eventPoster': imageUrl, // Store the uploaded image URL
+
+                        'eventDescription':eventDescription,
+                        'aboutEvent':aboutEvent,
+
+
+                        'eventPoster': imageUrl, // Store the uploaded image URL
                         }, context);
 
                         _formKey.currentState?.reset();
