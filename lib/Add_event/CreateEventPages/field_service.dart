@@ -8,13 +8,12 @@ import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-
-
-
 final firestore = FirebaseFirestore.instance;
-final documentRef =
-firestore.collection('eventss').doc();
-String documentRefLink=documentRef.id;
+final documentRef = firestore.collection('eventss').doc();
+String documentRefLink = documentRef.id;
+bool saveStatus = false;
+
+
 class FirebaseService {
   // final FirebaseFirestore _db = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
@@ -60,7 +59,6 @@ class _InfoFormState extends State<InfoForm> {
   List<Map<String, dynamic>> passes = [];
   File? eventPoster;
   final ImagePicker _picker = ImagePicker();
-
 
   // Time Picker
   Future<void> _selectTime(BuildContext context) async {
@@ -361,6 +359,9 @@ class _InfoFormState extends State<InfoForm> {
     }
   }
 
+
+
+
   // ----------------------------------------------------
   Widget getFieldWidget(FieldModel field, VoidCallback onDelete) {
     switch (field.type) {
@@ -476,6 +477,32 @@ class _InfoFormState extends State<InfoForm> {
   }
 
   // -----------------------------------------------------
+
+
+
+  bool isSaveEnabled = false;
+
+  void _validateForm() {
+    setState(() {
+      isSaveEnabled = eventName.isNotEmpty &&
+          selectedTime != null &&
+          selectedDate != null &&
+          duration.isNotEmpty &&
+          capacity > 0 &&
+          ageLimit > 0 &&
+          (!isOnline || location.isNotEmpty) &&
+          (!isPaid || passes.isNotEmpty);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the form with default values if needed.
+    _validateForm(); // Ensure the button is disabled initially.
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -491,22 +518,48 @@ class _InfoFormState extends State<InfoForm> {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
+                  child: GestureDetector(
+                    onTap: _pickPoster, // This opens the gallery on tap
+                    child: eventPoster != null
+                        ? Image.file(
+                      eventPoster!,
+                      height: 200.0, // Set the desired height for the image
+                      fit: BoxFit.cover, // Optional: Adjust fit as needed
+                    )
+                        : Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.add_a_photo, size: 50),
+                        SizedBox(height: 8), // Adds spacing between icon and text
+                        Text(
+                          "Upload Poster",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
                   child: TextFormField(
                     decoration: InputDecoration(
                       labelText: 'Event Name',
-                      border:
-                          UnderlineInputBorder(), // Keeps only the bottom border
+                     border:
+                    UnderlineInputBorder(), // Keeps only the bottom border
                       enabledBorder: UnderlineInputBorder(),
                       focusedBorder: UnderlineInputBorder(),
-                      fillColor:
-                          Colors.transparent, // Removes any background color
-                      filled: false,
+                      fillColor: Colors.transparent, // Removes any background color
+                      filled: false, // Keeps only the bottom border
                     ),
-                    onChanged: (value) => eventName = value,
-                    validator: (value) =>
-                        value!.isEmpty ? 'Please enter event name' : null,
+                    onChanged: (value) {
+                      eventName = value;
+                      _validateForm();
+                    },
+                    validator: (value) => value!.isEmpty ? 'Please enter event name' : null,
                   ),
                 ),
+                // Time selection
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
                   child: ListTile(
@@ -514,9 +567,13 @@ class _InfoFormState extends State<InfoForm> {
                         ? 'Select Time'
                         : 'Time: ${selectedTime!.format(context)}'),
                     trailing: Icon(Icons.access_time),
-                    onTap: () => _selectTime(context),
+                    onTap: () async {
+                      await _selectTime(context);
+                      _validateForm();
+                    },
                   ),
                 ),
+                // Date selection
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
                   child: ListTile(
@@ -524,26 +581,30 @@ class _InfoFormState extends State<InfoForm> {
                         ? 'Select Date'
                         : 'Date: ${DateFormat('dd-MM-yyyy').format(selectedDate!)}'),
                     trailing: Icon(Icons.calendar_today),
-                    onTap: () => _selectDate(context),
+                    onTap: () async {
+                      await _selectDate(context);
+                      _validateForm();
+                    },
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
                   child: TextFormField(
                     decoration: InputDecoration(
-                      labelText: 'Duration(in Minute)',
+                      labelText: 'Duration (in Minute)',
                       border:
-                          UnderlineInputBorder(), // Keeps only the bottom border
+                      UnderlineInputBorder(), // Keeps only the bottom border
                       enabledBorder: UnderlineInputBorder(),
                       focusedBorder: UnderlineInputBorder(),
-                      fillColor:
-                          Colors.transparent, // Removes any background color
+                      fillColor: Colors.transparent, // Removes any background color
                       filled: false,
                     ),
                     keyboardType: TextInputType.number,
-                    onChanged: (value) => duration = value,
-                    validator: (value) =>
-                        value!.isEmpty ? 'Please enter duration' : null,
+                    onChanged: (value) {
+                      duration = value;
+                      _validateForm();
+                    },
+                    validator: (value) => value!.isEmpty ? 'Please enter duration' : null,
                   ),
                 ),
                 Padding(
@@ -552,15 +613,17 @@ class _InfoFormState extends State<InfoForm> {
                     decoration: InputDecoration(
                       labelText: 'Capacity',
                       border:
-                          UnderlineInputBorder(), // Keeps only the bottom border
+                      UnderlineInputBorder(), // Keeps only the bottom border
                       enabledBorder: UnderlineInputBorder(),
                       focusedBorder: UnderlineInputBorder(),
-                      fillColor:
-                          Colors.transparent, // Removes any background color
+                      fillColor: Colors.transparent, // Removes any background color
                       filled: false,
                     ),
                     keyboardType: TextInputType.number,
-                    onChanged: (value) => capacity = int.tryParse(value) ?? 0,
+                    onChanged: (value) {
+                      capacity = int.tryParse(value) ?? 0;
+                      _validateForm();
+                    },
                   ),
                 ),
                 Padding(
@@ -569,15 +632,17 @@ class _InfoFormState extends State<InfoForm> {
                     decoration: InputDecoration(
                       labelText: 'Age Limit',
                       border:
-                          UnderlineInputBorder(), // Keeps only the bottom border
+                      UnderlineInputBorder(), // Keeps only the bottom border
                       enabledBorder: UnderlineInputBorder(),
                       focusedBorder: UnderlineInputBorder(),
-                      fillColor:
-                          Colors.transparent, // Removes any background color
+                      fillColor: Colors.transparent, // Removes any background color
                       filled: false,
                     ),
                     keyboardType: TextInputType.number,
-                    onChanged: (value) => ageLimit = int.tryParse(value) ?? 0,
+                    onChanged: (value) {
+                      ageLimit = int.tryParse(value) ?? 0;
+                      _validateForm();
+                    },
                   ),
                 ),
                 ListTile(
@@ -587,47 +652,51 @@ class _InfoFormState extends State<InfoForm> {
                     onChanged: (value) {
                       setState(() {
                         chatEnvironment = value;
+                        _validateForm();
                       });
                     },
                   ),
                 ),
                 ListTile(
-                  title: Text('Online/Offline'),
+                  title: Text('Offline'),
                   trailing: Switch(
                     value: isOnline,
                     onChanged: (value) {
                       setState(() {
                         isOnline = value;
+                        _validateForm();
                       });
                     },
                   ),
                 ),
-                if (isOnline == true)
+                if (isOnline)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 16.0),
                     child: TextFormField(
                       decoration: InputDecoration(
                         labelText: 'Location',
                         border:
-                            UnderlineInputBorder(), // Keeps only the bottom border
+                        UnderlineInputBorder(), // Keeps only the bottom border
                         enabledBorder: UnderlineInputBorder(),
                         focusedBorder: UnderlineInputBorder(),
-                        fillColor:
-                            Colors.transparent, // Removes any background color
+                        fillColor: Colors.transparent, // Removes any background color
                         filled: false,
                       ),
-                      onChanged: (value) => location = value,
-                      validator: (value) =>
-                          value!.isEmpty ? 'Please enter location' : null,
+                      onChanged: (value) {
+                        location = value;
+                        _validateForm();
+                      },
+                      validator: (value) => value!.isEmpty ? 'Please enter location' : null,
                     ),
                   ),
                 ListTile(
-                  title: Text('Paid/Unpaid'),
+                  title: Text('Paid'),
                   trailing: Switch(
                     value: isPaid,
                     onChanged: (value) {
                       setState(() {
                         isPaid = value;
+                        _validateForm();
                       });
                     },
                   ),
@@ -635,9 +704,7 @@ class _InfoFormState extends State<InfoForm> {
                 if (isPaid)
                   Column(
                     children: [
-                      SizedBox(
-                        height: 20,
-                      ),
+                      SizedBox(height: 20),
                       Container(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -645,9 +712,7 @@ class _InfoFormState extends State<InfoForm> {
                           child: Text('Add Pass'),
                         ),
                       ),
-                      SizedBox(
-                        height: 20,
-                      ),
+                      SizedBox(height: 20),
                       for (int i = 0; i < passes.length; i++)
                         ListTile(
                           title: Text('${passes[i]['name']}'),
@@ -667,45 +732,10 @@ class _InfoFormState extends State<InfoForm> {
                             ],
                           ),
                         ),
-                      SizedBox(
-                        height: 20,
-                      ),
+                      SizedBox(height: 20),
                     ],
                   ),
-                SizedBox(
-                  height: 20,
-                ),
-                Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
-                    child: GestureDetector(
-                      onTap: _pickPoster, // This opens the gallery on tap
-                      child: eventPoster != null
-                          ? Image.file(
-                              eventPoster!,
-                              height:
-                                  200.0, // Set the desired height for the image
-                              fit: BoxFit
-                                  .cover, // Optional: Adjust fit as needed
-                            )
-                          : Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.add_a_photo,
-                                    size: 50), // Icon with specified size
-                                SizedBox(
-                                    height:
-                                        8), // Adds spacing between icon and text
-                                Text(
-                                  "Upload Poster",
-                                  style: TextStyle(
-                                      fontSize: 16), // Style the text as needed
-                                ),
-                              ],
-                            ),
-                    )),
-                Padding(
-                  padding: EdgeInsets.all(16.0),
-                ),
+                SizedBox(height: 20),
                 SingleChildScrollView(
                   child: Column(
                     children: <Widget>[
@@ -715,21 +745,16 @@ class _InfoFormState extends State<InfoForm> {
                             Container(
                               padding: const EdgeInsets.all(8.0),
                               decoration: BoxDecoration(
-                                border:
-                                    Border.all(color: Colors.grey, width: 1.0),
+                                border: Border.all(color: Colors.grey, width: 1.0),
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: getFieldWidget(
-                                  fields[i], () => removeField(i)),
+                              child: getFieldWidget(fields[i], () => removeField(i)),
                             ),
                             if (i < fields.length - 1)
-                              SizedBox(
-                                height: 15.0,
-                              ) // Add a divider between fields
+                              SizedBox(height: 15.0) // Add a divider between fields
                           ],
                         ),
                       SizedBox(height: 20),
-                      // Conditionally show Add More button
                       Container(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -738,20 +763,20 @@ class _InfoFormState extends State<InfoForm> {
                         ),
                       ),
                       SizedBox(height: 20),
-                      // Conditionally show Save button
                     ],
                   ),
                 ),
+                SizedBox(height: 20),
                 Container(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () async {
+                    onPressed: isSaveEnabled
+                        ? () async {
                       if (_formKey.currentState!.validate()) {
                         String? imageUrl;
                         if (eventPoster != null) {
                           // Upload image to Firebase and get the URL
-                          imageUrl =
-                              await FirebaseService().uploadImage(eventPoster!);
+                          imageUrl = await FirebaseService().uploadImage(eventPoster!);
                         }
 
                         saveEventData({
@@ -766,8 +791,7 @@ class _InfoFormState extends State<InfoForm> {
                           'isPaid': isPaid,
                           'passes': passes,
                           'chatEnvironment': chatEnvironment,
-                          'eventPoster':
-                              imageUrl, // Store the uploaded image URL
+                          'eventPoster': imageUrl, // Store the uploaded image URL
                         }, context);
 
                         _formKey.currentState?.reset();
@@ -778,7 +802,8 @@ class _InfoFormState extends State<InfoForm> {
                           passes = [];
                         });
                       }
-                    },
+                    }
+                        : null, // Disable button if fields are incomplete
                     child: Text('Save'),
                   ),
                 ),
@@ -786,6 +811,7 @@ class _InfoFormState extends State<InfoForm> {
             ),
           ),
         ),
+
       ),
     );
   }
@@ -914,7 +940,8 @@ class _PhotoFieldWidgetState extends State<PhotoFieldWidget> {
       // Generate a unique file name
       String fileName = 'event_image_${DateTime.now().millisecondsSinceEpoch}';
       // Reference to the location in Firebase Storage (events_images/{uid}/{fileName})
-      Reference storageRef = _storage.ref().child('events_images/$uid/$documentRefLink/$fileName');
+      Reference storageRef =
+          _storage.ref().child('events_images/$uid/$documentRefLink/$fileName');
 
       // Upload the file
       UploadTask uploadTask = storageRef.putFile(imageFile);
@@ -999,44 +1026,45 @@ class _PhotoFieldWidgetState extends State<PhotoFieldWidget> {
         ),
         _imageFiles.isNotEmpty
             ? Wrap(
-          children: _imageFiles.map((imageFile) {
-            int index = _imageFiles.indexOf(imageFile);
-            return Stack(
-              children: [
-                Container(
-                  margin: EdgeInsets.all(8.0),
-                  width: 100,
-                  height: 100,
-                  child: Image.file(
-                    File(imageFile.path),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: IconButton(
-                    icon: Icon(Icons.delete, color: Colors.red),
-                    onPressed: () => removeImage(index),
-                  ),
-                ),
-              ],
-            );
-          }).toList(),
-        )
+                children: _imageFiles.map((imageFile) {
+                  int index = _imageFiles.indexOf(imageFile);
+                  return Stack(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.all(8.0),
+                        width: 100,
+                        height: 100,
+                        child: Image.file(
+                          File(imageFile.path),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => removeImage(index),
+                        ),
+                      ),
+                    ],
+                  );
+                }).toList(),
+              )
             : Container(),
         SizedBox(height: 16),
         // Show CircularProgressIndicator when uploading
         isLoading
             ? Center(child: CircularProgressIndicator())
             : ElevatedButton(
-          onPressed: uploadImagesAndSaveUrls,
-          child: Text('Upload Images'),
-        ),
+                onPressed: uploadImagesAndSaveUrls,
+                child: Text('Upload Images'),
+              ),
       ],
     );
   }
 }
+
 class FileFieldWidget extends StatefulWidget {
   final TextEditingController titleController;
   final List<String> fileNames; // File URLs will be saved here
@@ -1100,9 +1128,11 @@ class _FileFieldWidgetState extends State<FileFieldWidget> {
       }
 
       // Generate a unique file name
-      String fileName = 'event_file_${DateTime.now().millisecondsSinceEpoch}_${file.path.split('/').last}';
+      String fileName =
+          'event_file_${DateTime.now().millisecondsSinceEpoch}_${file.path.split('/').last}';
       // Reference to the location in Firebase Storage (events_files/{uid}/{fileName})
-      Reference storageRef = _storage.ref().child('events_files/$uid/$documentRefLink/$fileName');
+      Reference storageRef =
+          _storage.ref().child('events_files/$uid/$documentRefLink/$fileName');
 
       // Upload the file
       UploadTask uploadTask = storageRef.putFile(file);
@@ -1175,7 +1205,7 @@ class _FileFieldWidgetState extends State<FileFieldWidget> {
             labelText: "Title",
             border: UnderlineInputBorder(), // No border by default
             enabledBorder:
-            UnderlineInputBorder(), // No border when enabled but not focused
+                UnderlineInputBorder(), // No border when enabled but not focused
             focusedBorder: UnderlineInputBorder(), // No border when focused
             disabledBorder: InputBorder.none,
             filled: false, // No border by default
@@ -1188,32 +1218,31 @@ class _FileFieldWidgetState extends State<FileFieldWidget> {
         ),
         _pickedFiles.isNotEmpty
             ? Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: _pickedFiles.map((file) {
-            int index = _pickedFiles.indexOf(file);
-            return ListTile(
-              title: Text(file.name),
-              trailing: IconButton(
-                icon: Icon(Icons.delete, color: Colors.red),
-                onPressed: () => removeFile(index),
-              ),
-            );
-          }).toList(),
-        )
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: _pickedFiles.map((file) {
+                  int index = _pickedFiles.indexOf(file);
+                  return ListTile(
+                    title: Text(file.name),
+                    trailing: IconButton(
+                      icon: Icon(Icons.delete, color: Colors.red),
+                      onPressed: () => removeFile(index),
+                    ),
+                  );
+                }).toList(),
+              )
             : Container(),
         SizedBox(height: 16),
         // Show CircularProgressIndicator when uploading
         isLoading
             ? Center(child: CircularProgressIndicator())
             : ElevatedButton(
-          onPressed: uploadFilesAndSaveUrls,
-          child: Text('Upload Files'),
-        ),
+                onPressed: uploadFilesAndSaveUrls,
+                child: Text('Upload Files'),
+              ),
       ],
     );
   }
 }
-
 
 // Widget for Social Media Field
 class SocialMediaFieldWidget extends StatelessWidget {
