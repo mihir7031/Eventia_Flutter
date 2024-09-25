@@ -20,64 +20,19 @@ class _Event_infoState extends State<Event_info> {
     });
   }
 
-  // void _showTermsAndConditions(BuildContext context) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AnimatedContainer(
-  //         duration: const Duration(milliseconds: 300),
-  //         curve: Curves.easeInOut,
-  //         child: AlertDialog(
-  //           title: const Text('Terms & Conditions'),
-  //           content: const SingleChildScrollView(
-  //             child: Text('These are the terms and conditions for the event...'),
-  //           ),
-  //           actions: [
-  //             TextButton(
-  //               child: const Text('Cancel'),
-  //               onPressed: () {
-  //                 Navigator.of(context).pop();
-  //               },
-  //             ),
-  //             TextButton(
-  //               child: const Text('Next'),
-  //               onPressed: () {
-  //                 Navigator.of(context).pop();
-  //                 // Add your navigation code here
-  //               },
-  //             ),
-  //           ],
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
 
-  // void _showRequirements(BuildContext context) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AnimatedContainer(
-  //         duration: const Duration(milliseconds: 300),
-  //         curve: Curves.easeInOut,
-  //         child: AlertDialog(
-  //           title: const Text('Requirements'),
-  //           content: const SingleChildScrollView(
-  //             child: Text('These are the requirements for attending the event...'),
-  //           ),
-  //           actions: [
-  //             TextButton(
-  //               child: const Text('OK'),
-  //               onPressed: () {
-  //                 Navigator.of(context).pop();
-  //               },
-  //             ),
-  //           ],
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
+
+
+
+
+
+
+
+
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -304,19 +259,146 @@ class _Event_infoState extends State<Event_info> {
                   //     Text('${widget.event['artistName'] ?? 'Artist Name'}\n${widget.event['artistProfession'] ?? 'Profession'}'),
                   //   ],
                   // ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Accessibility Information',
-                    style: TextStyle(
+                  // const SizedBox(height: 16),
+                  // const Text(
+                  //   'Accessibility Information',
+                  //   style: TextStyle(
+                  //     fontWeight: FontWeight.bold,
+                  //     fontSize: 18,
+                  //   ),
+                  // ),
+                  // const SizedBox(height: 8),
+                  // // Text(widget.event['accessibilityInfo'] ?? 'No accessibility information provided.'),
+                  // const SizedBox(height: 16),
+
+
+                  // _buildFieldsSection(widget.event['fields'] ?? []),
+
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: widget.event['fields'].map<Widget>((field) {
+            if (field['type'] == 'text') {
+              // Display text fields
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Divider(color: Colors.grey),
+                  Text(
+                    field['title'] ?? 'Untitled',
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  // Text(widget.event['accessibilityInfo'] ?? 'No accessibility information provided.'),
+                  Text(
+                    field['description'] ?? '',
+                    style: const TextStyle(fontSize: 16),
+                  ),
                   const SizedBox(height: 16),
+                ],
+              );
+            } else if (field['type'] == 'photo') {
+              // Display photo fields
+              List<dynamic> imagePaths = field['imagePaths'] ?? [];
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   const Divider(color: Colors.grey),
+                  Text(
+                    field['title'] ?? 'Untitled',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  if (imagePaths.isNotEmpty)
+                    Column(
+                      children: [
+                        // Show max 3 images in a row using GridView
+                        GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3, // Show 3 images per row
+                            crossAxisSpacing: 8.0,
+                            mainAxisSpacing: 8.0,
+                          ),
+                          itemCount: imagePaths.length > 3 ? 3 : imagePaths.length,
+                          itemBuilder: (context, index) {
+                            return GestureDetector(
+                              onTap: () =>
+                                  _showFullScreenImage(context, imagePaths, index),
+                              child: Image.network(
+                                imagePaths[index],
+                                fit: BoxFit.cover,
+                              ),
+                            );
+                          },
+                        ),
+                        if (imagePaths.length > 3)
+                          TextButton(
+                            onPressed: () => _showMoreImages(context, imagePaths),
+                            child: const Text('See More'),
+                          ),
+                      ],
+                    )
+                  else
+                    const Text('No images available.'),
                   const SizedBox(height: 16),
+                ],
+              );
+            } else if (field['type'] == 'file') {
+              // Display file fields (file links)
+              List<dynamic> fileLinks = field['fileLinks'] ?? [];
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Divider(color: Colors.grey),
+                  Text(
+                    field['title'] ?? 'Untitled',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  if (fileLinks.isNotEmpty)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: fileLinks.map((fileLink) {
+                        return Column(
+                          children: [
+                            GestureDetector(
+                              onTap: () => _openFileLink(fileLink),
+                              child: Text(
+                                fileLink,
+                                style: const TextStyle(
+                                  color: Colors.blue,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                        );
+                      }).toList(),
+                    )
+                  else
+                    const Text('No files available.'),
+                  const SizedBox(height: 16),
+                ],
+              );
+            }
+            return Container();
+          }).toList(),
+        ),
+
+        const SizedBox(height: 16),
+
                   Row(
                     children: [
                       // Expanded(
@@ -359,4 +441,98 @@ class _Event_infoState extends State<Event_info> {
       ),
     );
   }
+}
+
+
+// Function to show a full-screen image viewer
+void _showFullScreenImage(BuildContext context, List<dynamic> imagePaths, int initialIndex) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => FullScreenImageViewer(imagePaths: imagePaths, initialIndex: initialIndex),
+    ),
+  );
+}
+
+// Function to show all images when "See More" is clicked
+void _showMoreImages(BuildContext context, List<dynamic> imagePaths) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => ImageGridViewer(imagePaths: imagePaths),
+    ),
+  );
+}
+
+// Full-screen image viewer widget
+class FullScreenImageViewer extends StatelessWidget {
+  final List<dynamic> imagePaths;
+  final int initialIndex;
+
+  const FullScreenImageViewer({Key? key, required this.imagePaths, required this.initialIndex}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: PageView.builder(
+          itemCount: imagePaths.length,
+          controller: PageController(initialPage: initialIndex),
+          itemBuilder: (context, index) {
+            return GestureDetector(
+              onTap: () => Navigator.pop(context), // Exit full screen on tap
+              child: Image.network(
+                imagePaths[index],
+                fit: BoxFit.contain,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+// Widget to display all images in a grid view
+class ImageGridViewer extends StatelessWidget {
+  final List<dynamic> imagePaths;
+
+  const ImageGridViewer({Key? key, required this.imagePaths}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("All Images"),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: GridView.builder(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 8.0,
+            mainAxisSpacing: 8.0,
+          ),
+          itemCount: imagePaths.length,
+          itemBuilder: (context, index) {
+            return GestureDetector(
+              onTap: () => _showFullScreenImage(context, imagePaths, index),
+              child: Image.network(
+                imagePaths[index],
+                fit: BoxFit.cover,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+// Function to open file link
+void _openFileLink(String fileLink) {
+  // You can use a package like url_launcher to open the file link
+  // Example: launchUrl(fileLink);
+  print("Opening file: $fileLink");
 }

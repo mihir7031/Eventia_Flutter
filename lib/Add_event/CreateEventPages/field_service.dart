@@ -9,7 +9,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 final firestore = FirebaseFirestore.instance;
-final documentRef = firestore.collection('eventss').doc();
+// final documentRef = firestore.collection('eventss').doc();
+CollectionReference  documentRef = FirebaseFirestore.instance.collection('eventss');
 String documentRefLink = documentRef.id;
 bool saveStatus = false;
 
@@ -92,7 +93,10 @@ class _InfoFormState extends State<InfoForm> {
       eventData['createdAt'] = FieldValue.serverTimestamp();
       eventData['uid'] = uid; // Add uid as a separate field
       // Save the event data and fields to Firestore
-      await documentRef.set(eventData);
+      ;
+
+      // Save the event data and fields to Firestore with a new document
+      await documentRef.add(eventData);
       setState(() {
         fields.clear();
       });
@@ -490,7 +494,7 @@ class _InfoFormState extends State<InfoForm> {
           selectedDate != null &&
           duration.isNotEmpty &&
           capacity > 0 &&
-          ageLimit > 0 &&
+          ageLimit >= 0 &&
           (!isOnline || location.isNotEmpty) &&
           (!isPaid || passes.isNotEmpty);
     });
@@ -502,7 +506,7 @@ class _InfoFormState extends State<InfoForm> {
     // Initialize the form with default values if needed.
     _validateForm(); // Ensure the button is disabled initially.
   }
-
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -653,7 +657,7 @@ class _InfoFormState extends State<InfoForm> {
                   padding: const EdgeInsets.only(bottom: 16.0),
                   child: TextFormField(
                     decoration: InputDecoration(
-                      labelText: 'Capacity',
+                      labelText: 'Capacity of peoples',
                       border:
                       UnderlineInputBorder(), // Keeps only the bottom border
                       enabledBorder: UnderlineInputBorder(),
@@ -851,7 +855,10 @@ class _InfoFormState extends State<InfoForm> {
                       }
                     }
                         : null, // Disable button if fields are incomplete
-                    child: Text('Save'),
+                    child: isLoading
+                        ? CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ):Text('Save'),
                   ),
                 ),
               ],
