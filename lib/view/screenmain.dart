@@ -13,6 +13,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:eventia/notification/notification.dart';
 import 'package:intl/intl.dart';
+import 'package:eventia/Favorite/FavoriteButton .dart';
 import 'dart:io';
 
 class ScreenMain extends StatefulWidget {
@@ -50,23 +51,13 @@ class _ScreenMainState extends State<ScreenMain> {
     }
   }
 
+
   Future<void> _toggleFavorite(String eventId) async {
     final userDoc =
-        firestore.collection('favourite').doc(auth.currentUser?.uid);
+    firestore.collection('favourite').doc(auth.currentUser?.uid);
     final isFavorited = favoriteEventIds.contains(eventId);
 
-    if (isFavorited) {
-      // If it's already a favorite, remove it
-      await userDoc.update({
-        'events': FieldValue.arrayRemove([eventId])
-      });
-    } else {
-      // Otherwise, add it to favorites
-      await userDoc.update({
-        'events': FieldValue.arrayUnion([eventId])
-      });
-    }
-
+    // Optimistically update the local state to reflect the change without waiting for Firestore
     setState(() {
       if (isFavorited) {
         favoriteEventIds.remove(eventId);
@@ -74,6 +65,30 @@ class _ScreenMainState extends State<ScreenMain> {
         favoriteEventIds.add(eventId);
       }
     });
+
+    try {
+      // Update Firestore
+      if (isFavorited) {
+        // If it's already a favorite, remove it
+        await userDoc.update({
+          'events': FieldValue.arrayRemove([eventId])
+        });
+      } else {
+        // Otherwise, add it to favorites
+        await userDoc.update({
+          'events': FieldValue.arrayUnion([eventId])
+        });
+      }
+    } catch (e) {
+      // In case of error, revert the optimistic update
+      setState(() {
+        if (isFavorited) {
+          favoriteEventIds.add(eventId);
+        } else {
+          favoriteEventIds.remove(eventId);
+        }
+      });
+    }
   }
 
   bool _isEventFavorited(String eventId) {
@@ -555,20 +570,11 @@ class _ScreenMainState extends State<ScreenMain> {
                                                 // Handle share logic
                                               },
                                             ),
-                                            IconButton(
-                                              icon: Icon(
-                                                _isEventFavorited(event.id)
-                                                    ? Icons.favorite
-                                                    : Icons.favorite_border,
-                                                color:
-                                                    _isEventFavorited(event.id)
-                                                        ? Colors.red
-                                                        : primaryColor,
-                                              ),
-                                              onPressed: () {
-                                                _toggleFavorite(event.id);
-                                              },
+                                            FavoriteButton(
+                                              eventId: event.id,
+                                              isFavorited: _isEventFavorited(event.id),
                                             ),
+
                                           ],
                                         ),
                                       ],
