@@ -129,6 +129,7 @@ class _BookingPageState extends State<BookingPage> {
                       ),
                       subtitle: Text('₹${category.price.toStringAsFixed(2)}'),
                       trailing: category.quantity == 0
+                      
                           ? ElevatedButton(
                         onPressed: () => addTicket(index),
                         style: ElevatedButton.styleFrom(

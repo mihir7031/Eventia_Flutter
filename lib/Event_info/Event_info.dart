@@ -209,18 +209,17 @@ class _Event_infoState extends State<Event_info> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    widget.event['location'] ?? 'Location Not Available',
+                    widget.event['eventDescription'] ?? 'Location Not Available',
                     style: const TextStyle(fontSize: 16),
-                    overflow: TextOverflow.ellipsis,  // Adds ellipsis if the text overflows
-                    maxLines: 1,
+
                   ),
-                  GestureDetector(
-                    onTap: _toggleExpansion,
-                    child: Text(
-                      _isExpanded ? 'Read Less' : 'Read More',
-                      style: const TextStyle(color: primaryColor),
-                    ),
-                  ),
+                  // GestureDetector(
+                  //   onTap: _toggleExpansion,
+                  //   child: Text(
+                  //     _isExpanded ? 'Read Less' : 'Read More',
+                  //     style: const TextStyle(color: primaryColor),
+                  //   ),
+                  // ),
                   const SizedBox(height: 16),
                   // const Text(
                   //   'Event Highlights',
