@@ -52,13 +52,13 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.blueGrey[900],
         elevation: 0,
         title: const Text(
           'Profile',
           style: TextStyle(
-            color: Color(0xFF333333),
-            fontSize: 24.0,
+            color: Colors.white,
+            fontSize: 26.0,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -67,10 +67,17 @@ class _ProfilePageState extends State<ProfilePage> {
       body: currentUser == null
           ? Center(
         child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blueGrey[900],
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+          ),
           onPressed: () {
             // Navigate to login page
           },
-          child: const Text('Please log in'),
+          child: const Text(
+            'Please log in',
+            style: TextStyle(fontSize: 18),
+          ),
         ),
       )
           : StreamBuilder<DocumentSnapshot>(
@@ -116,8 +123,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     clipBehavior: Clip.none,
                     children: [
                       CircleAvatar(
-                        radius: 55,
-                        backgroundColor: Colors.grey[200],
+                        radius: 60,
+                        backgroundColor: Colors.grey[300],
                         backgroundImage: userProfileImage != null && userProfileImage.isNotEmpty
                             ? NetworkImage(userProfileImage)
                             : null,
@@ -133,7 +140,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         right: -10,
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Colors.pinkAccent,
+                            color: Colors.teal,
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
@@ -157,8 +164,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: Text(
                     userName ?? 'Name not available',
                     style: const TextStyle(
-                      fontSize: 22.0,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 24.0,
+                      fontWeight: FontWeight.bold,
                       color: Color(0xFF333333),
                     ),
                   ),
@@ -247,7 +254,7 @@ class _ProfilePageState extends State<ProfilePage> {
       children: [
         Icon(
           icon,
-          color: Colors.grey,
+          color: Colors.teal[700],
           size: 28.0,
         ),
         const SizedBox(width: 12.0),
@@ -291,13 +298,20 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildEditButton() {
     return Center(
       child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.teal[700],
+          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+        ),
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) =>  UserInfoForm()),
           );
         },
-        child: const Text('Edit Profile'),
+        child: const Text(
+          'Edit Profile',
+          style: TextStyle(fontSize: 18),
+        ),
       ),
     );
   }

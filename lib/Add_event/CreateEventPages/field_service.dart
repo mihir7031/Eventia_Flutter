@@ -86,17 +86,26 @@ class _InfoFormState extends State<InfoForm> {
       final String uid = currentUser.uid;
       // Convert the fields list to a map
       List<Map<String, dynamic>> fieldMaps =
-          fields.map((field) => field.toMap()).toList();
+      fields.map((field) => field.toMap()).toList();
 
       // Add fields and eventData together, along with a timestamp
       eventData['fields'] = fieldMaps;
       eventData['createdAt'] = FieldValue.serverTimestamp();
-      eventData['uid'] = uid; // Add uid as a separate field
+      eventData['uid'] = uid;
+      // Add uid as a separate field
       // Save the event data and fields to Firestore
-      ;
+          ;
 
       // Save the event data and fields to Firestore with a new document
-      await documentRef.add(eventData);
+      DocumentReference documentRef = await FirebaseFirestore.instance
+          .collection('eventss') // Refers to the 'eventss' collection
+          .add(eventData); // Add the data to the collection, returns DocumentReference
+
+      // Retrieve the document ID
+      String documentId = documentRef.id;
+
+      // Update the document to include the document ID
+      await documentRef.update({'documentId': documentId});
       setState(() {
         fields.clear();
       });
@@ -115,6 +124,7 @@ class _InfoFormState extends State<InfoForm> {
       );
     }
   }
+
 
   // Date Picker
   Future<void> _selectDate(BuildContext context) async {
@@ -217,6 +227,7 @@ class _InfoFormState extends State<InfoForm> {
                       'name': passName,
                       'price': passPrice,
                       'quantity': passQuantity,
+                      'remainingPasses':passQuantity,
                       'peoplePerPass': peoplePerPass,
                     });
                   });
