@@ -14,6 +14,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:eventia/notification/notification.dart';
 import 'package:intl/intl.dart';
 import 'package:eventia/Favorite/FavoriteButton .dart';
+import 'package:eventia/view/drawer.dart';
 import 'dart:io';
 
 class ScreenMain extends StatefulWidget {
@@ -257,173 +258,174 @@ class _ScreenMainState extends State<ScreenMain> {
           )
         ],
       ),
-      drawer: Drawer(
-        backgroundColor: Colors.white,
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            UserAccountsDrawerHeader(
-              decoration: const BoxDecoration(
-                color: primaryColor,
-              ),
-              accountName: StreamBuilder<DocumentSnapshot>(
-                stream: firestore
-                    .collection('User')
-                    .doc(auth.currentUser?.uid)
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Text('Loading...',
-                        style: TextStyle(color: Colors.white));
-                  }
-                  if (snapshot.hasData && snapshot.data!.exists) {
-                    final userDoc = snapshot.data!;
-                    final name = userDoc['name'] ?? 'Add name';
-                    return Text(name,
-                        style: const TextStyle(color: Colors.white));
-                  }
-                  return const Text('Add name',
-                      style: TextStyle(color: Colors.white));
-                },
-              ),
-              accountEmail: Text(
-                auth.currentUser?.email ?? 'Add email',
-                style: const TextStyle(color: Colors.white),
-              ),
-              currentAccountPicture: StreamBuilder<DocumentSnapshot>(
-                stream: firestore
-                    .collection('User')
-                    .doc(auth.currentUser?.uid)
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CircleAvatar(
-                      backgroundColor: Colors.white,
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-                  if (snapshot.hasData && snapshot.data!.exists) {
-                    final userDoc = snapshot.data!;
-                    final imgUrl = userDoc['imgUrl'] ?? '';
-                    final name = userDoc['name'] ?? '';
-
-                    return Stack(
-                      children: [
-                        CircleAvatar(
-                          radius: 50,
-                          backgroundColor: Colors.white,
-                          backgroundImage:
-                              imgUrl.isNotEmpty ? NetworkImage(imgUrl) : null,
-                          child: imgUrl.isEmpty
-                              ? Text(
-                                  name.isNotEmpty ? name[0].toUpperCase() : '',
-                                  style: const TextStyle(
-                                      fontSize: 40.0, color: primaryColor),
-                                )
-                              : null,
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Container(
-                            width: 25,
-                            height: 25,
-                            decoration: const BoxDecoration(
-                              color: cardColor,
-                              shape: BoxShape.circle,
-                            ),
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.edit,
-                                color: primaryColor,
-                                size: 12,
-                              ),
-                              onPressed: _pickImage,
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  }
-                  return const CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.white,
-                    child: const Text(
-                      'U',
-                      style: TextStyle(fontSize: 40.0, color: primaryColor),
-                    ),
-                  );
-                },
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.person),
-              title: const Text('Profile'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ProfilePage()),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.event),
-              title: const Text('My Events'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const MyEventPage()),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.event_available),
-              title: const Text('Joined Events'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const JoinedEvent()),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('Settings'),
-              onTap: () {
-                Navigator.pop(context);
-                // Handle Settings action
-              },
-            ),
-            auth.currentUser != null
-                ? ListTile(
-                    leading: const Icon(Icons.logout),
-                    title: const Text('Sign Out'),
-                    onTap: () async {
-                      await auth.signOut();
-                      setState(() {
-                        userName = null;
-                        userProfileImage = null;
-                      });
-                      Navigator.pop(context);
-                    },
-                  )
-                : ListTile(
-                    leading: const Icon(Icons.login),
-                    title: const Text('Sign In'),
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const LogIn()),
-                      );
-                    },
-                  ),
-          ],
-        ),
-      ),
+      drawer:const DrawerWidget(),
+      // Drawer(
+      //   backgroundColor: Colors.white,
+      //   child: ListView(
+      //     padding: EdgeInsets.zero,
+      //     children: <Widget>[
+      //       UserAccountsDrawerHeader(
+      //         decoration: const BoxDecoration(
+      //           color: primaryColor,
+      //         ),
+      //         accountName: StreamBuilder<DocumentSnapshot>(
+      //           stream: firestore
+      //               .collection('User')
+      //               .doc(auth.currentUser?.uid)
+      //               .snapshots(),
+      //           builder: (context, snapshot) {
+      //             if (snapshot.connectionState == ConnectionState.waiting) {
+      //               return const Text('Loading...',
+      //                   style: TextStyle(color: Colors.white));
+      //             }
+      //             if (snapshot.hasData && snapshot.data!.exists) {
+      //               final userDoc = snapshot.data!;
+      //               final name = userDoc['name'] ?? 'Add name';
+      //               return Text(name,
+      //                   style: const TextStyle(color: Colors.white));
+      //             }
+      //             return const Text('Add name',
+      //                 style: TextStyle(color: Colors.white));
+      //           },
+      //         ),
+      //         accountEmail: Text(
+      //           auth.currentUser?.email ?? 'Add email',
+      //           style: const TextStyle(color: Colors.white),
+      //         ),
+      //         currentAccountPicture: StreamBuilder<DocumentSnapshot>(
+      //           stream: firestore
+      //               .collection('User')
+      //               .doc(auth.currentUser?.uid)
+      //               .snapshots(),
+      //           builder: (context, snapshot) {
+      //             if (snapshot.connectionState == ConnectionState.waiting) {
+      //               return const CircleAvatar(
+      //                 backgroundColor: Colors.white,
+      //                 child: CircularProgressIndicator(),
+      //               );
+      //             }
+      //             if (snapshot.hasData && snapshot.data!.exists) {
+      //               final userDoc = snapshot.data!;
+      //               final imgUrl = userDoc['imgUrl'] ?? '';
+      //               final name = userDoc['name'] ?? '';
+      //
+      //               return Stack(
+      //                 children: [
+      //                   CircleAvatar(
+      //                     radius: 50,
+      //                     backgroundColor: Colors.white,
+      //                     backgroundImage:
+      //                         imgUrl.isNotEmpty ? NetworkImage(imgUrl) : null,
+      //                     child: imgUrl.isEmpty
+      //                         ? Text(
+      //                             name.isNotEmpty ? name[0].toUpperCase() : '',
+      //                             style: const TextStyle(
+      //                                 fontSize: 40.0, color: primaryColor),
+      //                           )
+      //                         : null,
+      //                   ),
+      //                   Positioned(
+      //                     bottom: 0,
+      //                     right: 0,
+      //                     child: Container(
+      //                       width: 25,
+      //                       height: 25,
+      //                       decoration: const BoxDecoration(
+      //                         color: cardColor,
+      //                         shape: BoxShape.circle,
+      //                       ),
+      //                       child: IconButton(
+      //                         icon: const Icon(
+      //                           Icons.edit,
+      //                           color: primaryColor,
+      //                           size: 12,
+      //                         ),
+      //                         onPressed: _pickImage,
+      //                       ),
+      //                     ),
+      //                   ),
+      //                 ],
+      //               );
+      //             }
+      //             return const CircleAvatar(
+      //               radius: 50,
+      //               backgroundColor: Colors.white,
+      //               child: const Text(
+      //                 'U',
+      //                 style: TextStyle(fontSize: 40.0, color: primaryColor),
+      //               ),
+      //             );
+      //           },
+      //         ),
+      //       ),
+      //       ListTile(
+      //         leading: const Icon(Icons.person),
+      //         title: const Text('Profile'),
+      //         onTap: () {
+      //           Navigator.pop(context);
+      //           Navigator.push(
+      //             context,
+      //             MaterialPageRoute(builder: (context) => const ProfilePage()),
+      //           );
+      //         },
+      //       ),
+      //       ListTile(
+      //         leading: const Icon(Icons.event),
+      //         title: const Text('My Events'),
+      //         onTap: () {
+      //           Navigator.pop(context);
+      //           Navigator.push(
+      //             context,
+      //             MaterialPageRoute(builder: (context) => const MyEventPage()),
+      //           );
+      //         },
+      //       ),
+      //       ListTile(
+      //         leading: const Icon(Icons.event_available),
+      //         title: const Text('Joined Events'),
+      //         onTap: () {
+      //           Navigator.pop(context);
+      //           Navigator.push(
+      //             context,
+      //             MaterialPageRoute(builder: (context) => const JoinedEvent()),
+      //           );
+      //         },
+      //       ),
+      //       ListTile(
+      //         leading: const Icon(Icons.settings),
+      //         title: const Text('Settings'),
+      //         onTap: () {
+      //           Navigator.pop(context);
+      //           // Handle Settings action
+      //         },
+      //       ),
+      //       auth.currentUser != null
+      //           ? ListTile(
+      //               leading: const Icon(Icons.logout),
+      //               title: const Text('Sign Out'),
+      //               onTap: () async {
+      //                 await auth.signOut();
+      //                 setState(() {
+      //                   userName = null;
+      //                   userProfileImage = null;
+      //                 });
+      //                 Navigator.pop(context);
+      //               },
+      //             )
+      //           : ListTile(
+      //               leading: const Icon(Icons.login),
+      //               title: const Text('Sign In'),
+      //               onTap: () {
+      //                 Navigator.pop(context);
+      //                 Navigator.push(
+      //                   context,
+      //                   MaterialPageRoute(builder: (context) => const LogIn()),
+      //                 );
+      //               },
+      //             ),
+      //     ],
+      //   ),
+      // ),
       body: GestureDetector(
         onTap: () {
           FocusScope.of(context).requestFocus(FocusNode());

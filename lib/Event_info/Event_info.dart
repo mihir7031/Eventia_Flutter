@@ -20,20 +20,6 @@ class _Event_infoState extends State<Event_info> {
     });
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
