@@ -1,35 +1,88 @@
 import 'package:flutter/material.dart';
 import 'package:eventia/main.dart';
 import 'package:eventia/Event_info/booking.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter/material.dart';
+import 'package:eventia/Event_info/Event_info.dart';
+import 'package:eventia/main.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:eventia/notification/notification.dart';
+import 'package:intl/intl.dart';
+import 'package:eventia/Favorite/FavoriteButton .dart';
+import 'package:eventia/view/drawer.dart';
+import 'package:share_plus/share_plus.dart';
 
-class MyEventPage extends StatefulWidget {
-  const MyEventPage({super.key});
+
+
+class Myeventpage extends StatefulWidget {
+  const Myeventpage({super.key});
 
   @override
-  _MyEventPageState createState() => _MyEventPageState();
+  State<Myeventpage> createState() => _MyeventpageState();
 }
 
-class _MyEventPageState extends State<MyEventPage> {
-  int _selectedIndex = 0;
+class _MyeventpageState extends State<Myeventpage> {
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  void _onCardTapped() {
+  final FocusNode _searchFocusNode = FocusNode();
+  List<String> favoriteEventIds = [];
+  bool showScheduledEvents = true; // Determines whether to show scheduled or finished events
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFavoriteEvents();
+    _fetchUserProfile();
+  }
+
+  Future<void> _loadFavoriteEvents() async {
+    final userDoc = await firestore
+        .collection('favourite')
+        .doc(auth.currentUser?.uid)
+        .get();
+    if (userDoc.exists) {
+      final favoriteData = userDoc.data() as Map<String, dynamic>?;
+      setState(() {
+        favoriteEventIds = List<String>.from(favoriteData?['events'] ?? []);
+      });
+    }
+  }
+
+  bool _isEventFavorited(String eventId) {
+    return favoriteEventIds.contains(eventId);
+  }
+
+  String? userName;
+  String? userProfileImage;
+
+  Future<void> _fetchUserProfile() async {
+    User? currentUser = auth.currentUser;
+    if (currentUser != null) {
+      DocumentSnapshot userDoc =
+      await firestore.collection('User').doc(currentUser.uid).get();
+      if (userDoc.exists) {
+        setState(() {
+          userName = userDoc['name'];
+          userProfileImage = userDoc['imgUrl'];
+        });
+      }
+    }
+  }
+
+  void _onCardTapped(DocumentSnapshot event) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const BookingPage()),
+      MaterialPageRoute(builder: (context) => Event_info(event: event)),
     );
   }
 
-  final List<String> _events = [
-    'Event 1',
-    'Event 2',
-    'Event 3',
-    'Event 4',
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  @override
+  void dispose() {
+    _searchFocusNode.dispose(); // Dispose the FocusNode
+    super.dispose();
   }
 
   @override
@@ -37,132 +90,260 @@ class _MyEventPageState extends State<MyEventPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        iconTheme: const IconThemeData(
-          color: Colors.white, // Change this to your desired color
-        ),
-        title: const Text('Event Management', style: TextStyle(color: secondaryColor)),
-        backgroundColor: primaryColor,
-      ),
-      body: SingleChildScrollView(
-        child: Column(
+        backgroundColor: Colors.white,
+        title: const Row(
           children: [
-            // Option buttons
-            Container(
-              color: Colors.white,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    _buildOptionButton('Live Event', 0),
-                    _buildOptionButton('Finished Event', 1),
-                    _buildOptionButton('Scheduled Event', 2),
-                  ],
-                ),
+            SizedBox(width: 10),
+            Text('E',
+                style:
+                TextStyle(fontFamily: 'Blacksword', color: primaryColor)),
+            Text('ventia',
+                style:
+                TextStyle(fontFamily: 'BeautyDemo', color: primaryColor)),
+          ],
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: Container(
+              decoration: const BoxDecoration(
+                color: cardColor, // Background color
+                shape: BoxShape.circle, // Circular shape
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.notifications, color: primaryColor),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => NotificationPage()),
+                  );
+                },
               ),
             ),
-            // Event cards
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(), // Prevent scrolling on this ListView
-              itemCount: _events.length,
-              itemBuilder: (context, index) {
-                return InkWell(
-                  onTap: _onCardTapped,
-                  child: Card(
-                    color: cardColor, // Ensure cardColor is defined
-                    margin: const EdgeInsets.all(10.0),
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: SizedBox(
-                            width: 100.0,
-                            height: 150.0,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8.0),
-                              child: Image.asset(
-                                'assets/posters/p${index + 1}.png',
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+          )
+        ],
+      ),
+
+      drawer: const DrawerWidget(),
+
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).requestFocus(FocusNode());
+        },
+        child: Padding(
+          padding: const EdgeInsets.only(top: 8.0, right: 8.0, left: 8.0),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                const SizedBox(height: 10),
+
+                // Row of buttons for switching between Scheduled and Finished Events
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          showScheduledEvents = true;
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: showScheduledEvents
+                            ? Colors.blue
+                            : Colors.grey,
+                      ),
+                      child: const Text('Scheduled Events'),
+                    ),
+                    const SizedBox(width: 10),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          showScheduledEvents = false;
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: !showScheduledEvents
+                            ? Colors.blue
+                            : Colors.grey,
+                      ),
+                      child: const Text('Finished Events'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                StreamBuilder<QuerySnapshot>(
+                  stream: firestore
+                      .collection('eventss')
+                      .where('uid', isEqualTo: auth.currentUser?.uid)
+                      .snapshots(), // Only fetch the current user's events
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      return const Center(
+                        child: Text('No events found.'),
+                      );
+                    }
+
+                    var events = snapshot.data!.docs;
+
+                    List<DocumentSnapshot> scheduledEvents = [];
+                    List<DocumentSnapshot> finishedEvents = [];
+
+                    for (var event in events) {
+                      Timestamp? timestamp =
+                      event['selectedDate'] as Timestamp?;
+
+                      if (timestamp != null) {
+                        DateTime eventDate = timestamp.toDate();
+                        DateTime currentDate = DateTime.now();
+
+                        if (eventDate.isAfter(currentDate)) {
+                          scheduledEvents.add(event); // Upcoming events
+                        } else {
+                          finishedEvents.add(event); // Past events
+                        }
+                      }
+                    }
+
+                    // Select the appropriate list of events based on the button selection
+                    var eventsToShow = showScheduledEvents
+                        ? scheduledEvents
+                        : finishedEvents;
+
+                    if (eventsToShow.isEmpty) {
+                      return const Center(
+                        child: Text('No events found for this category.'),
+                      );
+                    }
+
+                    return Column(
+                      children: List.generate(eventsToShow.length, (index) {
+                        var event = eventsToShow[index];
+
+                        // Check if 'selectedDate' exists and is not null
+                        Timestamp? timestamp =
+                        event['selectedDate'] as Timestamp?;
+
+                        String formattedDate = 'Date not available';
+                        if (timestamp != null) {
+                          DateTime dateTime = timestamp.toDate();
+                          formattedDate =
+                              DateFormat('dd-MM-yy').format(dateTime);
+                        }
+
+                        return InkWell(
+                          onTap: () => _onCardTapped(event),
+                          child: Card(
+                            color: cardColor,
+                            margin: const EdgeInsets.all(10.0),
+                            child: Row(
                               children: [
-                                const Text(
-                                  'Fri, Jun 5  7:00PM IST',
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                                const SizedBox(height: 5.0),
-                                Text(
-                                  'Lorem Ipsum is simply dummy text of the ',
-                                  style: Theme.of(context).textTheme.titleLarge,
-                                ),
-                                const SizedBox(height: 5.0),
-                                const Text('By Eventia',
-                                    style: TextStyle(color: primaryColor)), // Ensure primaryColor is defined
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.share,
-                                          color: primaryColor),
-                                      onPressed: () {},
+                                Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: SizedBox(
+                                    width: 100.0,
+                                    height: 150.0,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      child: Image.network(
+                                        event['eventPoster'] != null &&
+                                            event['eventPoster']
+                                                .isNotEmpty &&
+                                            event['eventPoster'] != " "
+                                            ? event['eventPoster']
+                                            : 'https://via.placeholder.com/150',
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                          return Image.asset(
+                                            'assets/images/no_image_available.png',
+                                            fit: BoxFit.cover,
+                                          );
+                                        },
+                                      ),
                                     ),
-                                    IconButton(
-                                      icon: const Icon(Icons.favorite_border,
-                                          color: primaryColor),
-                                      onPressed: () {
-                                        _addFavoriteEvent({
-                                          'date': 'Fri, Jun 5  7:00PM IST',
-                                          'title': 'Lorem Ipsum is simply dummy text of the ',
-                                          'subtitle': 'By Eventia',
-                                          'image': 'assets/card_img1.jpg',
-                                        });
-                                      },
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          '$formattedDate  • ${event['selectedTime']}',
+                                          style: const TextStyle(
+                                            color: Colors.red,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 5.0),
+                                        Text(
+                                          event['eventName'],
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium,
+                                        ),
+                                        const SizedBox(height: 5.0),
+                                        Text(
+                                          event['aboutEvent'],
+                                          style: const TextStyle(
+                                              color: primaryColor),
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.end,
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(
+                                                  Icons.share,
+                                                  color: primaryColor),
+                                              onPressed: () {
+                                                String eventDetails = '''
+                                                          Check out this event: ${event['eventName']}
+                                                          Date: $formattedDate
+                                                          Time: ${event['selectedTime']}
+                                                          Details: ${event['aboutEvent']}
+                                                          ''';
+                                                if (event['eventPoster'] !=
+                                                    null &&
+                                                    event['eventPoster']
+                                                        .isNotEmpty) {
+                                                  eventDetails +=
+                                                  '\nEvent Poster: ${event['eventPoster']}';
+                                                }
+                                                Share.share(eventDetails);
+                                              },
+                                            ),
+                                            FavoriteButton(
+                                              eventId: event.id,
+                                              isFavorited:
+                                              _isEventFavorited(event.id),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
                                     ),
-                                  ],
+                                  ),
                                 ),
                               ],
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
+                        );
+                      }),
+                    );
+                  },
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOptionButton(String text, int index) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: ElevatedButton(
-        onPressed: () => _onItemTapped(index),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: _selectedIndex == index ? primaryColor : cardColor,
-        ),
-
-        child: Text(
-          text,
-          style: TextStyle(
-            color: _selectedIndex == index ? cardColor : primaryColor,
           ),
         ),
       ),
     );
-  }
-
-  void _addFavoriteEvent(Map<String, String> eventDetails) {
-    // Implement your favorite event logic here
   }
 }

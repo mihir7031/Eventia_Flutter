@@ -177,7 +177,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
             title: const Text('My Events'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const MyEventPage()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const Myeventpage()));
             },
           ),
           ListTile(
