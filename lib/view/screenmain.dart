@@ -24,6 +24,7 @@ class _ScreenMainState extends State<ScreenMain> {
 
   final FocusNode _searchFocusNode = FocusNode();
   List<String> favoriteEventIds = [];
+  String _searchQuery = ''; // Added for search
 
   @override
   void initState() {
@@ -45,26 +46,20 @@ class _ScreenMainState extends State<ScreenMain> {
     }
   }
 
-
-
-
   bool _isEventFavorited(String eventId) {
     return favoriteEventIds.contains(eventId);
   }
-
 
   List<Map<String, String>> favoriteEvents = [];
 
   String? userName;
   String? userProfileImage;
 
-
-
   Future<void> _fetchUserProfile() async {
     User? currentUser = auth.currentUser;
     if (currentUser != null) {
       DocumentSnapshot userDoc =
-          await firestore.collection('User').doc(currentUser.uid).get();
+      await firestore.collection('User').doc(currentUser.uid).get();
       if (userDoc.exists) {
         setState(() {
           userName = userDoc['name'];
@@ -73,8 +68,6 @@ class _ScreenMainState extends State<ScreenMain> {
       }
     }
   }
-
-
 
   void _onCardTapped(DocumentSnapshot event) {
     Navigator.push(
@@ -100,10 +93,10 @@ class _ScreenMainState extends State<ScreenMain> {
             SizedBox(width: 10),
             Text('E',
                 style:
-                    TextStyle(fontFamily: 'Blacksword', color: primaryColor)),
+                TextStyle(fontFamily: 'Blacksword', color: primaryColor)),
             Text('ventia',
                 style:
-                    TextStyle(fontFamily: 'BeautyDemo', color: primaryColor)),
+                TextStyle(fontFamily: 'BeautyDemo', color: primaryColor)),
           ],
         ),
         actions: [
@@ -127,12 +120,7 @@ class _ScreenMainState extends State<ScreenMain> {
           )
         ],
       ),
-
-
-      drawer:const DrawerWidget(),
-
-
-
+      drawer: const DrawerWidget(),
       body: GestureDetector(
         onTap: () {
           FocusScope.of(context).requestFocus(FocusNode());
@@ -153,14 +141,23 @@ class _ScreenMainState extends State<ScreenMain> {
                           decoration: InputDecoration(
                             hintText: 'Search',
                             prefixIcon:
-                                const Icon(Icons.search, color: primaryColor),
+                            const Icon(Icons.search, color: primaryColor),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10.0),
                               borderSide: BorderSide.none,
                             ),
                             filled: true,
                             fillColor: Colors.grey[200],
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                              borderSide: BorderSide.none, // No border when focused
+                            ),
                           ),
+                          onChanged: (value) {
+                            setState(() {
+                              _searchQuery = value.trim().toLowerCase(); // Normalize input
+                            });
+                          },
                         ),
                       ),
                       IconButton(
@@ -189,13 +186,27 @@ class _ScreenMainState extends State<ScreenMain> {
 
                     var events = snapshot.data!.docs;
 
+                    // Filter events based on search query
+                    var filteredEvents = events.where((event) {
+                      String eventName = (event['eventName'] as String)
+                          .trim()
+                          .toLowerCase(); // Normalize event name
+                      return eventName.contains(_searchQuery);
+                    }).toList();
+
+                    if (filteredEvents.isEmpty) {
+                      return const Center(
+                        child: Text('No events found.'),
+                      );
+                    }
+
                     return Column(
-                      children: List.generate(events.length, (index) {
-                        var event = events[index];
+                      children: List.generate(filteredEvents.length, (index) {
+                        var event = filteredEvents[index];
 
                         // Check if 'selectedDate' exists and is not null
                         Timestamp? timestamp =
-                            event['selectedDate'] as Timestamp?;
+                        event['selectedDate'] as Timestamp?;
 
                         // If the timestamp is null, show a default message
                         String formattedDate;
@@ -205,7 +216,7 @@ class _ScreenMainState extends State<ScreenMain> {
                               DateFormat('dd-MM-yy').format(dateTime);
                         } else {
                           formattedDate =
-                              'Date not available'; // Handle null date
+                          'Date not available'; // Handle null date
                         }
 
                         return InkWell(
@@ -224,9 +235,9 @@ class _ScreenMainState extends State<ScreenMain> {
                                       borderRadius: BorderRadius.circular(8.0),
                                       child: Image.network(
                                         event['eventPoster'] != null &&
-                                                event['eventPoster']
-                                                    .isNotEmpty &&
-                                                event['eventPoster'] != " "
+                                            event['eventPoster']
+                                                .isNotEmpty &&
+                                            event['eventPoster'] != " "
                                             ? event['eventPoster']
                                             : 'https://via.placeholder.com/150', // Placeholder image URL
                                         fit: BoxFit.cover,
@@ -246,7 +257,7 @@ class _ScreenMainState extends State<ScreenMain> {
                                     padding: const EdgeInsets.all(8.0),
                                     child: Column(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           '$formattedDate  • ${event['selectedTime']}',
@@ -270,10 +281,11 @@ class _ScreenMainState extends State<ScreenMain> {
                                         ),
                                         Row(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.end,
+                                          MainAxisAlignment.end,
                                           children: [
                                             IconButton(
-                                              icon: const Icon(Icons.share, color: primaryColor),
+                                              icon: const Icon(Icons.share,
+                                                  color: primaryColor),
                                               onPressed: () {
                                                 // Construct the message you want to share
                                                 String eventDetails = '''
@@ -284,26 +296,27 @@ class _ScreenMainState extends State<ScreenMain> {
                                                           ''';
 
                                                 // If eventPoster is available, include the link as well
-                                                if (event['eventPoster'] != null && event['eventPoster'].isNotEmpty) {
-                                                  eventDetails += '\nEvent Poster: ${event['eventPoster']}';
+                                                if (event['eventPoster'] != null &&
+                                                    event['eventPoster']
+                                                        .isNotEmpty) {
+                                                  eventDetails +=
+                                                  '\nEvent Poster: ${event['eventPoster']}';
                                                 }
 
-                                                // Use the share function to share the event details
                                                 Share.share(eventDetails);
                                               },
                                             ),
-
                                             FavoriteButton(
+                                              isFavorited: _isEventFavorited(
+                                                  event.id),
                                               eventId: event.id,
-                                              isFavorited: _isEventFavorited(event.id),
                                             ),
-
                                           ],
-                                        ),
+                                        )
                                       ],
                                     ),
                                   ),
-                                ),
+                                )
                               ],
                             ),
                           ),

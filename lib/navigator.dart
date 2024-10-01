@@ -6,10 +6,11 @@ import 'package:eventia/Add_event/eventform.dart';
 import 'package:eventia/Favorite/favorit_page.dart';
 import 'package:eventia/Add_event/CreateEventPages/field_service.dart';
 // import 'package:eventia/Add_event/CreateEventPages/BasicInfo.dart';
+import 'package:eventia/search/search.dart';
 
 final List<Widget> _pages = [
   const ScreenMain(),
-  const CreateEventForm(), // Assuming this is for adding events
+  const SearchPage(), // Assuming this is for adding events
   InfoForm(), // Could be another page like SearchPage(),
   FavoritePage(), // Could be another page like FavoritesPage(),
 ];
