@@ -1,4 +1,5 @@
 // drawer_widget.dart
+import 'package:eventia/LoginPages/login.dart';
 import 'package:eventia/main.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -201,8 +202,34 @@ class _DrawerWidgetState extends State<DrawerWidget> {
             leading: const Icon(Icons.logout),
             title: const Text('Sign Out'),
             onTap: () async {
-              await auth.signOut();
-              Navigator.pop(context);
+              // Show confirmation dialog when Sign Out is tapped
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text("Confirm Sign Out"),
+                    content: const Text("Are you sure you want to sign out?"),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          // If No is pressed, close the dialog
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text("No"),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          // If Yes is pressed, sign the user out and close dialog
+                          await auth.signOut();
+                          Navigator.of(context).pop(); // Close dialog
+                          Navigator.pop(context); // Close Drawer
+                        },
+                        child: const Text("Yes"),
+                      ),
+                    ],
+                  );
+                },
+              );
             },
           )
               : ListTile(
@@ -210,6 +237,8 @@ class _DrawerWidgetState extends State<DrawerWidget> {
             title: const Text('Sign In'),
             onTap: () {
               Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const LogIn()));
+
               // Handle Sign In action
             },
           ),

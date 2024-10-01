@@ -90,41 +90,17 @@ class _MyeventpageState extends State<Myeventpage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: const Row(
-          children: [
-            SizedBox(width: 10),
-            Text('E',
-                style:
-                TextStyle(fontFamily: 'Blacksword', color: primaryColor)),
-            Text('ventia',
-                style:
-                TextStyle(fontFamily: 'BeautyDemo', color: primaryColor)),
-          ],
+        iconTheme: const IconThemeData(
+          color: Colors.white, // Change this to your desired color
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: Container(
-              decoration: const BoxDecoration(
-                color: cardColor, // Background color
-                shape: BoxShape.circle, // Circular shape
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.notifications, color: primaryColor),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => NotificationPage()),
-                  );
-                },
-              ),
-            ),
-          )
-        ],
+        backgroundColor: primaryColor,
+        title: Text(
+          'My Events',
+          style: const TextStyle(color: secondaryColor),
+        ),
       ),
 
-      drawer: const DrawerWidget(),
+
 
       body: GestureDetector(
         onTap: () {
@@ -344,6 +320,8 @@ class _MyeventpageState extends State<Myeventpage> {
           ),
         ),
       ),
+
+
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:eventia/main.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';// Importing the main.dart for color constants
+import 'package:eventia/Event_info/bookingpage2.dart';
 
 class Event_info extends StatefulWidget {
   final dynamic event;
@@ -400,7 +401,7 @@ class _Event_infoState extends State<Event_info> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const BookingPage()),
+                            MaterialPageRoute(builder: (context) =>  RegistrationPage(eventId:widget.event['documentId'])),
                           );
                         },
                         style: ButtonStyle(
