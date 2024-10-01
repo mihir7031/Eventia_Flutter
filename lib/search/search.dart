@@ -127,11 +127,16 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   // Function to build the search history list
+  // Function to build the search history list
   Widget _buildSearchHistory() {
     return ListView.builder(
       itemCount: searchHistory.length,
       itemBuilder: (context, index) {
         return ListTile(
+          leading: const Icon(
+            Icons.history, // Icon for history items
+            color: Colors.grey, // You can adjust the color as needed
+          ),
           title: Text(searchHistory[index]),
           onTap: () {
             setState(() {
@@ -142,6 +147,7 @@ class _SearchPageState extends State<SearchPage> {
       },
     );
   }
+
 
   // Function to build the list of events
   Widget _buildEventList() {
