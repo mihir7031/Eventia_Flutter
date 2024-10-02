@@ -61,7 +61,18 @@ class _InfoFormState extends State<InfoForm> {
   List<Map<String, dynamic>> passes = [];
   File? eventPoster;
   final ImagePicker _picker = ImagePicker();
+  String? _selectedCategory;
+  String? selectedMode;
 
+  final List<String> _categories = [
+    'Sports',
+    'Music',
+    'Education',
+    'Technology',
+    'Health',
+    'Entertainment',
+    'Others',
+  ];
   // Time Picker
   Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay? pickedTime = await showTimePicker(
@@ -592,6 +603,8 @@ class _InfoFormState extends State<InfoForm> {
                     },
                     validator: (value) =>
                     value!.isEmpty ? 'Please enter event description' : null,
+                    maxLines: null,
+                    keyboardType: TextInputType.multiline,
                   ),
                 ),
 
@@ -700,6 +713,36 @@ class _InfoFormState extends State<InfoForm> {
                       ageLimit = int.tryParse(value) ?? 0;
                       _validateForm();
                     },
+                  ),
+                ),
+
+                // Category Dropdown Field
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: DropdownButtonFormField<String>(
+                    decoration: InputDecoration(
+                      labelText: 'Category',
+                      border:  UnderlineInputBorder(), // Keeps only the bottom border
+                      enabledBorder: UnderlineInputBorder(),
+                      focusedBorder: UnderlineInputBorder(),
+                      fillColor: Colors.transparent, // Removes any background color
+                      filled: false,
+                    ),
+                    value: _selectedCategory, // Default selected category (if any)
+                    items: _categories.map((String category) {
+                      return DropdownMenuItem<String>(
+                        value: category,
+                        child: Text(category),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedCategory = newValue;
+                      });
+                      _validateForm();
+                    },
+                    validator: (value) =>
+                    value == null ? 'Please select a category' : null,
                   ),
                 ),
                 ListTile(
@@ -848,16 +891,16 @@ class _InfoFormState extends State<InfoForm> {
                           'isPaid': isPaid,
                           'passes': passes,
                           'chatEnvironment': chatEnvironment,
-
-                        'eventDescription':eventDescription,
-                        'aboutEvent':aboutEvent,
-
-
-                        'eventPoster': imageUrl, // Store the uploaded image URL
+                          'eventDescription':eventDescription,
+                          'aboutEvent':aboutEvent,
+                          'category': _selectedCategory,
+                          'eventPoster': imageUrl, // Store the uploaded image URL
                         }, context);
 
                         _formKey.currentState?.reset();
                         setState(() {
+                          selectedMode = null;
+                          _selectedCategory = null;
                           selectedTime = null;
                           selectedDate = null;
                           eventPoster = null;

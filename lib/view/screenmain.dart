@@ -25,6 +25,7 @@ class _ScreenMainState extends State<ScreenMain> {
   final FocusNode _searchFocusNode = FocusNode();
   List<String> favoriteEventIds = [];
   String _searchQuery = ''; // Added for search
+  String _selectedCategory = ''; // Added for category filter
 
   @override
   void initState() {
@@ -67,6 +68,96 @@ class _ScreenMainState extends State<ScreenMain> {
         });
       }
     }
+  }
+
+  void _showCategoryFilterDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Select a Category'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                // Add the category options
+                ListTile(
+                  title: const Text('Music'),
+                  onTap: () {
+                    setState(() {
+                      _selectedCategory = 'Music';
+                    });
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
+                ),
+                ListTile(
+                  title: const Text('Sports'),
+                  onTap: () {
+                    setState(() {
+                      _selectedCategory = 'Sports';
+                    });
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
+                ),
+                ListTile(
+                  title: const Text('Education'),
+                  onTap: () {
+                    setState(() {
+                      _selectedCategory = 'Education';
+                    });
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
+                ),
+                ListTile(
+                  title: const Text('Technology'),
+                  onTap: () {
+                    setState(() {
+                      _selectedCategory = 'Technology';
+                    });
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
+                ),
+                ListTile(
+                  title: const Text('Health'),
+                  onTap: () {
+                    setState(() {
+                      _selectedCategory = 'Health';
+                    });
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
+                ),
+                ListTile(
+                  title: const Text('Entertainment'),
+                  onTap: () {
+                    setState(() {
+                      _selectedCategory = 'Entertainment';
+                    });
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
+                ),
+                ListTile(
+                  title: const Text('Others'),
+                  onTap: () {
+                    setState(() {
+                      _selectedCategory = 'Others';
+                    });
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
+                ),
+                ListTile(
+                  title: const Text('All'), // Option to clear the filter
+                  onTap: () {
+                    setState(() {
+                      _selectedCategory = ''; // Clear the category filter
+                    });
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _onCardTapped(DocumentSnapshot event) {
@@ -164,7 +255,7 @@ class _ScreenMainState extends State<ScreenMain> {
                         icon: const Icon(Icons.filter_alt_outlined,
                             color: primaryColor),
                         onPressed: () {
-                          // Handle filter icon press
+                          _showCategoryFilterDialog();
                         },
                       ),
                     ],
@@ -186,17 +277,23 @@ class _ScreenMainState extends State<ScreenMain> {
 
                     var events = snapshot.data!.docs;
 
-                    // Filter events based on search query
-                    var filteredEvents = events.where((event) {
-                      String eventName = (event['eventName'] as String)
-                          .trim()
-                          .toLowerCase(); // Normalize event name
-                      return eventName.contains(_searchQuery);
+                    // Filter events based on search query and selected category
+                    final List<DocumentSnapshot> filteredEvents = events.where((event) {
+                      final eventName = event['eventName']?.toLowerCase() ?? '';
+                      final eventCategory = event['category']?.toLowerCase() ?? '';
+
+                      // Check if the event matches the search query
+                      final matchesSearch = _searchQuery.isEmpty || eventName.contains(_searchQuery);
+
+                      // Check if the event matches the selected category (or all)
+                      final matchesCategory = _selectedCategory.isEmpty || eventCategory == _selectedCategory.toLowerCase();
+
+                      return matchesSearch && matchesCategory; // Only include events that match both conditions
                     }).toList();
 
                     if (filteredEvents.isEmpty) {
                       return const Center(
-                        child: Text('No events found.'),
+                        child: Text('No events available for the selected category.'),
                       );
                     }
 
