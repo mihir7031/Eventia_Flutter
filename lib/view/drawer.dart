@@ -186,7 +186,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
             title: const Text('Joined Events'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const JoinedEvent()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) =>  JoinedEventsScreen()));
             },
           ),
           ListTile(

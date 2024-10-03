@@ -4,6 +4,11 @@ import 'package:eventia/main.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';// Importing the main.dart for color constants
 import 'package:eventia/Event_info/bookingpage2.dart';
+import 'package:eventia/ticketsButtom/ticketButton.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+
+
 
 class Event_info extends StatefulWidget {
   final dynamic event;
@@ -19,6 +24,15 @@ class _Event_infoState extends State<Event_info> {
     setState(() {
       _isExpanded = !_isExpanded;
     });
+  }
+  String getCurrentUserId() {
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      return user.uid;  // Return the logged-in user's UID
+    } else {
+      return "No user is logged in";  // Handle if no user is logged in
+    }
   }
 
   @override
@@ -417,6 +431,24 @@ class _Event_infoState extends State<Event_info> {
                           style: TextStyle(color: secondaryColor),
                         ),
                       ),
+                      // In a widget where you have the eventId and userId (for example, from a list or database):
+                      ElevatedButton(
+                        onPressed: () {
+                          // Replace with the actual userId
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BookedTicketsScreen(
+                                eventId: widget.event['documentId'],
+                                userId: getCurrentUserId(),
+                              ),
+                            ),
+                          );
+                        },
+                        child: Text('Show Booked Tickets'),
+                      )
+
                     ],
                   ),
                 ],

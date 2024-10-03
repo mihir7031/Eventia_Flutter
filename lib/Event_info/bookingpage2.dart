@@ -65,7 +65,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
           children: [
             Text(
               'Available Tickets',
-              style: TextStyle(fontSize:18 , fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 16),
             Expanded(
@@ -79,8 +79,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     margin: EdgeInsets.symmetric(vertical: 12),
                     elevation: 4,
                     child: ListTile(
-                      title: Text(ticket.type, style: TextStyle(fontSize: 16)),
-                      subtitle: Text('Price: \$${ticket.price}', style: TextStyle(fontSize: 16)),
+                      title: Text(ticket.type, style: TextStyle(fontSize: 22)),
+                      subtitle: Text('Price: \$${ticket.price}', style: TextStyle(fontSize: 20)),
                       trailing: ticket.available
                           ? Row(
                         mainAxisSize: MainAxisSize.min,
@@ -133,14 +133,14 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 children: [
                   Text(
                     'Selected Tickets:',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                   ..._selectedTickets().map((ticket) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 4),
                       child: Text(
                         '${ticket.type} x${ticket.quantity}',
-                        style: TextStyle(fontSize: 16),
+                        style: TextStyle(fontSize: 20),
                       ),
                     );
                   }).toList(),
@@ -152,11 +152,11 @@ class _RegistrationPageState extends State<RegistrationPage> {
               children: [
                 Text(
                   'Total Tickets: ${_calculateTotalTickets()}',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 Text(
                   'Total Price: \$${_calculateTotalPrice().toStringAsFixed(2)}',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -172,11 +172,11 @@ class _RegistrationPageState extends State<RegistrationPage> {
                       : null,
                   child: Text(
                     'Checkout',
-                    style: TextStyle(color: Colors.white, fontSize: 18),
+                    style: TextStyle(color: Colors.white, fontSize: 20),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.deepPurple,
-                    padding: EdgeInsets.symmetric(horizontal: 22, vertical: 10),
+                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   ),
                 ),
               ],
@@ -279,11 +279,12 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     MaterialPageRoute(builder: (context) => LogIn()), // Replace with your actual login page
                   );
                 } else {
-                  await _processTicketPurchase(selectedTickets);
+                  await _processTicketPurchase(selectedTickets ,  user.uid);
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Tickets successfully purchased!')),
                   );
+                  await fetchPassesFromFirestore(); // Refresh the ticket data
                 }
               },
               child: Text('Confirm', style: TextStyle(color: Colors.white)),
@@ -299,12 +300,13 @@ class _RegistrationPageState extends State<RegistrationPage> {
   }
 
   // Process ticket purchase and update Firestore
-  Future<void> _processTicketPurchase(List<Ticket> selectedTickets) async {
+  Future<void> _processTicketPurchase(List<Ticket> selectedTickets, String userId) async {
     final eventRef = FirebaseFirestore.instance.collection('eventss').doc(widget.eventId);
 
     DocumentSnapshot eventDoc = await eventRef.get();
     List<dynamic> passesArray = eventDoc['passes'];
 
+    // Update remaining passes in the passes array
     for (var selectedTicket in selectedTickets) {
       for (var pass in passesArray) {
         if (pass['name'] == selectedTicket.type) {
@@ -316,25 +318,41 @@ class _RegistrationPageState extends State<RegistrationPage> {
       }
     }
 
+    // Update remaining passes in Firestore
     await eventRef.update({'passes': passesArray});
 
-    // Save the purchase information to Firestore
-    User? user = FirebaseAuth.instance.currentUser;
-
-    if (user != null) {
-      await FirebaseFirestore.instance.collection('purchases').add({
-        'userId': user.uid,
-        'userEmail': user.email, // Store user email
-        'eventId': widget.eventId,
-        'tickets': selectedTickets.map((ticket) => {
+    // Store the purchase in the eventPurchases collection
+    final purchaseData = {
+      'userId': userId,
+      'tickets': selectedTickets.map((ticket) {
+        return {
           'type': ticket.type,
           'quantity': ticket.quantity,
           'price': ticket.price,
-        }).toList(),
-        'totalPrice': _calculateTotalPrice(),
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-    }
+        };
+      }).toList(),
+      'totalPrice': _calculateTotalPrice(),
+      'timestamp': FieldValue.serverTimestamp(),
+    };
+
+    // Add purchase to eventPurchases collection
+    final purchaseRef = FirebaseFirestore.instance.collection('eventPurchases').doc(widget.eventId);
+    await purchaseRef.collection('purchases').add(purchaseData);
+
+    // Store the purchase in userPurchases collection
+    final userPurchasesRef = FirebaseFirestore.instance.collection('userPurchases').doc(userId);
+    await userPurchasesRef.collection('purchases').add({
+      'eventId': widget.eventId,
+      'tickets': selectedTickets.map((ticket) {
+        return {
+          'type': ticket.type,
+          'quantity': ticket.quantity,
+          'price': ticket.price,
+        };
+      }).toList(),
+      'totalPrice': _calculateTotalPrice(),
+      'timestamp': FieldValue.serverTimestamp(),
+    });
   }
 }
 
@@ -344,13 +362,28 @@ class Ticket {
   final double price;
   final bool available;
   int quantity; // Track the number of tickets selected
-  final int remainingPasses; // Track the remaining passes
+  final int remainingPasses; // Total remaining passes
 
   Ticket({
     required this.type,
     required this.price,
     required this.available,
     this.quantity = 0,
-    required this.remainingPasses, // Initialize remaining passes
+    required this.remainingPasses,
   });
+}
+
+// Dummy LoginPage for redirection if the user is not logged in
+class LoginPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Login'),
+      ),
+      body: Center(
+        child: Text('Login Page Placeholder'),
+      ),
+    );
+  }
 }
