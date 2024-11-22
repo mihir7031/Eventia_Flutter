@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:eventia/Event_info/Event_info.dart';
 import 'package:eventia/main.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:eventia/Favorite/FavoriteButton .dart';
 import 'package:intl/intl.dart';
 
 class FavoritePage extends StatefulWidget {
@@ -66,7 +68,7 @@ class _FavoritePageState extends State<FavoritePage> {
         backgroundColor: Colors.white,
         title: const Text(
           'Favorite Events',
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(color: primaryColor),
         ),
         iconTheme: const IconThemeData(color: Colors.black),
       ),
@@ -144,7 +146,9 @@ class _FavoritePageState extends State<FavoritePage> {
                                       event['eventPoster'].isNotEmpty &&
                                       event['eventPoster'] != " "
                                       ? event['eventPoster']
-                                      : 'https://via.placeholder.com/150', // Placeholder image URL
+                                      : 'https://via.placeholder.com/150', // Placeholder image URL width: 120,
+                                  width: 120,
+                                  height: 150,
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) {
                                     return Image.asset(
@@ -163,17 +167,44 @@ class _FavoritePageState extends State<FavoritePage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    '${formattedDate}  • ${event['selectedTime']}',
-                                    style: const TextStyle(
-                                      color: Colors.red,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 5.0),
-                                  Text(
                                     event['eventName'],
-                                    style:
-                                    Theme.of(context).textTheme.titleMedium,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: Colors.black,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    event['location'],
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 14,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Date: $formattedDate',
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 12,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Time: ${event['selectedTime']}',
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 12,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                   const SizedBox(height: 5.0),
                                   // Text(
@@ -185,15 +216,30 @@ class _FavoritePageState extends State<FavoritePage> {
                                     children: [
                                       IconButton(
                                         icon: const Icon(Icons.share,
-                                            color: primaryColor),
-                                        onPressed: () {},
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(Icons.favorite,
-                                            color: Colors.red),
+                                            color: iconColor),
                                         onPressed: () {
-                                          _showRemoveDialog(event.id);
+                                          // Construct the message to share
+                                          String eventDetails = '''
+                                Check out this event: ${event['eventName']}
+                                Date: $formattedDate
+                                Time: ${event['selectedTime']}
+                                Details: ${event['aboutEvent']}
+                                ''';
+
+                                          if (event['eventPoster'] !=
+                                              null &&
+                                              event['eventPoster']
+                                                  .isNotEmpty) {
+                                            eventDetails +=
+                                            '\nEvent Poster: ${event['eventPoster']}';
+                                          }
+
+                                          Share.share(eventDetails);
                                         },
+                                      ),
+                                      FavoriteButton(
+                                        isFavorited: true,
+                                        eventId: event.id,
                                       ),
                                     ],
                                   ),

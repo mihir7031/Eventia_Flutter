@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:eventia/view/profile.dart';
+import 'package:eventia/profile/profile.dart';
 class AdditionalInfoForm extends StatefulWidget {
   const AdditionalInfoForm({Key? key}) : super(key: key);
 

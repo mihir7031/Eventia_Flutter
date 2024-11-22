@@ -40,13 +40,13 @@ class _Event_infoState extends State<Event_info> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        iconTheme: const IconThemeData(
-          color: Colors.white, // Change this to your desired color
-        ),
-        backgroundColor: primaryColor,
+        // iconTheme: const IconThemeData(
+        //   color: Colors.white, // Change this to your desired color
+        // ),
+        backgroundColor: Colors.white,
         title: Text(
           widget.event['eventName'] ?? 'Event Detail',
-          style: const TextStyle(color: secondaryColor),
+          style: const TextStyle(color: primaryColor),
         ),
       ),
       body: SingleChildScrollView(
@@ -182,15 +182,15 @@ class _Event_infoState extends State<Event_info> {
                               ),
 
                               const SizedBox(width: 8),
-                              TextButton(
-                                onPressed: () {
-                                  // Add navigation to maps here
-                                },
-                                child: const Text(
-                                  'View On Maps',
-                                  style: TextStyle(color: primaryColor),
-                                ),
-                              ),
+                              // TextButton(
+                              //   onPressed: () {
+                              //     // Add navigation to maps here
+                              //   },
+                              //   child: const Text(
+                              //     'View On Maps',
+                              //     style: TextStyle(color: primaryColor),
+                              //   ),
+                              // ),
                             ],
                           ),
 
@@ -432,22 +432,22 @@ class _Event_infoState extends State<Event_info> {
                         ),
                       ),
                       // In a widget where you have the eventId and userId (for example, from a list or database):
-                      ElevatedButton(
-                        onPressed: () {
-                          // Replace with the actual userId
-
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => BookedTicketsScreen(
-                                eventId: widget.event['documentId'],
-                                userId: getCurrentUserId(),
-                              ),
-                            ),
-                          );
-                        },
-                        child: Text('Show Booked Tickets'),
-                      )
+                      // ElevatedButton(
+                      //   onPressed: () {
+                      //     // Replace with the actual userId
+                      //
+                      //     Navigator.push(
+                      //       context,
+                      //       MaterialPageRoute(
+                      //         builder: (context) => BookedTicketsScreen(
+                      //           eventId: widget.event['documentId'],
+                      //           userId: getCurrentUserId(),
+                      //         ),
+                      //       ),
+                      //     );
+                      //   },
+                      //   child: Text('Show Booked Tickets'),
+                      // )
 
                     ],
                   ),

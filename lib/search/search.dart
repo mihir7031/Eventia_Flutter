@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:eventia/Favorite/FavoriteButton .dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:eventia/main.dart';
+import 'package:eventia/Event_info/Event_info.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({Key? key}) : super(key: key);
@@ -66,12 +68,18 @@ class _SearchPageState extends State<SearchPage> {
   bool _isEventFavorited(String eventId) {
     return favoriteEventIds.contains(eventId);
   }
+  void _onCardTapped(DocumentSnapshot event) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => Event_info(event: event)),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Search Events'),
+        title: const Text('Search Events',style: TextStyle(color: primaryColor),),
       ),
       body: GestureDetector(
         onTap: () {
@@ -88,7 +96,8 @@ class _SearchPageState extends State<SearchPage> {
                       focusNode: _searchFocusNode,
                       decoration: InputDecoration(
                         hintText: 'Search for events...',
-                        prefixIcon: const Icon(Icons.search, color: Colors.blue),
+                        hintStyle: TextStyle(color: textColor),
+                        prefixIcon: const Icon(Icons.search, color: primaryColor),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10.0),
                           borderSide: BorderSide.none,
@@ -135,9 +144,9 @@ class _SearchPageState extends State<SearchPage> {
         return ListTile(
           leading: const Icon(
             Icons.history, // Icon for history items
-            color: Colors.grey, // You can adjust the color as needed
+            color: primaryColor, // You can adjust the color as needed
           ),
-          title: Text(searchHistory[index]),
+          title: Text(searchHistory[index],style: TextStyle(color: textColor),),
           onTap: () {
             setState(() {
               _searchQuery = searchHistory[index];
@@ -192,95 +201,114 @@ class _SearchPageState extends State<SearchPage> {
               formattedDate = 'Date not available';
             }
 
-            return InkWell(
-              onTap: () {
-                // Handle event tap
-              },
-              child: Card(
-                color: Colors.white,
-                margin: const EdgeInsets.all(10.0),
-                child: Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: SizedBox(
-                        width: 100.0,
-                        height: 150.0,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: Image.network(
-                            event['eventPoster'] != null &&
-                                event['eventPoster'].isNotEmpty &&
-                                event['eventPoster'] != " "
-                                ? event['eventPoster']
-                                : 'https://via.placeholder.com/150',
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Image.asset(
-                                'assets/images/no_image_available.png',
-                                fit: BoxFit.cover,
-                              );
-                            },
-                          ),
+            return Card(
+              margin: const EdgeInsets.symmetric(
+                  vertical: 8, horizontal: 16),
+              child: InkWell(
+                onTap: () => _onCardTapped(event),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0),
+                        child: Image.network(
+                          event['eventPoster'] != null &&
+                              event['eventPoster'].isNotEmpty
+                              ? event['eventPoster']
+                              : 'https://via.placeholder.com/150',
+                          width: 120,
+                          height: 150,
+                          fit: BoxFit.cover,
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
+
+                      const SizedBox(width: 16),
+                      Expanded(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment
+                              .start,
                           children: [
                             Text(
-                              '$formattedDate  • ${event['selectedTime']}',
-                              style: const TextStyle(
-                                color: Colors.red,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 5.0),
-                            Text(
                               event['eventName'],
-                              style: Theme.of(context).textTheme.titleMedium,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: Colors.black,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(height: 5.0),
+                            const SizedBox(height: 4),
                             Text(
-                              event['aboutEvent'],
-                              style: const TextStyle(color: Colors.black),
+                              event['location'],
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 14,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Date: $formattedDate',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 12,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Time: ${event['selectedTime']}',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 12,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 8),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
+                              mainAxisAlignment: MainAxisAlignment
+                                  .end,
                               children: [
                                 IconButton(
-                                  icon: const Icon(Icons.share, color: Colors.blue),
+                                  icon: const Icon(Icons.share,
+                                      color: primaryColor),
                                   onPressed: () {
-                                    // Construct the message you want to share
+                                    // Construct the message to share
                                     String eventDetails = '''
-                                      Check out this event: ${event['eventName']}
-                                      Date: $formattedDate
-                                      Time: ${event['selectedTime']}
-                                      Details: ${event['aboutEvent']}
-                                    ''';
+                                Check out this event: ${event['eventName']}
+                                Date: $formattedDate
+                                Time: ${event['selectedTime']}
+                                Details: ${event['aboutEvent']}
+                                ''';
 
-                                    // If eventPoster is available, include the link as well
-                                    if (event['eventPoster'] != null && event['eventPoster'].isNotEmpty) {
-                                      eventDetails += '\nEvent Poster: ${event['eventPoster']}';
+                                    if (event['eventPoster'] !=
+                                        null &&
+                                        event['eventPoster']
+                                            .isNotEmpty) {
+                                      eventDetails +=
+                                      '\nEvent Poster: ${event['eventPoster']}';
                                     }
 
                                     Share.share(eventDetails);
                                   },
                                 ),
                                 FavoriteButton(
-                                  isFavorited: _isEventFavorited(event.id),
+                                  isFavorited: _isEventFavorited(
+                                      event.id),
                                   eventId: event.id,
                                 ),
                               ],
-                            )
+                            ),
                           ],
                         ),
                       ),
-                    )
-                  ],
+                    ],
+                  ),
                 ),
               ),
             );

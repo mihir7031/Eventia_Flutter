@@ -1,43 +1,42 @@
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
 import 'package:eventia/LoginPages/auth_check.dart';
 
-
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  const SplashScreen({Key? key}) : super(key: key);
 
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
-  late VideoPlayerController _controller;
-  bool _isInitialized = false;
+class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.asset('assets/video/mm1.mp4')
-      ..initialize().then((_) {
-        setState(() {
-          _isInitialized = true;
-        });
-        _controller.play();
-        _controller.addListener(() {
-          if (_controller.value.position == _controller.value.duration) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => const AuthCheck()),
-            );
-          }
-        });
-      }).catchError((error) {
-        print("Error initializing video: $error");
-      });
+
+    // Initialize AnimationController with a duration of 3 seconds
+    _animationController = AnimationController(
+      duration: const Duration(seconds: 3),
+      vsync: this,
+    );
+
+    // Start the animation for a smooth progress bar fill
+    _animationController.forward();
+
+    // Navigate to the main screen when the animation completes
+    _animationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const AuthCheck()),
+        );
+      }
+    });
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -47,18 +46,33 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          _isInitialized
-              ? FittedBox(
+          // Splash screen image as background, loaded immediately
+          Image.asset(
+            'assets/images/splash_screen.jpeg',
             fit: BoxFit.cover,
+          ),
+          // Centered loading bar with a gradual fill
+          Positioned(
+            bottom: 80, // Position the loading bar near the bottom
+            left: MediaQuery.of(context).size.width * 0.1, // Center the bar with padding on each side
+            right: MediaQuery.of(context).size.width * 0.1,
             child: SizedBox(
-              width: _controller.value.size.width,
-              height: _controller.value.size.height,
-              child: VideoPlayer(_controller),
+              height: 10, // Thicker loading bar
+              child: AnimatedBuilder(
+                animation: _animationController,
+                builder: (context, child) {
+                  return LinearProgressIndicator(
+                    value: _animationController.value, // Link the progress to the animation
+                    backgroundColor: Colors.grey.withOpacity(0.3),
+                    color: Colors.blue, // Customize the color as needed
+                  );
+                },
+              ),
             ),
-          )
-              : const Center(child: CircularProgressIndicator()),
+          ),
         ],
       ),
+      backgroundColor: Colors.transparent, // Make sure background is transparent
     );
   }
 }

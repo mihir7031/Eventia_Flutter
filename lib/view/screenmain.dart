@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:eventia/Event_info/Event_info.dart';
-import 'package:eventia/main.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:eventia/notification/notification.dart';
-import 'package:intl/intl.dart';
-import 'package:eventia/Favorite/FavoriteButton .dart';
-import 'package:eventia/view/drawer.dart';
+import 'package:eventia/Event_info/Event_info.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:eventia/Favorite/FavoriteButton .dart';
+import 'package:intl/intl.dart';
+import 'package:eventia/main.dart';
+import 'package:eventia/view/drawer.dart';// To format the date4
+import 'package:eventia/profile/profile.dart';
 
 class ScreenMain extends StatefulWidget {
   const ScreenMain({super.key});
@@ -20,12 +20,31 @@ class ScreenMain extends StatefulWidget {
 class _ScreenMainState extends State<ScreenMain> {
   final FirebaseAuth auth = FirebaseAuth.instance;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
-  final FirebaseStorage storage = FirebaseStorage.instance;
 
-  final FocusNode _searchFocusNode = FocusNode();
+  String _searchQuery = '';
+  String? userName;
+  String? userProfileImage;
+  String _selectedCategory = 'All';
   List<String> favoriteEventIds = [];
-  String _searchQuery = ''; // Added for search
-  String _selectedCategory = ''; // Added for category filter
+  final List<String> categories = [
+    'All',
+    'Education',
+    'Sports',
+    'Music Festival',
+    'Festival Arts',
+    'Technology',
+    'Others',
+  ];
+
+  final Map<String, IconData> categoryIcons = {
+    'All': FontAwesomeIcons.solidCalendarAlt,
+    'Education': FontAwesomeIcons.school,
+    'Sports': FontAwesomeIcons.basketballBall,
+    'Music Festival': FontAwesomeIcons.music,
+    'Festival Arts': FontAwesomeIcons.theaterMasks,
+    'Technology': FontAwesomeIcons.laptopCode,
+    'Others': FontAwesomeIcons.cogs,
+  };
 
   @override
   void initState() {
@@ -53,8 +72,6 @@ class _ScreenMainState extends State<ScreenMain> {
 
   List<Map<String, String>> favoriteEvents = [];
 
-  String? userName;
-  String? userProfileImage;
 
   Future<void> _fetchUserProfile() async {
     User? currentUser = auth.currentUser;
@@ -70,94 +87,9 @@ class _ScreenMainState extends State<ScreenMain> {
     }
   }
 
-  void _showCategoryFilterDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Select a Category'),
-          content: SingleChildScrollView(
-            child: Column(
-              children: [
-                // Add the category options
-                ListTile(
-                  title: const Text('Music'),
-                  onTap: () {
-                    setState(() {
-                      _selectedCategory = 'Music';
-                    });
-                    Navigator.of(context).pop(); // Close the dialog
-                  },
-                ),
-                ListTile(
-                  title: const Text('Sports'),
-                  onTap: () {
-                    setState(() {
-                      _selectedCategory = 'Sports';
-                    });
-                    Navigator.of(context).pop(); // Close the dialog
-                  },
-                ),
-                ListTile(
-                  title: const Text('Education'),
-                  onTap: () {
-                    setState(() {
-                      _selectedCategory = 'Education';
-                    });
-                    Navigator.of(context).pop(); // Close the dialog
-                  },
-                ),
-                ListTile(
-                  title: const Text('Technology'),
-                  onTap: () {
-                    setState(() {
-                      _selectedCategory = 'Technology';
-                    });
-                    Navigator.of(context).pop(); // Close the dialog
-                  },
-                ),
-                ListTile(
-                  title: const Text('Health'),
-                  onTap: () {
-                    setState(() {
-                      _selectedCategory = 'Health';
-                    });
-                    Navigator.of(context).pop(); // Close the dialog
-                  },
-                ),
-                ListTile(
-                  title: const Text('Entertainment'),
-                  onTap: () {
-                    setState(() {
-                      _selectedCategory = 'Entertainment';
-                    });
-                    Navigator.of(context).pop(); // Close the dialog
-                  },
-                ),
-                ListTile(
-                  title: const Text('Others'),
-                  onTap: () {
-                    setState(() {
-                      _selectedCategory = 'Others';
-                    });
-                    Navigator.of(context).pop(); // Close the dialog
-                  },
-                ),
-                ListTile(
-                  title: const Text('All'), // Option to clear the filter
-                  onTap: () {
-                    setState(() {
-                      _selectedCategory = ''; // Clear the category filter
-                    });
-                    Navigator.of(context).pop(); // Close the dialog
-                  },
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+  String _formatDate(Timestamp timestamp) {
+    DateTime date = timestamp.toDate();
+    return DateFormat('dd/MM/yyyy').format(date);
   }
 
   void _onCardTapped(DocumentSnapshot event) {
@@ -167,103 +99,257 @@ class _ScreenMainState extends State<ScreenMain> {
     );
   }
 
-  @override
-  void dispose() {
-    _searchFocusNode.dispose(); // Dispose the FocusNode
-    super.dispose();
+  void _shareEvent(DocumentSnapshot event) {
+    final eventName = event['eventName'];
+    final eventLink = "https://example.com/events/${event.id}"; // Replace with actual link
+    final shareText = "Check out this event: $eventName!\n$eventLink";
+
+    Share.share(shareText);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: const Row(
-          children: [
-            SizedBox(width: 10),
-            Text('E',
-                style:
-                TextStyle(fontFamily: 'Blacksword', color: primaryColor)),
-            Text('ventia',
-                style:
-                TextStyle(fontFamily: 'BeautyDemo', color: primaryColor)),
-          ],
+      drawer: DrawerWidget(),
+      appBar:  AppBar(
+        title: Text(
+          'Eventia',
+          style: TextStyle(
+            fontFamily: 'Blacksword',
+            fontSize: 24,
+            color: primaryColor,
+          ),
         ),
+        backgroundColor: Colors.white,
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: Container(
-              decoration: const BoxDecoration(
-                color: cardColor, // Background color
-                shape: BoxShape.circle, // Circular shape
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.notifications, color: primaryColor),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => NotificationPage()),
-                  );
-                },
-              ),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProfilePage()),
+              );
+            },
+            child: CircleAvatar(
+              backgroundImage: userProfileImage != null
+                  ? NetworkImage(userProfileImage!)
+                  : null, // Set to null if no image is available
+              child: userProfileImage == null
+                  ? Icon(
+                Icons.person, // Use the person icon
+                color: primaryColor,
+              )
+                  : null, // No child if the image is available
+              backgroundColor: userProfileImage == null ? Colors.grey : Colors.transparent,
             ),
-          )
+
+          ),
+          SizedBox(width: 16),
         ],
       ),
-      drawer: const DrawerWidget(),
-      body: GestureDetector(
-        onTap: () {
-          FocusScope.of(context).requestFocus(FocusNode());
-        },
-        child: Padding(
-          padding: const EdgeInsets.only(top: 8.0, right: 8.0, left: 8.0),
+      body: Container(
+        color: Colors.white,
+        child: SafeArea(
           child: SingleChildScrollView(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 10),
+                // Search Bar
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          focusNode: _searchFocusNode,
-                          decoration: InputDecoration(
-                            hintText: 'Search',
-                            prefixIcon:
-                            const Icon(Icons.search, color: primaryColor),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                              borderSide: BorderSide.none,
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey[200],
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                              borderSide: BorderSide.none, // No border when focused
-                            ),
-                          ),
-                          onChanged: (value) {
-                            setState(() {
-                              _searchQuery = value.trim().toLowerCase(); // Normalize input
-                            });
-                          },
-                        ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Search events...',
+                      hintStyle: TextStyle(color: Colors.grey[600]),
+                      prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
+                      filled: true,
+                      fillColor: Colors.grey[200],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        borderSide: BorderSide.none,
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.filter_alt_outlined,
-                            color: primaryColor),
-                        onPressed: () {
-                          _showCategoryFilterDialog();
-                        },
-                      ),
-                    ],
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        _searchQuery = value.trim().toLowerCase();
+                      });
+                    },
                   ),
                 ),
+
+                // Filter by Category
+
                 const SizedBox(height: 20),
+
+                // Popular Events Section
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Text(
+                    'Popular Events',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                // Added expanded height to prevent overflow and ensure scrollable content
+                Container(
+                  height: 270,
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: firestore
+                        .collection('eventss')
+                        .where('isPopular', isEqualTo: true)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      }
+                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                        return Center(
+                          child: Text(
+                            'No popular events found.',
+                            style: TextStyle(color: Colors.black),
+                          ),
+                        );
+                      }
+                      return ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: snapshot.data!.docs.length,
+                        itemBuilder: (context, index) {
+                          var event = snapshot.data!.docs[index];
+                          return InkWell(
+                            onTap: () => _onCardTapped(event),
+                            child: Container(
+                              width: 220,
+                              margin: const EdgeInsets.all(10.0),
+                              padding: const EdgeInsets.all(10.0),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.3),
+                                    blurRadius: 8,
+                                    offset: Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Image.network(
+                                      event['eventPoster'] ?? 'https://via.placeholder.com/150',
+                                      fit: BoxFit.cover,
+                                      height: 170,
+                                      width: double.infinity,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 8.0),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                event['eventName'],
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 14,
+                                                  color: Colors.black,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              Text(
+                                                event['location'],
+                                                style: TextStyle(
+                                                  color: Colors.grey[600],
+                                                  fontSize: 12,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        IconButton(
+                                          icon: Icon(Icons.share, color: iconColor),
+                                          onPressed: () => _shareEvent(event),
+                                        ),
+                                        FavoriteButton(
+                                          isFavorited: _isEventFavorited(
+                                              event.id),
+                                          eventId: event.id,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+SizedBox(height: 20,),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: categories.map((category) {
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: ChoiceChip(
+                            avatar: Icon(
+                              categoryIcons[category],
+                              size: 20,
+                              color: _selectedCategory == category
+                                  ? Colors.white
+                                  : primaryColor,
+                            ),
+                            label: Text(category,style: TextStyle(color: textColor),),
+                            selected: _selectedCategory == category,
+                            onSelected: (selected) {
+                              setState(() {
+                                _selectedCategory = selected ? category : 'All';
+                              });
+                            },
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: 20,),
+                // All Events Section (Search Functionality Active)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Text(
+                    _selectedCategory,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
                 StreamBuilder<QuerySnapshot>(
-                  stream: firestore.collection('eventss').snapshots(),
+                  stream: firestore
+                      .collection('eventss')
+                      .where(
+                    'category',
+                    isEqualTo: _selectedCategory == 'All' ? null : _selectedCategory,
+                  )
+                      .snapshots(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
@@ -271,131 +357,110 @@ class _ScreenMainState extends State<ScreenMain> {
 
                     if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                       return const Center(
-                        child: Text('No events found.'),
+                        child: Text(
+                          'No events found.',
+                          style: TextStyle(color: Colors.black),
+                        ),
                       );
                     }
 
-                    var events = snapshot.data!.docs;
+                    final events = snapshot.data!.docs;
 
-                    // Filter events based on search query and selected category
-                    final List<DocumentSnapshot> filteredEvents = events.where((event) {
-                      final eventName = event['eventName']?.toLowerCase() ?? '';
-                      final eventCategory = event['category']?.toLowerCase() ?? '';
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: events.length,
+                      itemBuilder: (context, index) {
+                        final event = events[index];
 
-                      // Check if the event matches the search query
-                      final matchesSearch = _searchQuery.isEmpty || eventName.contains(_searchQuery);
-
-                      // Check if the event matches the selected category (or all)
-                      final matchesCategory = _selectedCategory.isEmpty || eventCategory == _selectedCategory.toLowerCase();
-
-                      return matchesSearch && matchesCategory; // Only include events that match both conditions
-                    }).toList();
-
-                    if (filteredEvents.isEmpty) {
-                      return const Center(
-                        child: Text('No events available for the selected category.'),
-                      );
-                    }
-
-                    return Column(
-                      children: List.generate(filteredEvents.length, (index) {
-                        var event = filteredEvents[index];
-
-                        // Check if 'selectedDate' exists and is not null
-                        Timestamp? timestamp =
-                        event['selectedDate'] as Timestamp?;
-
-                        // If the timestamp is null, show a default message
-                        String formattedDate;
-                        if (timestamp != null) {
-                          DateTime dateTime = timestamp.toDate();
-                          formattedDate =
-                              DateFormat('dd-MM-yy').format(dateTime);
-                        } else {
-                          formattedDate =
-                          'Date not available'; // Handle null date
+                        // Filter events by search query
+                        if (_searchQuery.isNotEmpty &&
+                            !event['eventName'].toLowerCase().contains(_searchQuery)) {
+                          return const SizedBox.shrink();
                         }
+
+                        final String formattedDate = _formatDate(event['selectedDate']);
+                        final String eventPoster = event['eventPoster'] ?? 'https://via.placeholder.com/150';
 
                         return InkWell(
                           onTap: () => _onCardTapped(event),
                           child: Card(
-                            color: cardColor,
-                            margin: const EdgeInsets.all(10.0),
-                            child: Row(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(4.0),
-                                  child: SizedBox(
-                                    width: 100.0,
-                                    height: 150.0,
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      child: Image.network(
-                                        event['eventPoster'] != null &&
-                                            event['eventPoster']
-                                                .isNotEmpty &&
-                                            event['eventPoster'] != " "
-                                            ? event['eventPoster']
-                                            : 'https://via.placeholder.com/150', // Placeholder image URL
-                                        fit: BoxFit.cover,
-                                        errorBuilder:
-                                            (context, error, stackTrace) {
-                                          return Image.asset(
-                                            'assets/images/no_image_available.png', // Path to your placeholder image in assets
-                                            fit: BoxFit.cover,
-                                          );
-                                        },
-                                      ),
+                            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Row(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Image.network(
+                                      eventPoster,
+                                      width: 120,
+                                      height: 150,
+                                      fit: BoxFit.cover,
                                     ),
                                   ),
-                                ),
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
+                                  const SizedBox(width: 16),
+                                  Expanded(
                                     child: Column(
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          '$formattedDate  • ${event['selectedTime']}',
-                                          style: const TextStyle(
-                                            color: Colors.red,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 5.0),
-                                        Text(
                                           event['eventName'],
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium,
-                                        ),
-                                        const SizedBox(height: 5.0),
-                                        Text(
-                                          event['aboutEvent'],
                                           style: const TextStyle(
-                                              color: primaryColor),
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                            color: Colors.black,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          event['location'],
+                                          style: TextStyle(
+                                            color: Colors.grey[600],
+                                            fontSize: 14,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'Date: $formattedDate',
+                                          style: TextStyle(
+                                            color: Colors.grey[600],
+                                            fontSize: 12,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'Time: ${event['selectedTime']}',
+                                          style: TextStyle(
+                                            color: Colors.grey[600],
+                                            fontSize: 12,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 8),
                                         Row(
-                                          mainAxisAlignment:
-                                          MainAxisAlignment.end,
+                                          mainAxisAlignment: MainAxisAlignment.end,
                                           children: [
                                             IconButton(
-                                              icon: const Icon(Icons.share,
-                                                  color: primaryColor),
+                                              icon: const Icon(Icons.share, color: iconColor),
                                               onPressed: () {
-                                                // Construct the message you want to share
+                                                // Construct the message to share
                                                 String eventDetails = '''
-                                                          Check out this event: ${event['eventName']}
-                                                          Date: $formattedDate
-                                                          Time: ${event['selectedTime']}
-                                                          Details: ${event['aboutEvent']}
-                                                          ''';
+                                Check out this event: ${event['eventName']}
+                                Date: $formattedDate
+                                Time: ${event['selectedTime']}
+                                Details: ${event['aboutEvent']}
+                                ''';
 
-                                                // If eventPoster is available, include the link as well
                                                 if (event['eventPoster'] != null &&
-                                                    event['eventPoster']
-                                                        .isNotEmpty) {
+                                                    event['eventPoster'].isNotEmpty) {
                                                   eventDetails +=
                                                   '\nEvent Poster: ${event['eventPoster']}';
                                                 }
@@ -404,24 +469,24 @@ class _ScreenMainState extends State<ScreenMain> {
                                               },
                                             ),
                                             FavoriteButton(
-                                              isFavorited: _isEventFavorited(
-                                                  event.id),
+                                              isFavorited: _isEventFavorited(event.id),
                                               eventId: event.id,
                                             ),
                                           ],
-                                        )
+                                        ),
                                       ],
                                     ),
                                   ),
-                                )
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         );
-                      }),
+                      },
                     );
                   },
                 ),
+
               ],
             ),
           ),

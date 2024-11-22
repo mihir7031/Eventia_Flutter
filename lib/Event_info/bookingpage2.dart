@@ -1,27 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
-import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Auth
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:eventia/LoginPages/login.dart';
+import 'package:eventia/main.dart';
 
 class RegistrationPage extends StatefulWidget {
-  final String eventId; // Event ID to fetch the specific event passes
+  final String eventId;
 
-  RegistrationPage({required this.eventId}); // Pass eventId to the page
+  const RegistrationPage({required this.eventId, Key? key}) : super(key: key);
 
   @override
   _RegistrationPageState createState() => _RegistrationPageState();
 }
 
 class _RegistrationPageState extends State<RegistrationPage> {
-  List<Ticket> tickets = []; // This will hold the passes (tickets) fetched from Firestore
+  List<Ticket> tickets = [];
+  bool _isFetchingPasses = true;
+  bool _isnotified=false;
 
   @override
   void initState() {
     super.initState();
-    fetchPassesFromFirestore(); // Fetch passes (tickets) from Firestore
+    fetchPassesFromFirestore();
   }
 
-  // Fetch passes (tickets) from Firestore
   Future<void> fetchPassesFromFirestore() async {
     try {
       DocumentSnapshot eventDoc = await FirebaseFirestore.instance
@@ -31,19 +33,19 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
       if (eventDoc.exists && eventDoc['passes'] != null) {
         List<dynamic> passesArray = eventDoc['passes'];
-
         List<Ticket> fetchedTickets = passesArray.map((pass) {
           return Ticket(
             type: pass['name'] ?? 'Unknown',
             price: (pass['price'] ?? 0).toDouble(),
-            available: int.parse(pass['remainingPasses'].toString()) > 0, // Check remaining passes
-            quantity: 0, // Track the quantity selected by the user
-            remainingPasses: int.parse(pass['remainingPasses'].toString()), // Add remaining passes
+            available: int.parse(pass['remainingPasses'].toString()) > 0,
+            quantity: 0,
+            remainingPasses: int.parse(pass['remainingPasses'].toString()),
           );
         }).toList();
 
         setState(() {
           tickets = fetchedTickets;
+          _isFetchingPasses = false;
         });
       }
     } catch (e) {
@@ -55,129 +57,117 @@ class _RegistrationPageState extends State<RegistrationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Registration & Tickets', style: TextStyle(fontSize: 24)),
-        backgroundColor: Colors.deepPurple,
+        title: const Text(
+            'Registration & Tickets', style: TextStyle(color: primaryColor)),
       ),
-      body: Padding(
+      body: _isFetchingPasses
+          ? const Center(child: CircularProgressIndicator())
+          : tickets.isEmpty
+          ? const Center(child: Text('It is free'))
+          : Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Available Tickets',
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Expanded(
-              child: tickets.isEmpty
-                  ? Center(child: CircularProgressIndicator())
-                  : ListView.builder(
+              child: ListView.builder(
                 itemCount: tickets.length,
                 itemBuilder: (context, index) {
                   final ticket = tickets[index];
                   return Card(
-                    margin: EdgeInsets.symmetric(vertical: 12),
+                    margin: const EdgeInsets.symmetric(vertical: 12),
                     elevation: 4,
                     child: ListTile(
-                      title: Text(ticket.type, style: TextStyle(fontSize: 22)),
-                      subtitle: Text('Price: \$${ticket.price}', style: TextStyle(fontSize: 20)),
+                      title: Text(ticket.type, style: const TextStyle(
+                          fontWeight: FontWeight.bold)),
+                      subtitle: Text('Price: \$${ticket.price}',style: TextStyle(color: textColor),),
                       trailing: ticket.available
                           ? Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            icon: Icon(Icons.remove, size: 28),
-                            color: Colors.red,
+                            icon: const Icon(Icons.remove),
                             onPressed: () {
                               setState(() {
-                                if (ticket.quantity > 0) {
-                                  ticket.quantity--;
-                                }
+                                if (ticket.quantity > 0) ticket.quantity--;
                               });
                             },
                           ),
-                          Text('${ticket.quantity}', style: TextStyle(fontSize: 20)),
+                          Text('${ticket.quantity}',
+                              style: const TextStyle(fontSize: 20)),
                           IconButton(
-                            icon: Icon(Icons.add, size: 28),
-                            color: ticket.quantity < ticket.remainingPasses ? Colors.green : Colors.grey,
+                            icon: const Icon(Icons.add),
+                            color: ticket.quantity < ticket.remainingPasses ? primaryColor: Colors.grey,
                             onPressed: () {
                               if (ticket.quantity < ticket.remainingPasses) {
                                 setState(() {
                                   ticket.quantity++;
                                 });
                               } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('No more passes available for ${ticket.type}.'),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
+
+                                if(_isnotified==false) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          'No more passes available for ${ticket
+                                              .type}.'),
+                                      backgroundColor: Colors.red,
+                                    ),
+
+                                  );
+                                }
+                                _isnotified=true;
                               }
                             },
                           ),
                         ],
                       )
-                          : Text(
+                          : const Text(
                         'Sold Out',
-                        style: TextStyle(color: Colors.red, fontSize: 20),
+                        style: TextStyle(fontSize: 18, color: Colors.red),
                       ),
                     ),
                   );
                 },
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             if (_selectedTickets().isNotEmpty)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Selected Tickets:',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                  ),
+                  const Text('Selected Tickets:', style: TextStyle(
+                      fontSize: 22, fontWeight: FontWeight.bold)),
                   ..._selectedTickets().map((ticket) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Text(
-                        '${ticket.type} x${ticket.quantity}',
-                        style: TextStyle(fontSize: 20),
-                      ),
+                      child: Text('${ticket.type} x${ticket.quantity}',
+                          style: const TextStyle(fontSize: 20)),
                     );
                   }).toList(),
                 ],
               ),
-            SizedBox(height: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Total Tickets: ${_calculateTotalTickets()}',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  'Total Price: \$${_calculateTotalPrice().toStringAsFixed(2)}',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
+            Text('Total Tickets: ${_calculateTotalTickets()}',
+                style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text('Total Price: \$${_calculateTotalPrice().toStringAsFixed(2)}',
+                style: const TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 ElevatedButton(
-                  onPressed: _calculateTotalTickets() > 0
-                      ? () {
-                    _showConfirmationDialog(context);
-                  }
-                      : null,
-                  child: Text(
-                    'Checkout',
-                    style: TextStyle(color: Colors.white, fontSize: 20),
-                  ),
+                  onPressed: _calculateTotalTickets() > 0 ? () =>
+                      _showConfirmationDialog(context) : null,
+                  child: const Text(
+                      'Checkout', style: TextStyle(color: Colors.white)),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
-                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  ),
+                      backgroundColor: primaryColor),
                 ),
               ],
             ),
@@ -187,22 +177,19 @@ class _RegistrationPageState extends State<RegistrationPage> {
     );
   }
 
-  // Calculate total tickets selected
   int _calculateTotalTickets() {
     return tickets.fold(0, (sum, ticket) => sum + ticket.quantity);
   }
 
-  // Calculate total price
   double _calculateTotalPrice() {
-    return tickets.fold(0.0, (sum, ticket) => sum + (ticket.quantity * ticket.price));
+    return tickets.fold(
+        0.0, (sum, ticket) => sum + (ticket.quantity * ticket.price));
   }
 
-  // Get the selected tickets
   List<Ticket> _selectedTickets() {
     return tickets.where((ticket) => ticket.quantity > 0).toList();
   }
 
-  // Show confirmation dialog when proceeding to checkout
   void _showConfirmationDialog(BuildContext context) {
     final totalPrice = _calculateTotalPrice();
     final selectedTickets = _selectedTickets();
@@ -211,87 +198,62 @@ class _RegistrationPageState extends State<RegistrationPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text(
-            'Confirm Purchase',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          content: Container(
-            width: double.maxFinite, // Ensures the dialog is wide enough
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'You have selected the following tickets:',
-                  style: TextStyle(fontSize: 18),
-                ),
-                SizedBox(height: 16),
-                ...selectedTickets.map((ticket) {
-                  final ticketTotal = ticket.quantity * ticket.price; // Calculate total for this ticket
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '${ticket.type} x${ticket.quantity}',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        Text(
-                          '\$${ticketTotal.toStringAsFixed(2)}', // Display total for this ticket
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-                SizedBox(height: 16),
-                Divider(color: Colors.black, thickness: 1),
-                SizedBox(height: 16),
-                Text(
-                  'Total Price:',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  '\$${totalPrice.toStringAsFixed(2)}',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green),
-                ),
-              ],
-            ),
+          title: const Text('Confirm Purchase',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ...selectedTickets.map((ticket) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('${ticket.type} x${ticket.quantity}',
+                          style: const TextStyle(fontSize: 16)),
+                      Text('\$${(ticket.quantity * ticket.price)
+                          .toStringAsFixed(2)}',
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                );
+              }).toList(),
+              const SizedBox(height: 16),
+              Divider(color: Colors.black),
+              const SizedBox(height: 16),
+              Text('Total Price: \$${totalPrice.toStringAsFixed(2)}',
+                  style: const TextStyle(fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green)),
+            ],
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: Text(
-                'Cancel',
-                style: TextStyle(color: Colors.red),
-              ),
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel', style: TextStyle(color: Colors.red)),
             ),
             ElevatedButton(
               onPressed: () async {
                 User? user = FirebaseAuth.instance.currentUser;
-
                 if (user == null) {
-                  Navigator.of(context).pop(); // Close the dialog
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => LogIn()), // Replace with your actual login page
-                  );
+                  Navigator.of(context).pop();
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => LogIn()));
                 } else {
-                  await _processTicketPurchase(selectedTickets ,  user.uid);
+                  await _processTicketPurchase(selectedTickets, user.uid);
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Tickets successfully purchased!')),
+                    const SnackBar(
+                        content: Text('Tickets successfully purchased!')),
                   );
-                  await fetchPassesFromFirestore(); // Refresh the ticket data
+                  await fetchPassesFromFirestore();
                 }
               },
-              child: Text('Confirm', style: TextStyle(color: Colors.white)),
+              child: const Text(
+                  'Confirm', style: TextStyle(color: Colors.white)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurple, // Button background color
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              ),
+                  backgroundColor: Colors.deepPurple),
             ),
           ],
         );
@@ -299,91 +261,95 @@ class _RegistrationPageState extends State<RegistrationPage> {
     );
   }
 
-  // Process ticket purchase and update Firestore
   Future<void> _processTicketPurchase(List<Ticket> selectedTickets, String userId) async {
     final eventRef = FirebaseFirestore.instance.collection('eventss').doc(widget.eventId);
-
     DocumentSnapshot eventDoc = await eventRef.get();
+
+    if (!eventDoc.exists) {
+      print("Event not found!");
+      return;
+    }
+
     List<dynamic> passesArray = eventDoc['passes'];
 
-    // Update remaining passes in the passes array
     for (var selectedTicket in selectedTickets) {
       for (var pass in passesArray) {
         if (pass['name'] == selectedTicket.type) {
           int remainingPasses = int.parse(pass['remainingPasses'].toString());
           if (remainingPasses >= selectedTicket.quantity) {
             pass['remainingPasses'] = remainingPasses - selectedTicket.quantity;
+          } else {
+            print("Not enough remaining passes for ${selectedTicket.type}");
+            return;
           }
         }
       }
     }
 
-    // Update remaining passes in Firestore
+    // Update the event document with new pass data
     await eventRef.update({'passes': passesArray});
 
-    // Store the purchase in the eventPurchases collection
-    final purchaseData = {
-      'userId': userId,
-      'tickets': selectedTickets.map((ticket) {
-        return {
-          'type': ticket.type,
-          'quantity': ticket.quantity,
-          'price': ticket.price,
-        };
-      }).toList(),
-      'totalPrice': _calculateTotalPrice(),
-      'timestamp': FieldValue.serverTimestamp(),
+    final userPurchasesRef = FirebaseFirestore.instance.collection('userPurchasedTickets').doc(userId);
+    final userDoc = await userPurchasesRef.get();
+
+    // Retrieve the current list of purchases for this specific event, or initialize as an empty list
+    List<dynamic> eventList = userDoc.data()?[widget.eventId] ?? [];
+
+    // Prepare the new purchase entry
+    final newPurchaseEntry = {
+      'passtype': selectedTickets.map((ticket) => ticket.type).join(', '),
+      'price': _calculateTotalPrice().toString(),
+      'totalprice': _calculateTotalPrice().toString(),
+      'totaltickets': _calculateTotalTickets().toString(),
+      'timestamp': DateTime.now().toIso8601String(),
     };
 
-    // Add purchase to eventPurchases collection
-    final purchaseRef = FirebaseFirestore.instance.collection('eventPurchases').doc(widget.eventId);
-    await purchaseRef.collection('purchases').add(purchaseData);
+    // Add the new purchase entry to the event list
+    eventList.add(newPurchaseEntry);
 
-    // Store the purchase in userPurchases collection
-    final userPurchasesRef = FirebaseFirestore.instance.collection('userPurchases').doc(userId);
-    await userPurchasesRef.collection('purchases').add({
-      'eventId': widget.eventId,
-      'tickets': selectedTickets.map((ticket) {
-        return {
-          'type': ticket.type,
-          'quantity': ticket.quantity,
-          'price': ticket.price,
-        };
-      }).toList(),
-      'totalPrice': _calculateTotalPrice(),
-      'timestamp': FieldValue.serverTimestamp(),
-    });
+    // Update user's purchase document with new data, dynamically using widget.eventId as the field key
+    await userPurchasesRef.set({
+      widget.eventId: eventList
+    }, SetOptions(merge: true));
+
+    // Now, also update the EventPurchases collection, using userId as a key inside the event document
+    final eventPurchasesRef = FirebaseFirestore.instance.collection('EventPurchases').doc(widget.eventId);
+    final eventPurchasesDoc = await eventPurchasesRef.get();
+
+    // Retrieve existing purchases for this user, or initialize as an empty array
+    List<dynamic> userPurchases = eventPurchasesDoc.data()?[userId] ?? [];
+
+    // Prepare the new purchase map entry for EventPurchases under the user's userId
+    final newEventPurchaseEntry = {
+      'type': selectedTickets.map((ticket) => ticket.type).join(', '),
+      'price': _calculateTotalPrice().toString(),
+      'quantities': _calculateTotalTickets().toString(),
+      'totalprice': _calculateTotalPrice().toString(),
+      'timestamp': DateTime.now().toIso8601String(),
+    };
+
+    // Add the new purchase entry to the array of user purchases
+    userPurchases.add(newEventPurchaseEntry);
+
+    // Update the EventPurchases document with new data, using userId as a dynamic field, and merge
+    await eventPurchasesRef.set({
+      userId: userPurchases
+    }, SetOptions(merge: true));
   }
-}
 
-// Ticket model class to hold ticket data
+}
 class Ticket {
   final String type;
   final double price;
   final bool available;
-  int quantity; // Track the number of tickets selected
-  final int remainingPasses; // Total remaining passes
+  int quantity;
+  final int remainingPasses;
 
   Ticket({
     required this.type,
     required this.price,
     required this.available,
-    this.quantity = 0,
+    required this.quantity,
     required this.remainingPasses,
   });
-}
-
-// Dummy LoginPage for redirection if the user is not logged in
-class LoginPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Login'),
-      ),
-      body: Center(
-        child: Text('Login Page Placeholder'),
-      ),
-    );
-  }
 }

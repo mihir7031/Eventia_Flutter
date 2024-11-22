@@ -1,3 +1,4 @@
+import 'package:eventia/main.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
@@ -170,24 +171,42 @@ class _InfoFormState extends State<InfoForm> {
               TextFormField(
                 decoration: InputDecoration(
                   labelText: 'Pass Name',
-                  border:
-                      UnderlineInputBorder(), // Keeps only the bottom border
-                  enabledBorder: UnderlineInputBorder(),
-                  focusedBorder: UnderlineInputBorder(),
+                  labelStyle: TextStyle(
+                    color: textColor, // Change label text color here
+                  ),
+                  border: UnderlineInputBorder(), // Keeps only the bottom border
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: primaryColor),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: primaryColor),
+                  ),
                   fillColor: Colors.transparent, // Removes any background color
-                  filled: false,
+                  filled: false, // Keeps only the bottom border
+                ),
+                style: TextStyle(
+                  color: textColor, // Change the input text color here
                 ),
                 onChanged: (value) => passName = value,
               ),
               TextFormField(
                 decoration: InputDecoration(
                   labelText: 'Price',
-                  border:
-                      UnderlineInputBorder(), // Keeps only the bottom border
-                  enabledBorder: UnderlineInputBorder(),
-                  focusedBorder: UnderlineInputBorder(),
+                  labelStyle: TextStyle(
+                    color: textColor, // Change label text color here
+                  ),
+                  border: UnderlineInputBorder(), // Keeps only the bottom border
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: primaryColor),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: primaryColor),
+                  ),
                   fillColor: Colors.transparent, // Removes any background color
-                  filled: false,
+                  filled: false, // Keeps only the bottom border
+                ),
+                style: TextStyle(
+                  color: textColor, // Change the input text color here
                 ),
                 keyboardType: TextInputType.number,
                 onChanged: (value) => passPrice = double.tryParse(value) ?? 0.0,
@@ -195,12 +214,21 @@ class _InfoFormState extends State<InfoForm> {
               TextFormField(
                 decoration: InputDecoration(
                   labelText: 'Quantity',
-                  border:
-                      UnderlineInputBorder(), // Keeps only the bottom border
-                  enabledBorder: UnderlineInputBorder(),
-                  focusedBorder: UnderlineInputBorder(),
+                  labelStyle: TextStyle(
+                    color: textColor, // Change label text color here
+                  ),
+                  border: UnderlineInputBorder(), // Keeps only the bottom border
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: primaryColor),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: primaryColor),
+                  ),
                   fillColor: Colors.transparent, // Removes any background color
-                  filled: false,
+                  filled: false, // Keeps only the bottom border
+                ),
+                style: TextStyle(
+                  color: textColor, // Change the input text color here
                 ),
                 keyboardType: TextInputType.number,
                 onChanged: (value) => passQuantity = int.tryParse(value) ?? 0,
@@ -208,12 +236,21 @@ class _InfoFormState extends State<InfoForm> {
               TextFormField(
                 decoration: InputDecoration(
                   labelText: 'People Per Pass',
-                  border:
-                      UnderlineInputBorder(), // Keeps only the bottom border
-                  enabledBorder: UnderlineInputBorder(),
-                  focusedBorder: UnderlineInputBorder(),
+                  labelStyle: TextStyle(
+                    color: textColor, // Change label text color here
+                  ),
+                  border: UnderlineInputBorder(), // Keeps only the bottom border
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: primaryColor),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: primaryColor),
+                  ),
                   fillColor: Colors.transparent, // Removes any background color
-                  filled: false,
+                  filled: false, // Keeps only the bottom border
+                ),
+                style: TextStyle(
+                  color: textColor, // Change the input text color here
                 ),
                 keyboardType: TextInputType.number,
                 onChanged: (value) => peoplePerPass = int.tryParse(value) ?? 0,
@@ -465,7 +502,7 @@ class _InfoFormState extends State<InfoForm> {
               children: <Widget>[
                 ListTile(
                   leading: Icon(Icons.text_fields),
-                  title: Text('Text'),
+                  title: Text('Text',style: TextStyle(color: textColor),),
                   onTap: () {
                     addTextField();
                     Navigator.pop(context);
@@ -473,7 +510,7 @@ class _InfoFormState extends State<InfoForm> {
                 ),
                 ListTile(
                   leading: Icon(Icons.photo),
-                  title: Text('Photo'),
+                  title: Text('Photo',style: TextStyle(color: textColor),),
                   onTap: () {
                     addPhotoField();
                     Navigator.pop(context);
@@ -481,7 +518,7 @@ class _InfoFormState extends State<InfoForm> {
                 ),
                 ListTile(
                   leading: Icon(Icons.file_present),
-                  title: Text('File'),
+                  title: Text('File',style: TextStyle(color: textColor),),
                   onTap: () {
                     addFileField();
                     Navigator.pop(context);
@@ -489,7 +526,7 @@ class _InfoFormState extends State<InfoForm> {
                 ),
                 ListTile(
                   leading: Icon(Icons.share),
-                  title: Text('Social Media'),
+                  title: Text('Social Media',style: TextStyle(color: textColor),),
                   onTap: () {
                     addSocialMediaField();
                     Navigator.pop(context);
@@ -534,7 +571,7 @@ class _InfoFormState extends State<InfoForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Basic Info'),
+        title: Text('Event Creation Form',style: TextStyle(color: primaryColor),),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -572,12 +609,18 @@ class _InfoFormState extends State<InfoForm> {
                   child: TextFormField(
                     decoration: InputDecoration(
                       labelText: 'Event Name',
+                      labelStyle: TextStyle(
+                        color: textColor, // Change label text color here
+                      ),
                      border:
                     UnderlineInputBorder(), // Keeps only the bottom border
-                      enabledBorder: UnderlineInputBorder(),
-                      focusedBorder: UnderlineInputBorder(),
+                      enabledBorder: UnderlineInputBorder( borderSide: BorderSide(color: primaryColor), ),
+                      focusedBorder: UnderlineInputBorder( borderSide: BorderSide(color: primaryColor), ),
                       fillColor: Colors.transparent, // Removes any background color
                       filled: false, // Keeps only the bottom border
+                    ),
+                    style: TextStyle(
+                      color: textColor, // Change the input text color here
                     ),
                     onChanged: (value) {
                       eventName = value;
@@ -591,11 +634,18 @@ class _InfoFormState extends State<InfoForm> {
                   child: TextFormField(
                     decoration: InputDecoration(
                       labelText: 'Event Description',
-                      border: UnderlineInputBorder(),
-                      enabledBorder: UnderlineInputBorder(),
-                      focusedBorder: UnderlineInputBorder(),
-                      fillColor: Colors.transparent,
-                      filled: false,
+                      labelStyle: TextStyle(
+                        color: textColor, // Change label text color here
+                      ),
+                      border:
+                      UnderlineInputBorder(), // Keeps only the bottom border
+                      enabledBorder: UnderlineInputBorder( borderSide: BorderSide(color: primaryColor), ),
+                      focusedBorder: UnderlineInputBorder( borderSide: BorderSide(color: primaryColor), ),
+                      fillColor: Colors.transparent, // Removes any background color
+                      filled: false, // Keeps only the bottom border
+                    ),
+                    style: TextStyle(
+                      color: textColor, // Change the input text color here
                     ),
                     onChanged: (value) {
                       eventDescription = value;
@@ -615,11 +665,18 @@ class _InfoFormState extends State<InfoForm> {
                     maxLength: 60, // Limit the input to 30 characters
                     decoration: InputDecoration(
                       labelText: 'About Event (60 characters)',
-                      border: UnderlineInputBorder(),
-                      enabledBorder: UnderlineInputBorder(),
-                      focusedBorder: UnderlineInputBorder(),
-                      fillColor: Colors.transparent,
-                      filled: false,
+                      labelStyle: TextStyle(
+                        color: textColor, // Change label text color here
+                      ),
+                      border:
+                      UnderlineInputBorder(), // Keeps only the bottom border
+                      enabledBorder: UnderlineInputBorder( borderSide: BorderSide(color: primaryColor), ),
+                      focusedBorder: UnderlineInputBorder( borderSide: BorderSide(color: primaryColor), ),
+                      fillColor: Colors.transparent, // Removes any background color
+                      filled: false, // Keeps only the bottom border
+                    ),
+                    style: TextStyle(
+                      color: textColor, // Change the input text color here
                     ),
                     onChanged: (value) {
                       aboutEvent = value;
@@ -635,7 +692,7 @@ class _InfoFormState extends State<InfoForm> {
                   child: ListTile(
                     title: Text(selectedTime == null
                         ? 'Select Time'
-                        : 'Time: ${selectedTime!.format(context)}'),
+                        : 'Time: ${selectedTime!.format(context)}',style: TextStyle(color: textColor),),
                     trailing: Icon(Icons.access_time),
                     onTap: () async {
                       await _selectTime(context);
@@ -649,7 +706,7 @@ class _InfoFormState extends State<InfoForm> {
                   child: ListTile(
                     title: Text(selectedDate == null
                         ? 'Select Date'
-                        : 'Date: ${DateFormat('dd-MM-yyyy').format(selectedDate!)}'),
+                        : 'Date: ${DateFormat('dd-MM-yyyy').format(selectedDate!)}',style: TextStyle(color: textColor),),
                     trailing: Icon(Icons.calendar_today),
                     onTap: () async {
                       await _selectDate(context);
@@ -662,12 +719,18 @@ class _InfoFormState extends State<InfoForm> {
                   child: TextFormField(
                     decoration: InputDecoration(
                       labelText: 'Duration (in Minute)',
+                      labelStyle: TextStyle(
+                        color: textColor, // Change label text color here
+                      ),
                       border:
                       UnderlineInputBorder(), // Keeps only the bottom border
-                      enabledBorder: UnderlineInputBorder(),
-                      focusedBorder: UnderlineInputBorder(),
+                      enabledBorder: UnderlineInputBorder( borderSide: BorderSide(color: primaryColor), ),
+                      focusedBorder: UnderlineInputBorder( borderSide: BorderSide(color: primaryColor), ),
                       fillColor: Colors.transparent, // Removes any background color
-                      filled: false,
+                      filled: false, // Keeps only the bottom border
+                    ),
+                    style: TextStyle(
+                      color: textColor, // Change the input text color here
                     ),
                     keyboardType: TextInputType.number,
                     onChanged: (value) {
@@ -682,12 +745,18 @@ class _InfoFormState extends State<InfoForm> {
                   child: TextFormField(
                     decoration: InputDecoration(
                       labelText: 'Capacity of peoples',
+                      labelStyle: TextStyle(
+                        color: textColor, // Change label text color here
+                      ),
                       border:
                       UnderlineInputBorder(), // Keeps only the bottom border
-                      enabledBorder: UnderlineInputBorder(),
-                      focusedBorder: UnderlineInputBorder(),
+                      enabledBorder: UnderlineInputBorder( borderSide: BorderSide(color: primaryColor), ),
+                      focusedBorder: UnderlineInputBorder( borderSide: BorderSide(color: primaryColor), ),
                       fillColor: Colors.transparent, // Removes any background color
-                      filled: false,
+                      filled: false, // Keeps only the bottom border
+                    ),
+                    style: TextStyle(
+                      color: textColor, // Change the input text color here
                     ),
                     keyboardType: TextInputType.number,
                     onChanged: (value) {
@@ -701,12 +770,18 @@ class _InfoFormState extends State<InfoForm> {
                   child: TextFormField(
                     decoration: InputDecoration(
                       labelText: 'Age Limit',
+                      labelStyle: TextStyle(
+                        color: textColor, // Change label text color here
+                      ),
                       border:
                       UnderlineInputBorder(), // Keeps only the bottom border
-                      enabledBorder: UnderlineInputBorder(),
-                      focusedBorder: UnderlineInputBorder(),
+                      enabledBorder: UnderlineInputBorder( borderSide: BorderSide(color: primaryColor), ),
+                      focusedBorder: UnderlineInputBorder( borderSide: BorderSide(color: primaryColor), ),
                       fillColor: Colors.transparent, // Removes any background color
-                      filled: false,
+                      filled: false, // Keeps only the bottom border
+                    ),
+                    style: TextStyle(
+                      color: textColor, // Change the input text color here
                     ),
                     keyboardType: TextInputType.number,
                     onChanged: (value) {
@@ -722,11 +797,18 @@ class _InfoFormState extends State<InfoForm> {
                   child: DropdownButtonFormField<String>(
                     decoration: InputDecoration(
                       labelText: 'Category',
-                      border:  UnderlineInputBorder(), // Keeps only the bottom border
-                      enabledBorder: UnderlineInputBorder(),
-                      focusedBorder: UnderlineInputBorder(),
+                      labelStyle: TextStyle(
+                        color: textColor, // Change label text color here
+                      ),
+                      border:
+                      UnderlineInputBorder(), // Keeps only the bottom border
+                      enabledBorder: UnderlineInputBorder( borderSide: BorderSide(color: primaryColor), ),
+                      focusedBorder: UnderlineInputBorder( borderSide: BorderSide(color: primaryColor), ),
                       fillColor: Colors.transparent, // Removes any background color
-                      filled: false,
+                      filled: false, // Keeps only the bottom border
+                    ),
+                    style: TextStyle(
+                      color: textColor, // Change the input text color here
                     ),
                     value: _selectedCategory, // Default selected category (if any)
                     items: _categories.map((String category) {
@@ -746,7 +828,7 @@ class _InfoFormState extends State<InfoForm> {
                   ),
                 ),
                 ListTile(
-                  title: Text('Chat Environment'),
+                  title: Text('Chat Environment',style: TextStyle(color: textColor),),
                   trailing: Switch(
                     value: chatEnvironment,
                     onChanged: (value) {
@@ -755,10 +837,16 @@ class _InfoFormState extends State<InfoForm> {
                         _validateForm();
                       });
                     },
+                    activeColor: primaryColor, // Color when the switch is ON
+                    inactiveThumbColor: inactiveColor, // Color of the thumb when the switch is OFF
+                    inactiveTrackColor: primaryColor,
+
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap, // Avoid extra space around the switch
+                     // Adjust splash effect radius
                   ),
                 ),
                 ListTile(
-                  title: Text('Offline'),
+                  title: Text('Offline',style: TextStyle(color: textColor),),
                   trailing: Switch(
                     value: isOnline,
                     onChanged: (value) {
@@ -767,6 +855,11 @@ class _InfoFormState extends State<InfoForm> {
                         _validateForm();
                       });
                     },
+                    activeColor: primaryColor, // Color when the switch is ON
+                    inactiveThumbColor: inactiveColor, // Color of the thumb when the switch is OFF
+                    inactiveTrackColor: primaryColor,
+
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                 ),
                 if (isOnline)
@@ -775,12 +868,18 @@ class _InfoFormState extends State<InfoForm> {
                     child: TextFormField(
                       decoration: InputDecoration(
                         labelText: 'Location',
+                        labelStyle: TextStyle(
+                          color: textColor, // Change label text color here
+                        ),
                         border:
                         UnderlineInputBorder(), // Keeps only the bottom border
-                        enabledBorder: UnderlineInputBorder(),
-                        focusedBorder: UnderlineInputBorder(),
+                        enabledBorder: UnderlineInputBorder( borderSide: BorderSide(color: primaryColor), ),
+                        focusedBorder: UnderlineInputBorder( borderSide: BorderSide(color: primaryColor), ),
                         fillColor: Colors.transparent, // Removes any background color
-                        filled: false,
+                        filled: false, // Keeps only the bottom border
+                      ),
+                      style: TextStyle(
+                        color: textColor, // Change the input text color here
                       ),
                       onChanged: (value) {
                         location = value;
@@ -790,7 +889,7 @@ class _InfoFormState extends State<InfoForm> {
                     ),
                   ),
                 ListTile(
-                  title: Text('Paid'),
+                  title: Text('Paid',style: TextStyle(color: textColor),),
                   trailing: Switch(
                     value: isPaid,
                     onChanged: (value) {
@@ -799,9 +898,15 @@ class _InfoFormState extends State<InfoForm> {
                         _validateForm();
                       });
                     },
+                    activeColor: primaryColor, // Color when the switch is ON
+                    inactiveThumbColor: inactiveColor, // Color of the thumb when the switch is OFF
+                    inactiveTrackColor: primaryColor,
+
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
+
                 ),
-                if (isPaid)
+                if (!isPaid)
                   Column(
                     children: [
                       SizedBox(height: 20),
@@ -809,7 +914,7 @@ class _InfoFormState extends State<InfoForm> {
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: _addPass,
-                          child: Text('Add Pass'),
+                          child: Text('Add Pass',style: TextStyle(color: Colors.white),),
                         ),
                       ),
                       SizedBox(height: 20),
@@ -826,7 +931,7 @@ class _InfoFormState extends State<InfoForm> {
                                 onPressed: () => _editPass(i),
                               ),
                               IconButton(
-                                icon: Icon(Icons.delete),
+                                icon: Icon(Icons.delete,color: iconColor,),
                                 onPressed: () => _removePass(i),
                               ),
                             ],
@@ -859,7 +964,7 @@ class _InfoFormState extends State<InfoForm> {
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: showFieldOptions,
-                          child: Text('Add More'),
+                          child: Text('Add More',style: TextStyle(color: Colors.white),),
                         ),
                       ),
                       SizedBox(height: 20),
@@ -947,7 +1052,7 @@ class TextFieldWidget extends StatelessWidget {
             Text("Text Field"),
             Spacer(),
             IconButton(
-              icon: Icon(Icons.delete),
+              icon: Icon(Icons.delete,color: iconColor,),
               onPressed: onDelete,
             ),
           ],
@@ -957,12 +1062,21 @@ class TextFieldWidget extends StatelessWidget {
           controller: titleController,
           decoration: InputDecoration(
             labelText: 'Title',
-            border: UnderlineInputBorder(), // No border by default
-            enabledBorder:
-                UnderlineInputBorder(), // No border when enabled but not focused
-            focusedBorder: UnderlineInputBorder(), // No border when focused
-            disabledBorder: InputBorder.none,
-            filled: false, // No border by default
+            labelStyle: TextStyle(
+              color: textColor, // Change label text color here
+            ),
+            border: UnderlineInputBorder(), // Keeps only the bottom border
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: primaryColor),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: primaryColor),
+            ),
+            fillColor: Colors.transparent, // Removes any background color
+            filled: false, // Keeps only the bottom border
+          ),
+          style: TextStyle(
+            color: textColor, // Change the input text color here
           ),
         ),
         SizedBox(height: 16), // Padding between title and description
@@ -970,13 +1084,23 @@ class TextFieldWidget extends StatelessWidget {
           controller: descriptionController,
           decoration: InputDecoration(
             labelText: 'Description',
-            border: UnderlineInputBorder(), // No border by default
-            enabledBorder:
-                UnderlineInputBorder(), // No border when enabled but not focused
-            focusedBorder: UnderlineInputBorder(), // No border when focused
-            disabledBorder: InputBorder.none,
-            filled: false, // No border by default
+            labelStyle: TextStyle(
+              color: textColor, // Change label text color here
+            ),
+            border: UnderlineInputBorder(), // Keeps only the bottom border
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: primaryColor),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: primaryColor),
+            ),
+            fillColor: Colors.transparent, // Removes any background color
+            filled: false, // Keeps only the bottom border
           ),
+          style: TextStyle(
+            color: textColor, // Change the input text color here
+          ),
+
           keyboardType: TextInputType.multiline, // Enables multiline input
           minLines: 1, // Minimum number of lines the TextField will show
           maxLines: null,
@@ -1110,7 +1234,7 @@ class _PhotoFieldWidgetState extends State<PhotoFieldWidget> {
             Text("Photo Field"),
             Spacer(),
             IconButton(
-              icon: Icon(Icons.delete),
+              icon: Icon(Icons.delete,color: iconColor,),
               onPressed: widget.onDelete,
             ),
           ],
@@ -1120,17 +1244,27 @@ class _PhotoFieldWidgetState extends State<PhotoFieldWidget> {
           controller: widget.titleController,
           decoration: InputDecoration(
             labelText: "Title",
-            border: UnderlineInputBorder(),
-            enabledBorder: UnderlineInputBorder(),
-            focusedBorder: UnderlineInputBorder(),
-            disabledBorder: InputBorder.none,
-            filled: false,
+            labelStyle: TextStyle(
+              color: textColor, // Change label text color here
+            ),
+            border: UnderlineInputBorder(), // Keeps only the bottom border
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: primaryColor),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: primaryColor),
+            ),
+            fillColor: Colors.transparent, // Removes any background color
+            filled: false, // Keeps only the bottom border
+          ),
+          style: TextStyle(
+            color: textColor, // Change the input text color here
           ),
         ),
         SizedBox(height: 16),
         ElevatedButton(
           onPressed: pickImages,
-          child: Text('Pick Images'),
+          child: Text('Pick Images',style: TextStyle(color: Colors.white),),
         ),
         _imageFiles.isNotEmpty
             ? Wrap(
@@ -1151,7 +1285,7 @@ class _PhotoFieldWidgetState extends State<PhotoFieldWidget> {
                         right: 0,
                         top: 0,
                         child: IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red),
+                          icon: Icon(Icons.delete,color: iconColor,),
                           onPressed: () => removeImage(index),
                         ),
                       ),
@@ -1166,7 +1300,7 @@ class _PhotoFieldWidgetState extends State<PhotoFieldWidget> {
             ? Center(child: CircularProgressIndicator())
             : ElevatedButton(
                 onPressed: uploadImagesAndSaveUrls,
-                child: Text('Upload Images'),
+                child: Text('Upload Images',style: TextStyle(color: Colors.white),),
               ),
       ],
     );
@@ -1301,7 +1435,7 @@ class _FileFieldWidgetState extends State<FileFieldWidget> {
             Text("File Field"),
             Spacer(),
             IconButton(
-              icon: Icon(Icons.delete),
+              icon: Icon(Icons.delete,color: iconColor,),
               onPressed: widget.onDelete,
             ),
           ],
@@ -1311,18 +1445,27 @@ class _FileFieldWidgetState extends State<FileFieldWidget> {
           controller: widget.titleController,
           decoration: InputDecoration(
             labelText: "Title",
-            border: UnderlineInputBorder(), // No border by default
-            enabledBorder:
-                UnderlineInputBorder(), // No border when enabled but not focused
-            focusedBorder: UnderlineInputBorder(), // No border when focused
-            disabledBorder: InputBorder.none,
-            filled: false, // No border by default
+            labelStyle: TextStyle(
+              color: textColor, // Change label text color here
+            ),
+            border: UnderlineInputBorder(), // Keeps only the bottom border
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: primaryColor),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: primaryColor),
+            ),
+            fillColor: Colors.transparent, // Removes any background color
+            filled: false, // Keeps only the bottom border
+          ),
+          style: TextStyle(
+            color: textColor, // Change the input text color here
           ),
         ),
         SizedBox(height: 16), // Padding between title and file button
         ElevatedButton(
           onPressed: pickFiles,
-          child: Text('Pick Files'),
+          child: Text('Pick Files',style: TextStyle(color: Colors.white),),
         ),
         _pickedFiles.isNotEmpty
             ? Column(
@@ -1330,9 +1473,9 @@ class _FileFieldWidgetState extends State<FileFieldWidget> {
                 children: _pickedFiles.map((file) {
                   int index = _pickedFiles.indexOf(file);
                   return ListTile(
-                    title: Text(file.name),
+                    title: Text(file.name,style: TextStyle(color: textColor),),
                     trailing: IconButton(
-                      icon: Icon(Icons.delete, color: Colors.red),
+                      icon: Icon(Icons.delete,color: primaryColor,),
                       onPressed: () => removeFile(index),
                     ),
                   );
@@ -1345,7 +1488,7 @@ class _FileFieldWidgetState extends State<FileFieldWidget> {
             ? Center(child: CircularProgressIndicator())
             : ElevatedButton(
                 onPressed: uploadFilesAndSaveUrls,
-                child: Text('Upload Files'),
+                child: Text('Upload Files',style: TextStyle(color: Colors.white),),
               ),
       ],
     );
@@ -1374,7 +1517,7 @@ class SocialMediaFieldWidget extends StatelessWidget {
             Text("Social Media Field"),
             Spacer(),
             IconButton(
-              icon: Icon(Icons.delete),
+              icon: Icon(Icons.delete,color: iconColor,),
               onPressed: onDelete,
             ),
           ],
@@ -1384,12 +1527,21 @@ class SocialMediaFieldWidget extends StatelessWidget {
           controller: titleController,
           decoration: InputDecoration(
             labelText: 'Title',
-            border: UnderlineInputBorder(), // No border by default
-            enabledBorder:
-                UnderlineInputBorder(), // No border when enabled but not focused
-            focusedBorder: UnderlineInputBorder(), // No border when focused
-            disabledBorder: InputBorder.none,
-            filled: false, // No border by default
+            labelStyle: TextStyle(
+              color: textColor, // Change label text color here
+            ),
+            border: UnderlineInputBorder(), // Keeps only the bottom border
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: primaryColor),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: primaryColor),
+            ),
+            fillColor: Colors.transparent, // Removes any background color
+            filled: false, // Keeps only the bottom border
+          ),
+          style: TextStyle(
+            color: textColor, // Change the input text color here
           ),
         ),
         SizedBox(height: 16), // Padding between title and link
@@ -1397,12 +1549,21 @@ class SocialMediaFieldWidget extends StatelessWidget {
           controller: linkController,
           decoration: InputDecoration(
             labelText: 'Link',
-            border: UnderlineInputBorder(), // No border by default
-            enabledBorder:
-                UnderlineInputBorder(), // No border when enabled but not focused
-            focusedBorder: UnderlineInputBorder(), // No border when focused
-            disabledBorder: InputBorder.none,
-            filled: false, // No border by default
+            labelStyle: TextStyle(
+              color: textColor, // Change label text color here
+            ),
+            border: UnderlineInputBorder(), // Keeps only the bottom border
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: primaryColor),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: primaryColor),
+            ),
+            fillColor: Colors.transparent, // Removes any background color
+            filled: false, // Keeps only the bottom border
+          ),
+          style: TextStyle(
+            color: textColor, // Change the input text color here
           ),
         ),
       ],
