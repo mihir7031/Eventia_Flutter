@@ -1,4 +1,4 @@
-# eventia
+# Eventia_Flutter
 
 A new Flutter project.
 
